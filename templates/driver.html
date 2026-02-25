@@ -4,6 +4,7 @@
     <title>Transport Tracker - Driver App</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicons/favicon-driver.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/scrollbars.css') }}" />
     <style>
         :root {
             --ui-theme-hue: 0deg;
@@ -194,6 +195,10 @@
         let driverRouteLine = null;
         let routesLayer = null;
         let routesPolylinesMap = {};
+        const routeCoordsCache = {};
+        const routeCumulDistCache = {};
+        const busSpeedCache = {};
+        const busSpeedSamples = {};
         const BHUBANESWAR_CORE_BOUNDS = L.latLngBounds([20.195, 85.74], [20.44, 85.93]);
         const BHUBANESWAR_PADDING_KM = 10;
         let driverBoundaryRect = null;

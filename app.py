@@ -1,25 +1,64 @@
 # gevent monkey-patching must be first — makes threading/queue/time cooperative
-try:
-    from gevent import monkey
-    monkey.patch_all()
-except ImportError:
-    pass  # Allow running without gevent (localhost dev)
+import os
+import sys
+
+_gevent_mode = str(os.environ.get('USE_GEVENT_MONKEY', 'auto')).strip().lower()
+_try_gevent = (
+    _gevent_mode in ('1', 'true', 'yes', 'on')
+    or (_gevent_mode in ('', 'auto') and sys.version_info < (3, 14))
+)
+if _try_gevent:
+    try:
+        from gevent import monkey
+        monkey.patch_all()
+    except BaseException as gevent_err:
+        print(f"[startup] gevent disabled: {gevent_err!r}", file=sys.stderr)
 
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, Response, stream_with_context, has_request_context
 from flask_cors import CORS
 import json
 import copy
-import os
-import sys
 import math
 import shutil
 import uuid
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash
 from werkzeug.middleware.proxy_fix import ProxyFix
 from datetime import datetime, timezone
 import threading
 import queue
 import time
+from services.admin_service import (
+    load_admins as service_load_admins,
+    save_admins as service_save_admins,
+    validate_login as service_validate_login,
+    validate_pin as service_validate_pin,
+    is_gold_username as service_is_gold_username,
+    bootstrap_from_legacy as service_bootstrap_from_legacy,
+)
+
+def _load_local_env_file():
+    """Load .env entries for local development without overriding real env vars."""
+    try:
+        env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
+        if not os.path.isfile(env_path):
+            return
+        with open(env_path, 'r', encoding='utf-8') as f:
+            for raw_line in f:
+                line = raw_line.strip()
+                if not line or line.startswith('#') or '=' not in line:
+                    continue
+                key, value = line.split('=', 1)
+                key = key.strip()
+                if not key or key in os.environ:
+                    continue
+                value = value.strip()
+                if len(value) >= 2 and value[0] == value[-1] and value[0] in ('"', "'"):
+                    value = value[1:-1]
+                os.environ[key] = value
+    except Exception:
+        pass
+
+_load_local_env_file()
 
 # ---------- 1-D Kalman filter for GPS smoothing ----------
 class GPSKalman:
@@ -138,8 +177,9 @@ RENDER_URL = os.environ.get('RENDER_EXTERNAL_URL', '')
 ON_RENDER = bool(os.environ.get('RENDER') or RENDER_URL)
 IS_HTTPS = RENDER_URL.startswith('https://')
 app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE='Lax',
-    SESSION_COOKIE_SECURE=IS_HTTPS if ON_RENDER else False,
+    SESSION_COOKIE_SECURE=True if ON_RENDER else False,
     PREFERRED_URL_SCHEME='https' if IS_HTTPS else 'http'
 )
 
@@ -178,6 +218,7 @@ DEFAULT_LOCATIONS_PAYLOAD = {"hostels": [], "classes": [], "routes": []}
 DEFAULT_CREDENTIALS_PAYLOAD = {"admins": [], "institute_name": "INSTITUTE"}
 ADMIN_ROLE_STANDARD = 'admin'
 ADMIN_ROLE_GOLD = 'gold'
+GOOGLE_MAPS_API_KEY_FALLBACK = 'AIzaSyCTsZO8Wn-LPSs8-jwMRv968D8qRsH6efE'
 _app_disk_io_lock = threading.Lock()
 APP_DISK_READ_BYTES = 0
 APP_DISK_WRITE_BYTES = 0
@@ -194,6 +235,12 @@ _credentials_cache_mtime = None
 
 _metrics_lock = threading.Lock()
 _app_ready_lock = threading.Lock()
+
+_login_rate_lock = threading.Lock()
+_login_rate_state = {}  # ip -> {'window_start': float, 'fail_count': int, 'blocked_until': float}
+LOGIN_RATE_WINDOW_SEC = max(60, int(os.environ.get('LOGIN_RATE_WINDOW_SEC', '300')))
+LOGIN_RATE_MAX_FAILURES = max(3, int(os.environ.get('LOGIN_RATE_MAX_FAILURES', '8')))
+LOGIN_RATE_BLOCK_SEC = max(30, int(os.environ.get('LOGIN_RATE_BLOCK_SEC', '300')))
 
 # ---------- simple JSON helpers ----------
 def _get_file_mtime(path):
@@ -404,6 +451,14 @@ def ensure_files():
                 pass
     if not os.path.exists(AUDIT_FILE):
         save_json(AUDIT_FILE, [])
+    try:
+        service_bootstrap_from_legacy(CREDENTIALS_FILE)
+    except Exception:
+        pass
+    try:
+        service_load_admins(force=True)
+    except Exception:
+        pass
 
 def _utc_now_iso():
     return datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
@@ -421,6 +476,54 @@ def _client_ip():
         return request.remote_addr or 'unknown'
     except Exception:
         return 'unknown'
+
+def _prune_login_rate_state(now_ts=None):
+    now = float(now_ts if now_ts is not None else time.time())
+    window_cutoff = now - max(1, LOGIN_RATE_WINDOW_SEC)
+    with _login_rate_lock:
+        stale_keys = []
+        for ip, state in _login_rate_state.items():
+            blocked_until = float((state or {}).get('blocked_until') or 0.0)
+            window_start = float((state or {}).get('window_start') or 0.0)
+            fail_count = int((state or {}).get('fail_count') or 0)
+            if blocked_until > now:
+                continue
+            if fail_count <= 0 and window_start <= window_cutoff:
+                stale_keys.append(ip)
+            elif window_start <= window_cutoff:
+                stale_keys.append(ip)
+        for ip in stale_keys:
+            _login_rate_state.pop(ip, None)
+
+def _is_login_rate_limited(ip, now_ts=None):
+    now = float(now_ts if now_ts is not None else time.time())
+    _prune_login_rate_state(now)
+    with _login_rate_lock:
+        state = _login_rate_state.get(str(ip or 'unknown'), {})
+        blocked_until = float((state or {}).get('blocked_until') or 0.0)
+        if blocked_until > now:
+            return True, max(1, int(blocked_until - now))
+    return False, 0
+
+def _record_login_attempt(ip, success, now_ts=None):
+    now = float(now_ts if now_ts is not None else time.time())
+    key = str(ip or 'unknown')
+    with _login_rate_lock:
+        state = _login_rate_state.get(key)
+        if not state:
+            state = {'window_start': now, 'fail_count': 0, 'blocked_until': 0.0}
+            _login_rate_state[key] = state
+        if success:
+            state['window_start'] = now
+            state['fail_count'] = 0
+            state['blocked_until'] = 0.0
+            return
+        if (now - float(state.get('window_start') or 0.0)) > LOGIN_RATE_WINDOW_SEC:
+            state['window_start'] = now
+            state['fail_count'] = 0
+        state['fail_count'] = int(state.get('fail_count') or 0) + 1
+        if state['fail_count'] >= LOGIN_RATE_MAX_FAILURES:
+            state['blocked_until'] = now + LOGIN_RATE_BLOCK_SEC
 
 _audit_lock = threading.Lock()
 _audit_logs = []
@@ -1049,6 +1152,7 @@ _student_presence = {}  # client_id -> last_seen epoch seconds
 _driver_presence = {}   # driver_key -> last_seen epoch seconds
 STUDENT_PRESENCE_TTL_SEC = max(20, int(os.environ.get('STUDENT_PRESENCE_TTL_SEC', '45')))
 DRIVER_PRESENCE_TTL_SEC = max(20, int(os.environ.get('DRIVER_PRESENCE_TTL_SEC', '45')))
+SSE_QUEUE_MAXSIZE = max(200, int(os.environ.get('SSE_QUEUE_MAXSIZE', '2000')))
 
 def broadcast(payload):
     try:
@@ -1093,6 +1197,12 @@ def broadcast(payload):
     for q in targets:
         try:
             q.put_nowait(data)
+        except queue.Full:
+            try:
+                q.get_nowait()
+                q.put_nowait(data)
+            except Exception:
+                pass
         except Exception:
             pass
 
@@ -1102,7 +1212,7 @@ def sse_events():
         return Response('SSE disabled', status=503, mimetype='text/plain')
     route_id = request.args.get('routeId') or 'all'
     def stream():
-        q = queue.Queue(maxsize=100)
+        q = queue.Queue(maxsize=SSE_QUEUE_MAXSIZE)
         hb = max(5, int(os.environ.get('SSE_HEARTBEAT_SEC', '20')))
         with _subscribers_lock:
             _subscribers.setdefault(route_id, []).append(q)
@@ -1134,7 +1244,7 @@ def sse_events():
                     })
 
 # ---------- credentials helpers ----------
-def load_credentials(persist_changes=True):
+def load_credentials(persist_changes=False):
     t0 = time.perf_counter()
     default_creds = copy.deepcopy(DEFAULT_CREDENTIALS_PAYLOAD)
     creds = _get_credentials_cached_payload()
@@ -1145,27 +1255,9 @@ def load_credentials(persist_changes=True):
         return dict(default_creds)
 
     changed = False
-    admins = creds.get('admins')
-    if not isinstance(admins, list):
-        admins = []
-        changed = True
-
-    normalized_admins = []
-    for raw in admins:
-        if not isinstance(raw, dict):
-            changed = True
-            continue
-        role_raw = str(raw.get('role') or ADMIN_ROLE_STANDARD).strip().lower()
-        role = ADMIN_ROLE_GOLD if role_raw == ADMIN_ROLE_GOLD else ADMIN_ROLE_STANDARD
-        entry = dict(raw)
-        if entry.get('role') != role:
-            entry['role'] = role
-            changed = True
-        normalized_admins.append(entry)
-
-    if creds.get('admins') != normalized_admins:
-        creds['admins'] = normalized_admins
-        changed = True
+    live_admins = service_load_admins()
+    if creds.get('admins') != live_admins:
+        creds['admins'] = live_admins
     if 'institute_name' not in creds:
         creds['institute_name'] = default_creds['institute_name']
         changed = True
@@ -1207,9 +1299,16 @@ def load_credentials(persist_changes=True):
     return creds
 
 def save_credentials(data):
-    ok = _save_json_with_status(CREDENTIALS_FILE, data)
+    payload = copy.deepcopy(data if isinstance(data, dict) else {})
+    admins_payload = payload.pop('admins', None)
+    if isinstance(admins_payload, list):
+        try:
+            service_save_admins(admins_payload)
+        except Exception:
+            pass
+    ok = _save_json_with_status(CREDENTIALS_FILE, payload)
     if ok:
-        _update_credentials_cache(data)
+        _update_credentials_cache(payload)
     return ok
 
 def sanitize_ui_theme(raw_theme):
@@ -1486,12 +1585,13 @@ def login_required(fn):
     from functools import wraps
     @wraps(fn)
     def wrapper(*args, **kwargs):
-        if 'admin' not in session:
+        if 'admin' not in session or not session.get('admin_authenticated'):
             return redirect(url_for('admin_login'))
         creds = load_credentials()
         if not get_admin_record(creds, session.get('admin')):
             remove_active_admin_session()
             session.pop('admin', None)
+            session.pop('admin_authenticated', None)
             return redirect(url_for('admin_login'))
         touch_active_admin_session(session.get('admin'))
         return fn(*args, **kwargs)
@@ -1547,12 +1647,62 @@ def admin_view():
     creds = load_credentials()
     current_admin = current_admin_record(creds)
     role = get_admin_role(current_admin)
+    google_maps_api_key = str(os.environ.get('GOOGLE_MAPS_API_KEY', GOOGLE_MAPS_API_KEY_FALLBACK) or '').strip()
     return render_template(
         'admin.html',
         institute_name=creds.get('institute_name', 'INSTITUTE'),
         admin_user=session.get('admin'),
         admin_role=role,
         is_gold_admin=(role == ADMIN_ROLE_GOLD),
+        google_maps_api_key=google_maps_api_key,
+    )
+
+PENDING_ADMIN_PIN_KEY = 'pending_admin_pin'
+PENDING_ADMIN_PIN_TTL_SEC = 300
+
+def _clear_pending_admin_pin():
+    session.pop(PENDING_ADMIN_PIN_KEY, None)
+
+def _get_pending_admin_pin(creds=None):
+    if not has_request_context():
+        return None
+    pending = session.get(PENDING_ADMIN_PIN_KEY)
+    if not isinstance(pending, dict):
+        return None
+    username = str(pending.get('username') or '').strip()
+    role = str(pending.get('role') or ADMIN_ROLE_STANDARD).strip().lower()
+    try:
+        created_at = int(pending.get('created_at') or 0)
+    except (TypeError, ValueError):
+        created_at = 0
+    now_ts = int(time.time())
+    if not username or created_at <= 0 or (now_ts - created_at) > PENDING_ADMIN_PIN_TTL_SEC:
+        _clear_pending_admin_pin()
+        return None
+    creds_obj = creds if isinstance(creds, dict) else load_credentials()
+    admin = get_admin_record(creds_obj, username)
+    if not admin:
+        _clear_pending_admin_pin()
+        return None
+    safe_role = get_admin_role(admin)
+    if role not in (ADMIN_ROLE_STANDARD, ADMIN_ROLE_GOLD):
+        role = safe_role
+    return {
+        'username': username,
+        'role': safe_role,
+        'created_at': created_at,
+    }
+
+def _render_admin_login_view(creds, error_text=None, require_pin=False, pending_username='', institute_name=None, clear_pin_on_error=False):
+    safe_creds = creds if isinstance(creds, dict) else load_credentials()
+    return render_template(
+        'admin_login.html',
+        credentials_exist=bool(safe_creds.get('admins')),
+        institute_name=(institute_name or safe_creds.get('institute_name', 'INSTITUTE')),
+        error_text=error_text,
+        require_gold_pin=bool(require_pin),
+        pending_gold_username=(pending_username or ''),
+        clear_pin_on_error=bool(clear_pin_on_error),
     )
 
 @app.route('/admin/login', methods=['GET', 'POST'])
@@ -1560,152 +1710,101 @@ def admin_login():
     try:
         creds = load_credentials()
         now_ts = int(time.time())
-
-        def get_pending_gold_login():
-            pending = session.get('pending_gold_login')
-            if not isinstance(pending, dict):
-                return None
-            username = str(pending.get('username') or '').strip()
-            try:
-                created_at = int(pending.get('created_at') or 0)
-            except (TypeError, ValueError):
-                created_at = 0
-            if not username or created_at <= 0 or (now_ts - created_at) > 300:
-                session.pop('pending_gold_login', None)
-                return None
-            admin = next((a for a in creds.get('admins', []) if a.get('username') == username), None)
-            if not admin or get_admin_role(admin) != ADMIN_ROLE_GOLD:
-                session.pop('pending_gold_login', None)
-                return None
-            return {'username': username, 'created_at': created_at}
-
         if request.method == 'GET':
-            pending_gold = get_pending_gold_login()
-            return render_template(
-                'admin_login.html',
-                credentials_exist=bool(creds.get('admins')),
-                institute_name=creds.get('institute_name', 'INSTITUTE'),
-                require_gold_pin=bool(pending_gold),
-                pending_gold_username=(pending_gold.get('username') if pending_gold else '')
+            pending = _get_pending_admin_pin(creds)
+            return _render_admin_login_view(
+                creds,
+                require_pin=bool(pending),
+                pending_username=(pending.get('username') if pending else '')
             )
 
         data = request.form
-        action = data.get('action')
+        action = (data.get('action') or 'login').strip().lower()
         institute = data.get('institute_name', '').strip()
         username = data.get('username', '').strip()
-        password = data.get('password', '').strip()
-        gold_login_pin = (data.get('gold_login_pin', '') or '').strip()
-        error_text = None
-        require_gold_pin = False
-        pending_gold_username = ''
-
-        if 'admins' not in creds:
-            creds['admins'] = []
+        password = data.get('password', '')
+        login_ip = _client_ip()
 
         if action == 'signup':
-            session.pop('pending_gold_login', None)
+            _clear_pending_admin_pin()
             pin = (data.get('signup_pin', '') or '').strip()
             signup_role = role_from_signup_pin(pin, creds)
             if not signup_role:
-                error_text = "Invalid signup pin."
                 record_audit('admin_signup', status='failed', username=username or 'anonymous', details='invalid_pin')
-            elif not username or not password:
-                error_text = "Provide username and password."
+                return _render_admin_login_view(creds, error_text='Invalid signup pin.', institute_name=institute)
+            if not username or not password:
                 record_audit('admin_signup', status='failed', username=username or 'anonymous', details='missing_credentials')
-            elif any(a.get('username') == username for a in creds['admins']):
-                error_text = "Admin username already exists."
+                return _render_admin_login_view(creds, error_text='Provide username and password.', institute_name=institute)
+            if service_is_gold_username(username):
+                record_audit('admin_signup', status='failed', username=username, details='reserved_gold_username')
+                return _render_admin_login_view(creds, error_text='Username is reserved.', institute_name=institute)
+
+            admins = [
+                a for a in (service_load_admins() or [])
+                if not service_is_gold_username(a.get('username'))
+            ]
+            if any(str(a.get('username') or '') == username for a in admins):
                 record_audit('admin_signup', status='failed', username=username, details='username_exists')
-            else:
-                creds['institute_name'] = institute or creds.get('institute_name', 'INSTITUTE')
-                creds['admins'].append({
-                    'username': username,
-                    'password_hash': generate_password_hash(password),
-                    # Product requirement: gold admins can reveal admin passwords.
-                    'password_plain': password,
-                    'role': signup_role
-                })
-                save_credentials(creds)
-                session['admin'] = username
-                touch_active_admin_session(username)
-                record_audit('admin_signup', status='success', username=username, details=f'signup_created role={signup_role}')
-                return redirect(url_for('admin_view'))
+                return _render_admin_login_view(creds, error_text='Admin username already exists.', institute_name=institute)
 
-        elif action == 'verify_gold_pin':
-            pending_gold = get_pending_gold_login()
-            if not pending_gold:
-                error_text = "Gold login session expired. Enter username and password again."
-                session.pop('pending_gold_login', None)
-                record_audit('admin_login', status='failed', username='anonymous', details='missing_or_expired_gold_login_session')
-            else:
-                pending_gold_username = pending_gold['username']
-                require_gold_pin = True
-                required_pin = required_login_pin_for_role(ADMIN_ROLE_GOLD, creds)
-                if not gold_login_pin:
-                    error_text = "Login pin is required."
-                    record_audit('admin_login', status='failed', username=pending_gold_username, details='missing_gold_login_pin')
-                elif gold_login_pin != required_pin:
-                    error_text = "Invalid login pin."
-                    record_audit('admin_login', status='failed', username=pending_gold_username, details='invalid_gold_login_pin')
-                else:
-                    session['admin'] = pending_gold_username
-                    session.pop('pending_gold_login', None)
-                    touch_active_admin_session(pending_gold_username)
-                    record_audit('admin_login', status='success', username=pending_gold_username, details=f'login_ok role={ADMIN_ROLE_GOLD}')
-                    return redirect(url_for('admin_view'))
+            admins.append({
+                'username': username,
+                'display_name': username,
+                'password_hash': generate_password_hash(password),
+                'role': signup_role
+            })
+            service_save_admins(admins)
+            creds['admins'] = service_load_admins()
+            creds['institute_name'] = institute or creds.get('institute_name', 'INSTITUTE')
+            save_credentials(creds)
+            session['admin'] = username
+            session['admin_authenticated'] = True
+            _clear_pending_admin_pin()
+            touch_active_admin_session(username)
+            record_audit('admin_signup', status='success', username=username, details=f'signup_created role={signup_role}')
+            return redirect(url_for('admin_view'))
 
-        elif action == 'login':
-            session.pop('pending_gold_login', None)
-            if not creds.get('admins'):
-                error_text = "No admin accounts exist. Please signup first."
-                record_audit('admin_login', status='failed', username=username or 'anonymous', details='no_admin_accounts')
-            else:
-                admin = next((a for a in creds['admins'] if a.get('username') == username), None)
-                if not admin:
-                    error_text = "Invalid username."
-                    record_audit('admin_login', status='failed', username=username or 'anonymous', details='invalid_username')
-                elif admin.get('password_hash') and check_password_hash(admin['password_hash'], password):
-                    role = get_admin_role(admin)
-                    if role == ADMIN_ROLE_GOLD:
-                        required_pin = required_login_pin_for_role(role, creds)
-                        pending_gold_username = username
-                        if gold_login_pin:
-                            if gold_login_pin != required_pin:
-                                error_text = "Invalid login pin."
-                                require_gold_pin = True
-                                session['pending_gold_login'] = {'username': username, 'created_at': now_ts}
-                                record_audit('admin_login', status='failed', username=username, details='invalid_gold_login_pin')
-                            else:
-                                session['admin'] = username
-                                touch_active_admin_session(username)
-                                record_audit('admin_login', status='success', username=username, details=f'login_ok role={role}')
-                                return redirect(url_for('admin_view'))
-                        else:
-                            require_gold_pin = True
-                            session['pending_gold_login'] = {'username': username, 'created_at': now_ts}
-                    else:
-                        session['admin'] = username
-                        touch_active_admin_session(username)
-                        record_audit('admin_login', status='success', username=username, details=f'login_ok role={role}')
-                        return redirect(url_for('admin_view'))
-                else:
-                    error_text = "Invalid password."
-                    record_audit('admin_login', status='failed', username=username or 'anonymous', details='invalid_password')
-        else:
-            error_text = "Invalid action."
+        if action == 'verify_gold_pin':
+            return admin_verify_pin()
+
+        if action != 'login':
             record_audit('admin_login', status='failed', username=username or 'anonymous', details='invalid_action')
+            return _render_admin_login_view(creds, error_text='Invalid action.', institute_name=institute)
 
-        if require_gold_pin and not pending_gold_username:
-            pending_gold = get_pending_gold_login()
-            pending_gold_username = pending_gold['username'] if pending_gold else ''
-            require_gold_pin = bool(pending_gold_username)
+        blocked, retry_after = _is_login_rate_limited(login_ip, now_ts)
+        if blocked:
+            record_audit('admin_login', status='failed', username=username or 'anonymous', details=f'rate_limited retry_after={retry_after}s')
+            return _render_admin_login_view(
+                creds,
+                error_text=f'Too many login attempts. Try again in {retry_after}s.',
+                institute_name=institute
+            )
 
-        return render_template(
-            'admin_login.html',
-            credentials_exist=bool(creds.get('admins')),
-            institute_name=institute or creds.get('institute_name', 'INSTITUTE'),
-            error_text=error_text,
-            require_gold_pin=require_gold_pin,
-            pending_gold_username=pending_gold_username
+        login_result = service_validate_login(username, password)
+        if not login_result.get('ok'):
+            _record_login_attempt(login_ip, False, now_ts)
+            record_audit('admin_login', status='failed', username=username or 'anonymous', details=login_result.get('error') or 'invalid_login')
+            return _render_admin_login_view(
+                creds,
+                error_text=login_result.get('message') or 'Invalid username or password.',
+                institute_name=institute
+            )
+
+        admin = login_result.get('admin') or {}
+        role = get_admin_role(admin)
+        session.pop('admin', None)
+        session.pop('admin_authenticated', None)
+        session[PENDING_ADMIN_PIN_KEY] = {
+            'username': admin.get('username'),
+            'role': role,
+            'created_at': now_ts
+        }
+        record_audit('admin_login', status='pending', username=admin.get('username') or 'anonymous', details=f'password_ok role={role}')
+        return _render_admin_login_view(
+            creds,
+            require_pin=True,
+            pending_username=admin.get('username'),
+            institute_name=institute or creds.get('institute_name', 'INSTITUTE')
         )
     except Exception as e:
         import traceback
@@ -1713,11 +1812,76 @@ def admin_login():
         record_audit('admin_login', status='error', username=(request.form.get('username', '').strip() if request and request.form else 'anonymous'), details='server_error')
         return f"Server Error: {str(e)}", 500
 
+@app.route('/admin/login/pin', methods=['POST'])
+def admin_verify_pin():
+    creds = load_credentials()
+    pending = _get_pending_admin_pin(creds)
+    username = (pending or {}).get('username') or 'anonymous'
+    login_ip = _client_ip()
+    now_ts = int(time.time())
+
+    if not pending:
+        record_audit('admin_login', status='failed', username='anonymous', details='missing_or_expired_pin_session')
+        if request.is_json:
+            return jsonify({'status': 'error', 'error': 'Pin session expired. Login again.'}), 400
+        return _render_admin_login_view(
+            creds,
+            error_text='PIN session expired. Enter username and password again.',
+            require_pin=False,
+            institute_name=creds.get('institute_name', 'INSTITUTE')
+        )
+
+    blocked, retry_after = _is_login_rate_limited(login_ip, now_ts)
+    if blocked:
+        record_audit('admin_login', status='failed', username=username, details=f'rate_limited_pin retry_after={retry_after}s')
+        if request.is_json:
+            return jsonify({'status': 'error', 'error': f'Too many attempts. Retry in {retry_after}s.'}), 429
+        return _render_admin_login_view(
+            creds,
+            error_text=f'Too many attempts. Retry in {retry_after}s.',
+            require_pin=True,
+            pending_username=username,
+            clear_pin_on_error=True
+        )
+
+    pin = ''
+    if request.is_json:
+        payload = request.get_json(silent=True) or {}
+        pin = str(payload.get('pin') or '').strip()
+    else:
+        pin = str(request.form.get('gold_login_pin') or '').strip()
+
+    pin_result = service_validate_pin(pending.get('role'), pin, get_pin_config(creds))
+    if not pin_result.get('ok'):
+        _record_login_attempt(login_ip, False, now_ts)
+        record_audit('admin_login', status='failed', username=username, details=pin_result.get('error') or 'invalid_pin')
+        if request.is_json:
+            return jsonify({'status': 'error', 'error': pin_result.get('message') or 'Invalid login pin.'}), 400
+        return _render_admin_login_view(
+            creds,
+            error_text=pin_result.get('message') or 'Invalid login pin.',
+            require_pin=True,
+            pending_username=username,
+            clear_pin_on_error=True
+        )
+
+    _record_login_attempt(login_ip, True, now_ts)
+    _clear_pending_admin_pin()
+    session['admin'] = username
+    session['admin_authenticated'] = True
+    touch_active_admin_session(username)
+    record_audit('admin_login', status='success', username=username, details=f'login_ok role={pending.get("role")}')
+    if request.is_json:
+        return jsonify({'status': 'success', 'redirect': url_for('admin_view')})
+    return redirect(url_for('admin_view'))
+
 @app.route('/admin/logout')
 def admin_logout():
     username = session.get('admin') or 'anonymous'
     remove_active_admin_session()
     session.pop('admin', None)
+    session.pop('admin_authenticated', None)
+    _clear_pending_admin_pin()
     record_audit('admin_logout', status='success', username=username, details='logout')
     return redirect(url_for('admin_login'))
 
@@ -1733,10 +1897,9 @@ def admin_users():
             'type': 'Admin',
             'username': adm.get('username', ''),
             'password': '************',
-            'role': get_admin_role(adm) if is_gold else ADMIN_ROLE_STANDARD
+            'role': get_admin_role(adm) if is_gold else ADMIN_ROLE_STANDARD,
+            'display_name': adm.get('display_name') or adm.get('username', ''),
         }
-        if is_gold:
-            entry['password_plain'] = adm.get('password_plain')
         users.append(entry)
     for s in creds.get('students', []):
         users.append({'type': 'Student', 'username': s.get('username', ''), 'password': '************'})
@@ -1751,10 +1914,9 @@ def list_admins():
     for admin in creds.get('admins', []):
         row = {
             'username': admin.get('username', ''),
+            'display_name': admin.get('display_name') or admin.get('username', ''),
             'role': get_admin_role(admin) if is_gold else ADMIN_ROLE_STANDARD
         }
-        if is_gold:
-            row['password_plain'] = admin.get('password_plain')
         admins_payload.append(row)
     return jsonify({
         'admins': admins_payload,
@@ -1767,6 +1929,7 @@ def list_admins():
 def add_admin():
     data = request.json or {}
     username = (data.get('username', '') or '').strip()
+    display_name = (data.get('display_name', '') or '').strip()
     password = (data.get('password', '') or '').strip()
     pin = (data.get('pin', '') or '').strip()
     actor = session.get('admin') or 'anonymous'
@@ -1781,17 +1944,23 @@ def add_admin():
     if not username or not password:
         record_audit('admin_add', status='failed', username=session.get('admin') or 'anonymous', details='missing_credentials')
         return jsonify({'error': 'Provide username and password'}), 400
+    if service_is_gold_username(username):
+        record_audit('admin_add', status='failed', username=actor, details=f'reserved_gold_username target={username}')
+        return jsonify({'error': 'Username is reserved'}), 400
     if any(a.get('username') == username for a in creds.get('admins', [])):
         record_audit('admin_add', status='failed', username=session.get('admin') or 'anonymous', details=f'username_exists target={username}')
         return jsonify({'error': 'Admin username already exists'}), 400
-    creds.setdefault('admins', []).append({
+    admins = [
+        a for a in creds.get('admins', [])
+        if not service_is_gold_username(a.get('username'))
+    ]
+    admins.append({
         'username': username,
+        'display_name': display_name or username,
         'password_hash': generate_password_hash(password),
-        # Product requirement: gold admins can reveal admin passwords.
-        'password_plain': password,
         'role': target_role
     })
-    save_credentials(creds)
+    service_save_admins(admins)
     record_audit('admin_add', status='success', username=session.get('admin') or 'anonymous', details=f'target={username} role={target_role}')
     return jsonify({'status': 'success', 'username': username, 'role': target_role})
 
@@ -1803,6 +1972,10 @@ def delete_admin(username):
     if not current_admin_is_gold(creds):
         record_audit('admin_delete', status='failed', username=actor, details=f'forbidden_non_gold target={username}')
         return jsonify(access_denied_error()), 403
+
+    if service_is_gold_username(username):
+        record_audit('admin_delete', status='failed', username=actor, details=f'blocked_fixed_gold target={username}')
+        return jsonify({'error': 'Gold admin is fixed and cannot be deleted'}), 400
 
     admins = creds.get('admins', [])
     target = next((a for a in admins if a.get('username') == username), None)
@@ -1816,12 +1989,15 @@ def delete_admin(username):
             record_audit('admin_delete', status='failed', username=actor, details=f'blocked_last_gold target={username}')
             return jsonify({'error': 'Cannot delete the last gold admin'}), 400
 
-    new = [a for a in admins if a.get('username') != username]
-    creds['admins'] = new
-    save_credentials(creds)
+    new = [
+        a for a in admins
+        if a.get('username') != username and not service_is_gold_username(a.get('username'))
+    ]
+    service_save_admins(new)
     if session.get('admin') == username:
         remove_active_admin_session()
         session.pop('admin', None)
+        session.pop('admin_authenticated', None)
     record_audit('admin_delete', status='success', username=actor, details=f'target={username}')
     return jsonify({'status': 'success'})
 
@@ -1836,6 +2012,9 @@ def change_admin_password(username):
     if not current_admin_is_gold(creds):
         record_audit('admin_password_change', status='failed', username=actor, details=f'forbidden_non_gold target={username}')
         return jsonify(access_denied_error()), 403
+    if service_is_gold_username(username):
+        record_audit('admin_password_change', status='failed', username=actor, details=f'blocked_fixed_gold target={username}')
+        return jsonify({'error': 'Gold admin password is managed via environment and cannot be edited here'}), 400
     if not new_pw:
         record_audit('admin_password_change', status='failed', username=session.get('admin') or 'anonymous', details=f'missing_password target={username}')
         return jsonify({'error': 'Provide new password'}), 400
@@ -1850,9 +2029,11 @@ def change_admin_password(username):
         return jsonify({'error': 'Invalid pin'}), 400
 
     admin['password_hash'] = generate_password_hash(new_pw)
-    # Product requirement: gold admins can reveal admin passwords.
-    admin['password_plain'] = new_pw
-    save_credentials(creds)
+    admins = [
+        a for a in creds.get('admins', [])
+        if not service_is_gold_username(a.get('username'))
+    ]
+    service_save_admins(admins)
     record_audit('admin_password_change', status='success', username=session.get('admin') or 'anonymous', details=f'target={username}')
     return jsonify({'status': 'success'})
 
@@ -2451,6 +2632,7 @@ def get_route_snap_settings_api():
     return jsonify(get_route_snap_settings(creds))
 
 @app.route('/api/route', methods=['POST'])
+@login_required
 def create_route():
     data = request.json or {}
     locs = get_locations_for_update()

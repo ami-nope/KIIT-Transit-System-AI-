@@ -3,6 +3,7 @@
 <head>
 <title>Bus Simulator</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/scrollbars.css') }}"/>
 <style>
 :root {
   --ui-theme-hue: 0deg;
@@ -118,11 +119,128 @@ body {
   margin-top:10px; padding:8px 10px; border-radius:14px;
   background:rgba(140,115,255,0.10); border:1px solid rgba(140,115,255,0.28);
 }
+.load-sim-head {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:6px;
+}
+.load-sim-title {
+  font-weight:700;
+  font-size:13px;
+  color:#c7d2fe;
+}
+.load-sim-badges {
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-wrap:wrap;
+}
+.load-mode-badge {
+  display:none;
+  align-items:center;
+  padding:2px 8px;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:0.05em;
+  border:1px solid transparent;
+}
+.load-mode-badge.show {
+  display:inline-flex;
+  animation: loadModePulse 2s ease-in-out infinite;
+}
+.load-mode-badge.stress {
+  color:#ffd8de;
+  border-color:rgba(255,130,150,0.56);
+  background:linear-gradient(155deg, rgba(255,130,150,0.30), rgba(255,130,150,0.08));
+}
+.load-mode-badge.chaos {
+  color:#ffd9b0;
+  border-color:rgba(255,176,94,0.56);
+  background:linear-gradient(155deg, rgba(255,176,94,0.30), rgba(255,176,94,0.08));
+}
+@keyframes loadModePulse {
+  0%, 100% { opacity: 0.88; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.04); }
+}
 .load-sim-panel label { margin-top:0; }
 #loadSimCount {
   margin-top:4px; width:100%; box-sizing:border-box;
   padding:6px 8px; border-radius:12px; border:1px solid var(--edge);
   background-image:var(--glass-soft); color:var(--text); font-size:13px;
+}
+.load-sim-modes {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:8px;
+}
+.glass-check {
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 8px;
+  border-radius:12px;
+  border:1px solid rgba(198,171,255,0.34);
+  background:linear-gradient(160deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+  color:var(--text-sub);
+  cursor:pointer;
+  user-select:none;
+  transition: border-color 0.18s ease, background 0.18s ease, opacity 0.18s ease;
+}
+.glass-check input {
+  position:absolute;
+  width:1px;
+  height:1px;
+  opacity:0;
+  pointer-events:none;
+}
+.glass-check-box {
+  width:15px;
+  height:15px;
+  border-radius:4px;
+  border:1px solid rgba(198,171,255,0.62);
+  background:rgba(255,255,255,0.04);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  transition: all 0.18s ease;
+}
+.glass-check-box::after {
+  content:'';
+  width:7px;
+  height:4px;
+  border-left:2px solid transparent;
+  border-bottom:2px solid transparent;
+  transform: rotate(-45deg) translateY(-1px);
+  opacity:0;
+  transition: opacity 0.18s ease;
+}
+.glass-check-text {
+  font-size:11px;
+  color:#d7def3;
+}
+.glass-check input:checked + .glass-check-box {
+  border-color:rgba(124,243,192,0.76);
+  background:rgba(124,243,192,0.20);
+}
+.glass-check input:checked + .glass-check-box::after {
+  border-left-color:#7cf3c0;
+  border-bottom-color:#7cf3c0;
+  opacity:1;
+}
+.glass-check:hover {
+  border-color:rgba(198,171,255,0.56);
+}
+.glass-check input:disabled + .glass-check-box {
+  border-color:rgba(160,166,188,0.34);
+  background:rgba(130,136,160,0.08);
+}
+.glass-check input:disabled ~ .glass-check-text {
+  color:rgba(186,194,216,0.54);
 }
 .load-sim-row { display:flex; align-items:center; gap:8px; margin-top:8px; }
 #startLoadSimBtn, #stopLoadSimBtn {
@@ -192,6 +310,24 @@ body {
   background: #101a2d !important;
   border-color: #2b3b58 !important;
 }
+.glass-check {
+  background: #111a2d !important;
+  border-color: #2b3b58 !important;
+}
+.glass-check-box {
+  border-color: #4a5f87 !important;
+  background: #0b1220 !important;
+}
+.glass-check input:checked + .glass-check-box {
+  border-color: rgba(124,243,192,0.72) !important;
+  background: rgba(124,243,192,0.16) !important;
+}
+.load-mode-badge.stress {
+  background: linear-gradient(155deg, rgba(255,130,150,0.28), rgba(255,130,150,0.12)) !important;
+}
+.load-mode-badge.chaos {
+  background: linear-gradient(155deg, rgba(255,176,94,0.28), rgba(255,176,94,0.12)) !important;
+}
 .dir-btn {
   background: #131f33 !important;
   color: #c6d1e5 !important;
@@ -242,8 +378,8 @@ body {
 
   <label>Speed (km/h)
     <div class="speed-row">
-      <input type="range" id="speedSlider" min="1" max="200" step="1" value="50"/>
-      <input type="number" id="customSpeed" min="1" max="200" step="1" value="50"/>
+      <input type="range" id="speedSlider" min="1" max="200" step="1" value="15"/>
+      <input type="number" id="customSpeed" min="1" max="200" step="1" value="15"/>
       <span class="speed-unit">km/h</span>
     </div>
   </label>
@@ -279,9 +415,27 @@ body {
   <button id="startBtn" disabled>Select bus & route first</button>
 
   <div class="load-sim-panel">
-    <div style="font-weight:700; font-size:13px; color:#c7d2fe; margin-bottom:6px;">Transport Simulator</div>
+    <div class="load-sim-head">
+      <div class="load-sim-title">Transport Simulator</div>
+      <div class="load-sim-badges" id="loadSimModeBadges">
+        <span id="loadSimStressBadge" class="load-mode-badge stress">STRESS</span>
+        <span id="loadSimChaosBadge" class="load-mode-badge chaos">CHAOS</span>
+      </div>
+    </div>
     <label for="loadSimCount">Transport Count</label>
-    <input type="number" id="loadSimCount" min="1" max="50" step="1" value="20"/>
+    <input type="number" id="loadSimCount" min="1" max="200" step="1" value="20"/>
+    <div class="load-sim-modes" id="loadSimModes">
+      <label class="glass-check" for="loadSimStressCheck">
+        <input type="checkbox" id="loadSimStressCheck"/>
+        <span class="glass-check-box" aria-hidden="true"></span>
+        <span class="glass-check-text">Stress Mode</span>
+      </label>
+      <label class="glass-check" for="loadSimChaosCheck">
+        <input type="checkbox" id="loadSimChaosCheck"/>
+        <span class="glass-check-box" aria-hidden="true"></span>
+        <span class="glass-check-text">Chaos Mode</span>
+      </label>
+    </div>
     <div class="load-sim-row">
       <button id="startLoadSimBtn" type="button">Start Load Simulation</button>
       <button id="stopLoadSimBtn" type="button" disabled>Stop Simulation</button>
@@ -408,7 +562,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   startBtn.addEventListener('click', async () => {
     if (systemSimRunning) return;
-    const driverCount = Math.max(1, Math.min(100, parseInt(driverInput.value, 10) || 20));
+    const driverCount = Math.max(1, Math.min(200, parseInt(driverInput.value, 10) || 20));
     const studentCount = Math.max(1, Math.min(500, parseInt(studentInput.value, 10) || 100));
     setSystemSimStatus('Starting simulation...', true);
     systemSimRunning = true;
@@ -474,6 +628,247 @@ let studentSimZone = 'mixed';
 let studentSimDemandZones = { hostels: [], classes: [] };
 let studentSimLastUpdate = 0;
 let studentSimDotColors = ['#a78bfa','#f472b6','#60a5fa','#fbbf24','#34d399','#f87171'];
+let studentSimLoadRunning = false;
+let studentSimClients = {}; // clientId -> runtime state
+let studentSimClientOrder = [];
+let studentSimOpenSseCount = 0;
+let studentSimInFlightBuses = 0;
+let studentSimInFlightRoutes = 0;
+let studentSimResizeTimer = null;
+let studentSimRetuneTimer = null;
+const STUDENT_SIM_MAX_COUNT = 500;
+
+function clampStudentSimCount(value) {
+  const n = Number.isFinite(value) ? Math.round(value) : 0;
+  return Math.max(0, Math.min(STUDENT_SIM_MAX_COUNT, n || 0));
+}
+
+function studentSimSpeedNormalized() {
+  const n = Number(studentSimSpeed);
+  if (!Number.isFinite(n)) return 0.5;
+  return Math.max(0, Math.min(1, (n - 1) / 9));
+}
+
+function getStudentSimLoadProfile() {
+  const t = studentSimSpeedNormalized();
+  const intervalMinMs = Math.round(4200 - (t * 2300)); // 4.2s -> 1.9s
+  const intervalMaxMs = Math.round(6500 - (t * 3400)); // 6.5s -> 3.1s
+  const presenceMinMs = Math.round(9000 - (t * 4000)); // 9s -> 5s
+  const presenceMaxMs = Math.round(18000 - (t * 6000)); // 18s -> 12s
+  const routesChance = 0.03 + (t * 0.12); // 3% -> 15%
+  const sseChance = 0.01 + (t * 0.05); // 1% -> 6%
+  const desiredCount = Math.max(1, studentSimClientOrder.length || studentSimCount || 1);
+  return {
+    intervalMinMs,
+    intervalMaxMs: Math.max(intervalMinMs + 400, intervalMaxMs),
+    presenceMinMs,
+    presenceMaxMs: Math.max(presenceMinMs + 1000, presenceMaxMs),
+    routesChance,
+    sseChance,
+    sseDurationMinMs: 4500,
+    sseDurationMaxMs: 12000,
+    maxConcurrentSse: Math.max(2, Math.min(24, Math.round(desiredCount / 25))),
+    maxConcurrentBuses: Math.max(6, Math.min(40, Math.round(desiredCount / 12))),
+    maxConcurrentRoutes: Math.max(2, Math.min(12, Math.round(desiredCount / 50)))
+  };
+}
+
+function sampleBetween(minValue, maxValue) {
+  const lo = Number(minValue) || 0;
+  const hi = Number(maxValue) || lo;
+  if (hi <= lo) return lo;
+  return lo + Math.floor(Math.random() * (hi - lo + 1));
+}
+
+function refreshStudentSimViewerCount() {
+  const el = document.getElementById('studentSimViewerCount');
+  if (!el) return;
+  el.textContent = studentSimEnabled ? String(studentSimClientOrder.length) : '0';
+}
+
+function refreshStudentSimInfo() {
+  const info = document.getElementById('studentSimInfo');
+  if (!info) return;
+  if (!studentSimEnabled) {
+    info.textContent = 'Simulated student demand activity';
+    return;
+  }
+  info.textContent = `Load test running: ${studentSimClientOrder.length} viewers, ${studentSimOpenSseCount} SSE`;
+}
+
+function closeStudentSimClientSse(client) {
+  if (!client) return;
+  if (client.sseCloseTimer) {
+    clearTimeout(client.sseCloseTimer);
+    client.sseCloseTimer = null;
+  }
+  if (client.eventSource) {
+    try { client.eventSource.close(); } catch (e) {}
+    client.eventSource = null;
+    studentSimOpenSseCount = Math.max(0, studentSimOpenSseCount - 1);
+  }
+}
+
+function maybeOpenStudentSimSse(client) {
+  if (!client || client.eventSource || !studentSimLoadRunning) return;
+  const profile = getStudentSimLoadProfile();
+  if (studentSimOpenSseCount >= profile.maxConcurrentSse) return;
+  if (Math.random() >= profile.sseChance) return;
+  try {
+    const es = new EventSource('/events');
+    client.eventSource = es;
+    studentSimOpenSseCount += 1;
+    es.onmessage = () => {};
+    es.onerror = () => { closeStudentSimClientSse(client); };
+    const closeAfter = sampleBetween(profile.sseDurationMinMs, profile.sseDurationMaxMs);
+    client.sseCloseTimer = setTimeout(() => { closeStudentSimClientSse(client); }, closeAfter);
+  } catch (e) {
+    closeStudentSimClientSse(client);
+  }
+}
+
+function tickStudentSimClient(clientId) {
+  if (!studentSimLoadRunning) return;
+  const client = studentSimClients[clientId];
+  if (!client) return;
+  const now = Date.now();
+  const profile = getStudentSimLoadProfile();
+
+  if (!client.nextPresenceAt || now >= client.nextPresenceAt) {
+    reportSimStudentPresence(clientId, true);
+    client.nextPresenceAt = now + sampleBetween(profile.presenceMinMs, profile.presenceMaxMs);
+  }
+
+  if (studentSimInFlightBuses < profile.maxConcurrentBuses) {
+    studentSimInFlightBuses += 1;
+    fetch('/api/buses', { cache: 'no-store' })
+      .catch(() => {})
+      .finally(() => { studentSimInFlightBuses = Math.max(0, studentSimInFlightBuses - 1); });
+  }
+
+  if (Math.random() < profile.routesChance && studentSimInFlightRoutes < profile.maxConcurrentRoutes) {
+    studentSimInFlightRoutes += 1;
+    fetch('/api/routes', { cache: 'no-store' })
+      .catch(() => {})
+      .finally(() => { studentSimInFlightRoutes = Math.max(0, studentSimInFlightRoutes - 1); });
+  }
+
+  maybeOpenStudentSimSse(client);
+}
+
+function armStudentSimClientInterval(client) {
+  if (!client) return;
+  if (client.intervalId) clearInterval(client.intervalId);
+  const profile = getStudentSimLoadProfile();
+  const intervalMs = sampleBetween(profile.intervalMinMs, profile.intervalMaxMs);
+  client.intervalId = setInterval(() => { tickStudentSimClient(client.id); }, intervalMs);
+}
+
+function createStudentSimClient() {
+  const clientId = `sim_student_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+  const client = {
+    id: clientId,
+    intervalId: null,
+    eventSource: null,
+    sseCloseTimer: null,
+    nextPresenceAt: 0
+  };
+  studentSimClients[clientId] = client;
+  studentSimClientOrder.push(clientId);
+  reportSimStudentPresence(clientId, true);
+  armStudentSimClientInterval(client);
+  const staggerMs = sampleBetween(120, 900);
+  setTimeout(() => { tickStudentSimClient(clientId); }, staggerMs);
+}
+
+function removeStudentSimClient(clientId, notifyInactive = true) {
+  const client = studentSimClients[clientId];
+  if (!client) return;
+  if (client.intervalId) {
+    clearInterval(client.intervalId);
+    client.intervalId = null;
+  }
+  closeStudentSimClientSse(client);
+  delete studentSimClients[clientId];
+  const idx = studentSimClientOrder.indexOf(clientId);
+  if (idx >= 0) studentSimClientOrder.splice(idx, 1);
+  if (notifyInactive) reportSimStudentPresence(clientId, false);
+}
+
+function resizeStudentSimNetwork(targetCount) {
+  const desired = clampStudentSimCount(targetCount);
+  const current = studentSimClientOrder.length;
+  if (!studentSimLoadRunning) return;
+  if (desired > current) {
+    for (let i = 0; i < (desired - current); i++) {
+      createStudentSimClient();
+    }
+  } else if (desired < current) {
+    const removeIds = studentSimClientOrder.slice(desired);
+    removeIds.forEach((id) => { removeStudentSimClient(id, true); });
+  }
+  refreshStudentSimViewerCount();
+  refreshStudentSimInfo();
+}
+
+function retuneStudentSimNetworkIntervals() {
+  if (!studentSimLoadRunning) return;
+  studentSimClientOrder.forEach((id) => {
+    const client = studentSimClients[id];
+    if (client) armStudentSimClientInterval(client);
+  });
+  refreshStudentSimInfo();
+}
+
+function startStudentSimNetwork(targetCount) {
+  if (studentSimResizeTimer) {
+    clearTimeout(studentSimResizeTimer);
+    studentSimResizeTimer = null;
+  }
+  if (studentSimRetuneTimer) {
+    clearTimeout(studentSimRetuneTimer);
+    studentSimRetuneTimer = null;
+  }
+  studentSimLoadRunning = true;
+  resizeStudentSimNetwork(targetCount);
+}
+
+function stopStudentSimNetwork() {
+  if (studentSimResizeTimer) {
+    clearTimeout(studentSimResizeTimer);
+    studentSimResizeTimer = null;
+  }
+  if (studentSimRetuneTimer) {
+    clearTimeout(studentSimRetuneTimer);
+    studentSimRetuneTimer = null;
+  }
+  studentSimLoadRunning = false;
+  const ids = studentSimClientOrder.slice();
+  ids.forEach((id) => { removeStudentSimClient(id, true); });
+  studentSimClients = {};
+  studentSimClientOrder = [];
+  studentSimOpenSseCount = 0;
+  studentSimInFlightBuses = 0;
+  studentSimInFlightRoutes = 0;
+  refreshStudentSimViewerCount();
+  refreshStudentSimInfo();
+}
+
+function scheduleStudentSimResize(targetCount) {
+  if (studentSimResizeTimer) clearTimeout(studentSimResizeTimer);
+  studentSimResizeTimer = setTimeout(() => {
+    studentSimResizeTimer = null;
+    resizeStudentSimNetwork(targetCount);
+  }, 180);
+}
+
+function scheduleStudentSimRetune() {
+  if (studentSimRetuneTimer) clearTimeout(studentSimRetuneTimer);
+  studentSimRetuneTimer = setTimeout(() => {
+    studentSimRetuneTimer = null;
+    retuneStudentSimNetworkIntervals();
+  }, 180);
+}
 
 function getRandomZoneLatLng(zone) {
   const arr = studentSimDemandZones[zone];
@@ -549,7 +944,7 @@ function renderStudentSimDots() {
     circle._path && (circle._path.style.filter = `drop-shadow(${glow})`);
     studentSimLayer.addLayer(circle);
   }
-  document.getElementById('studentSimViewerCount').textContent = maxDots;
+  refreshStudentSimViewerCount();
 }
 
 function studentSimAnimationLoop(now) {
@@ -575,10 +970,13 @@ function setStudentSimEnabled(val) {
     renderStudentSimDots();
     studentSimLastUpdate = performance.now();
     requestAnimationFrame(studentSimAnimationLoop);
+    startStudentSimNetwork(studentSimCount);
   } else {
     if (studentSimLayer) studentSimLayer.clearLayers();
-    document.getElementById('studentSimViewerCount').textContent = '0';
+    stopStudentSimNetwork();
+    refreshStudentSimViewerCount();
   }
+  refreshStudentSimInfo();
 }
 
 function updateStudentSimDemandZones() {
@@ -597,20 +995,27 @@ document.addEventListener('DOMContentLoaded',()=>{
   const count = document.getElementById('studentSimCount');
   const speed = document.getElementById('studentSimSpeed');
   const zone = document.getElementById('studentSimZone');
+  studentSimCount = clampStudentSimCount(parseInt(count.value, 10));
+  count.value = String(studentSimCount);
+  refreshStudentSimInfo();
+  refreshStudentSimViewerCount();
   enable.addEventListener('change',()=>{
     setStudentSimEnabled(enable.checked);
   });
   count.addEventListener('input',()=>{
-    studentSimCount = parseInt(count.value,10)||0;
+    studentSimCount = clampStudentSimCount(parseInt(count.value, 10));
+    count.value = String(studentSimCount);
     if (studentSimEnabled) {
       studentSimDots = createStudentSimDots(studentSimCount);
       renderStudentSimDots();
+      scheduleStudentSimResize(studentSimCount);
     }
   });
   speed.addEventListener('input',()=>{
     studentSimSpeed = parseInt(speed.value,10)||1;
     if (studentSimEnabled) {
       for (const dot of studentSimDots) dot.speed = 0.00005 + Math.random()*0.00012*studentSimSpeed;
+      scheduleStudentSimRetune();
     }
   });
   zone.addEventListener('change',()=>{
@@ -628,6 +1033,7 @@ let systemSimDriverIntervals = [];
 let systemSimStudentIntervals = [];
 let systemSimStudentPresenceIds = [];
 let systemSimActiveBusNumbers = [];
+let systemSimBusStates = {};
 let systemSimRunning = false;
 let systemSimRoutesCache = [];
 
@@ -653,37 +1059,21 @@ async function startSystemDriverSimulation(driverCount) {
   for (let i = 0; i < driverCount; i++) {
     const busNumber = 100 + i;
     const route = routes[Math.floor(Math.random()*routes.length)];
-    if (!route || !route.waypoints || route.waypoints.length < 2) continue;
-    const waypoints = route.waypoints;
-    let segIdx = 0, t = 0;
-    let direction = 1;
-    let lat = waypoints[0][0], lng = waypoints[0][1];
-    let heading = 0;
+    const state = createSimulatedBusState(busNumber, route);
+    if (!state) continue;
+    state.simMode = 'system';
+    systemSimBusStates[busNumber] = state;
     systemSimActiveBusNumbers.push(busNumber);
     // Assign route
     fetch(`/api/bus/${busNumber}/route`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ routeId: route.id })
-    }).catch(()=>{});
+      body: JSON.stringify({ routeId: state.routeId })
+    }).catch(()=>{}).then(() => sendSimulatedBusUpdate(state));
     // Movement interval
     const interval = setInterval(() => {
-      // Move along waypoints
-      const a = waypoints[segIdx], b = waypoints[segIdx+1];
-      if (!a || !b) return;
-      const segDx = b[0]-a[0], segDy = b[1]-a[1];
-      const segLen = Math.sqrt(segDx*segDx + segDy*segDy);
-      const speed = 0.00012; // slow, realistic
-      t += speed;
-      if (t >= 1) { t = 0; segIdx++; if (segIdx >= waypoints.length-1) { segIdx = 0; } }
-      lat = a[0] + t*(b[0]-a[0]);
-      lng = a[1] + t*(b[1]-a[1]);
-      heading = Math.atan2(b[1]-a[1], b[0]-a[0]) * 180/Math.PI;
-      // Send update
-      fetch(`/api/bus/${busNumber}`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lat, lng, heading, lastUpdate: new Date().toISOString() })
-      }).catch(()=>{});
-    }, 2000 + Math.floor(Math.random()*400)); // randomize a bit
+      advanceSimulatedBus(state, state.tickMs / 1000);
+      sendSimulatedBusUpdate(state);
+    }, state.tickMs);
     systemSimDriverIntervals.push(interval);
   }
 }
@@ -693,9 +1083,12 @@ function stopSystemDriverSimulation() {
   systemSimDriverIntervals = [];
   // Delete all simulated buses
   for (const busNumber of systemSimActiveBusNumbers) {
+    clearSimulatedBusDelayedTimers(systemSimBusStates[busNumber]);
+    delete systemSimBusStates[busNumber];
     fetch(`/api/bus/${busNumber}`, { method: 'DELETE' }).catch(()=>{});
   }
   systemSimActiveBusNumbers = [];
+  systemSimBusStates = {};
 }
 // --- Gamepad Status Indicator ---
 let gamepadStatusEl = document.createElement('div');
@@ -944,8 +1337,31 @@ let allRoutesData = [];
 
 // --- Load Simulation Mode ---
 const LOAD_SIM_START_BUS_NUMBER = 100;
-const LOAD_SIM_TICK_MS = 500;
-const LOAD_SIM_MAX_COUNT = 50;
+const LOAD_SIM_TICK_MIN_MS = 900;
+const LOAD_SIM_TICK_MAX_MS = 1300;
+const LOAD_SIM_MIN_SPEED_KMH = 10;
+const LOAD_SIM_MAX_SPEED_KMH = 20;
+const LOAD_SIM_MAX_COUNT = 200;
+const LOAD_SIM_STRESS_TICK_MIN_MS = 150;
+const LOAD_SIM_STRESS_TICK_MAX_MS = 300;
+const LOAD_SIM_STRESS_DOUBLE_SEND_CHANCE = 0.10;
+const LOAD_SIM_CHAOS_DROP_CHANCE = 0.05;
+const LOAD_SIM_CHAOS_DUPLICATE_CHANCE = 0.05;
+const LOAD_SIM_CHAOS_OUT_OF_ORDER_CHANCE = 0.03;
+const LOAD_SIM_CHAOS_SPEED_SPIKE_CHANCE = 0.03;
+const LOAD_SIM_CHAOS_FREEZE_CHANCE = 0.03;
+const LOAD_SIM_CHAOS_REVERSE_CHANCE = 0.02;
+const LOAD_SIM_CHAOS_SPIKE_MIN_KMH = 30;
+const LOAD_SIM_CHAOS_SPIKE_MAX_KMH = 45;
+const LOAD_SIM_CHAOS_FREEZE_MIN_MS = 2000;
+const LOAD_SIM_CHAOS_FREEZE_MAX_MS = 6000;
+const LOAD_SIM_CHAOS_REVERSE_MIN_MS = 1200;
+const LOAD_SIM_CHAOS_REVERSE_MAX_MS = 3200;
+const LOAD_SIM_CHAOS_LATENCY_MIN_MS = 50;
+const LOAD_SIM_CHAOS_LATENCY_MAX_MS = 800;
+const LOAD_SIM_MAX_DELAYED_SEND_TIMERS = 6;
+const LOAD_SIM_OUT_OF_ORDER_MIN_MS = 700;
+const LOAD_SIM_OUT_OF_ORDER_MAX_MS = 2600;
 
 const activeSimulatedBuses = {};
 const loadSimulationTimers = {};
@@ -957,6 +1373,10 @@ const loadSimCountInput = document.getElementById('loadSimCount');
 const startLoadSimBtn = document.getElementById('startLoadSimBtn');
 const stopLoadSimBtn = document.getElementById('stopLoadSimBtn');
 const loadSimStatusEl = document.getElementById('loadSimStatus');
+const loadSimStressCheck = document.getElementById('loadSimStressCheck');
+const loadSimChaosCheck = document.getElementById('loadSimChaosCheck');
+const loadSimStressBadge = document.getElementById('loadSimStressBadge');
+const loadSimChaosBadge = document.getElementById('loadSimChaosBadge');
 
 function setLoadSimStatus(message, isError) {
   loadSimStatusEl.textContent = message;
@@ -966,6 +1386,10 @@ function setLoadSimStatus(message, isError) {
 function refreshLoadSimControls() {
   startLoadSimBtn.disabled = loadSimulationBusy || loadSimulationRunning;
   stopLoadSimBtn.disabled = loadSimulationBusy || !loadSimulationRunning;
+  const lockModes = loadSimulationBusy || loadSimulationRunning;
+  if (loadSimStressCheck) loadSimStressCheck.disabled = lockModes;
+  if (loadSimChaosCheck) loadSimChaosCheck.disabled = lockModes;
+  refreshLoadSimModeUi();
 }
 
 function clampLoadSimCount(value) {
@@ -973,11 +1397,53 @@ function clampLoadSimCount(value) {
   return Math.max(1, Math.min(LOAD_SIM_MAX_COUNT, n || 1));
 }
 
+function randomInt(minValue, maxValue) {
+  const lo = Math.floor(Number(minValue) || 0);
+  const hi = Math.floor(Number(maxValue) || lo);
+  if (hi <= lo) return lo;
+  return lo + Math.floor(Math.random() * (hi - lo + 1));
+}
+
+function randomFloat(minValue, maxValue) {
+  const lo = Number(minValue) || 0;
+  const hi = Number(maxValue) || lo;
+  if (hi <= lo) return lo;
+  return lo + (Math.random() * (hi - lo));
+}
+
+function getLoadSimModeConfig() {
+  return {
+    stress: !!(loadSimStressCheck && loadSimStressCheck.checked),
+    chaos: !!(loadSimChaosCheck && loadSimChaosCheck.checked)
+  };
+}
+
+function refreshLoadSimModeUi() {
+  const mode = getLoadSimModeConfig();
+  if (loadSimStressBadge) loadSimStressBadge.classList.toggle('show', !!mode.stress);
+  if (loadSimChaosBadge) loadSimChaosBadge.classList.toggle('show', !!mode.chaos);
+}
+
 function sanitizeWaypoints(route) {
-  if (!route || !Array.isArray(route.waypoints)) return [];
-  return route.waypoints
+  if (!route) return [];
+  const source = (Array.isArray(route.path_points) && route.path_points.length >= 2)
+    ? route.path_points
+    : route.waypoints;
+  if (!Array.isArray(source)) return [];
+  return source
     .map(wp => [Number(wp[0]), Number(wp[1])])
     .filter(wp => Number.isFinite(wp[0]) && Number.isFinite(wp[1]));
+}
+
+function buildContinuousTrack(waypoints) {
+  if (!Array.isArray(waypoints) || waypoints.length < 2) return [];
+  const track = waypoints.slice();
+  const start = track[0];
+  const end = track[track.length - 1];
+  const isLoop = calcDist(start[0], start[1], end[0], end[1]) <= 25;
+  if (isLoop) return track;
+  const reverseLeg = track.slice(0, -1).reverse();
+  return track.concat(reverseLeg);
 }
 
 function pickRandomRoute(routes) {
@@ -985,11 +1451,10 @@ function pickRandomRoute(routes) {
   return routes[Math.floor(Math.random() * routes.length)];
 }
 
-function computeHeading(a, b, direction) {
+function computeHeading(a, b) {
   const dx = b[1] - a[1];
   const dy = b[0] - a[0];
-  const heading = (Math.atan2(dx, dy) * 180 / Math.PI + 360) % 360;
-  return direction >= 0 ? heading : (heading + 180) % 360;
+  return (Math.atan2(dx, dy) * 180 / Math.PI + 360) % 360;
 }
 
 function updateSimulatedBusPose(state) {
@@ -998,43 +1463,47 @@ function updateSimulatedBusPose(state) {
   if (!a || !b) return;
 
   const t = Math.max(0, Math.min(1, state.t));
-  let latPos = a[0] + (b[0] - a[0]) * t;
-  let lngPos = a[1] + (b[1] - a[1]) * t;
-
-  const latMid = (a[0] + b[0]) * 0.5;
-  const metersPerLng = Math.max(1, 111320 * Math.cos(latMid * Math.PI / 180));
-  const segEast = (b[1] - a[1]) * metersPerLng;
-  const segNorth = (b[0] - a[0]) * 111320;
-  const segLen = Math.sqrt(segEast * segEast + segNorth * segNorth);
-
-  if (segLen > 0.001) {
-    const perpEast = -segNorth / segLen;
-    const perpNorth = segEast / segLen;
-    state.swayPhase += state.swayStep;
-    const swayMeters = Math.sin(state.swayPhase) * state.swayAmplitude;
-    latPos += (perpNorth * swayMeters) / 111320;
-    lngPos += (perpEast * swayMeters) / metersPerLng;
-  }
-
-  state.lat = latPos;
-  state.lng = lngPos;
-  state.heading = computeHeading(a, b, state.direction);
+  state.lat = a[0] + (b[0] - a[0]) * t;
+  state.lng = a[1] + (b[1] - a[1]) * t;
+  const directionSign = state.directionSign < 0 ? -1 : 1;
+  const segmentHeading = computeHeading(a, b);
+  state.heading = directionSign < 0 ? ((segmentHeading + 180) % 360) : segmentHeading;
 
   const dLat = b[0] - a[0];
   const dLng = b[1] - a[1];
   const vecMag = Math.sqrt(dLat * dLat + dLng * dLng) || 1;
-  const sign = state.direction >= 0 ? 1 : -1;
   state.directionVector = {
-    lat: sign * dLat / vecMag,
-    lng: sign * dLng / vecMag
+    lat: (dLat / vecMag) * directionSign,
+    lng: (dLng / vecMag) * directionSign
   };
 }
 
 function advanceSimulatedBus(state, dtSec) {
   if (!state || !Array.isArray(state.waypoints) || state.waypoints.length < 2) return;
+  const nowMs = Date.now();
+
+  if (state.freezeUntilMs && nowMs < state.freezeUntilMs) {
+    state.directionSign = 1;
+    if (state.modeChaos && state.allowReverse && state.reverseUntilMs && nowMs < state.reverseUntilMs) {
+      state.directionSign = -1;
+    }
+    updateSimulatedBusPose(state);
+    return;
+  }
+
+  state.directionSign = 1;
+  if (state.modeChaos && state.allowReverse && state.reverseUntilMs && nowMs < state.reverseUntilMs) {
+    state.directionSign = -1;
+  }
 
   state.speedPhase += state.speedPhaseStep;
-  const variedKmh = Math.max(4, state.baseSpeedKmh * (0.92 + 0.16 * Math.sin(state.speedPhase)));
+  let variedKmh = Math.max(
+    LOAD_SIM_MIN_SPEED_KMH,
+    Math.min(LOAD_SIM_MAX_SPEED_KMH, state.baseSpeedKmh + Math.sin(state.speedPhase) * state.speedJitterKmh)
+  );
+  if (state.modeChaos && state.spikeUntilMs && nowMs < state.spikeUntilMs) {
+    variedKmh = Math.max(variedKmh, state.spikeKmh || LOAD_SIM_CHAOS_SPIKE_MIN_KMH);
+  }
   let remainingMeters = (variedKmh / 3.6) * dtSec;
   let guard = 0;
 
@@ -1046,39 +1515,25 @@ function advanceSimulatedBus(state, dtSec) {
 
     const segLen = calcDist(a[0], a[1], b[0], b[1]);
     if (segLen < 0.05) {
-      if (state.direction >= 0) {
-        if (state.segmentIdx >= state.waypoints.length - 2) {
-          state.segmentIdx = state.waypoints.length - 2;
-          state.t = 1;
-          state.direction = -1;
-        } else {
-          state.segmentIdx += 1;
-          state.t = 0;
-        }
+      if (state.directionSign >= 0) {
+        state.segmentIdx = (state.segmentIdx + 1) % Math.max(1, state.waypoints.length - 1);
+        state.t = 0;
       } else {
-        if (state.segmentIdx <= 0) {
-          state.segmentIdx = 0;
-          state.t = 0;
-          state.direction = 1;
-        } else {
-          state.segmentIdx -= 1;
-          state.t = 1;
-        }
+        state.segmentIdx -= 1;
+        if (state.segmentIdx < 0) state.segmentIdx = Math.max(0, state.waypoints.length - 2);
+        state.t = 1;
       }
       continue;
     }
 
-    if (state.direction >= 0) {
+    if (state.directionSign >= 0) {
       const distToEnd = (1 - state.t) * segLen;
       if (remainingMeters >= distToEnd) {
         remainingMeters -= distToEnd;
-        if (state.segmentIdx >= state.waypoints.length - 2) {
-          state.segmentIdx = state.waypoints.length - 2;
-          state.t = 1;
-          state.direction = -1;
-        } else {
-          state.segmentIdx += 1;
-          state.t = 0;
+        state.segmentIdx += 1;
+        state.t = 0;
+        if (state.segmentIdx >= state.waypoints.length - 1) {
+          state.segmentIdx = 0;
         }
       } else {
         state.t += remainingMeters / segLen;
@@ -1088,13 +1543,10 @@ function advanceSimulatedBus(state, dtSec) {
       const distToStart = state.t * segLen;
       if (remainingMeters >= distToStart) {
         remainingMeters -= distToStart;
-        if (state.segmentIdx <= 0) {
-          state.segmentIdx = 0;
-          state.t = 0;
-          state.direction = 1;
-        } else {
-          state.segmentIdx -= 1;
-          state.t = 1;
+        state.segmentIdx -= 1;
+        state.t = 1;
+        if (state.segmentIdx < 0) {
+          state.segmentIdx = Math.max(0, state.waypoints.length - 2);
         }
       } else {
         state.t -= remainingMeters / segLen;
@@ -1107,15 +1559,109 @@ function advanceSimulatedBus(state, dtSec) {
   updateSimulatedBusPose(state);
 }
 
-function sendSimulatedBusUpdate(state) {
-  if (!state || state.inFlight) return Promise.resolve(false);
+function clearSimulatedBusDelayedTimers(state) {
+  if (!state || !state.delayedSendTimers) return;
+  state.delayedSendTimers.forEach((timerId) => { clearTimeout(timerId); });
+  state.delayedSendTimers.clear();
+}
+
+function queueSimulatedBusUpdate(state, options = {}) {
+  if (!state) return Promise.resolve(false);
+  const delayMs = Math.max(0, Math.round(Number(options.delayMs) || 0));
+  const sendOpts = {
+    lastUpdateIso: options.lastUpdateIso || null
+  };
+  if (delayMs <= 0) {
+    return sendSimulatedBusUpdate(state, sendOpts);
+  }
+
+  if (!state.delayedSendTimers) state.delayedSendTimers = new Set();
+  if (state.delayedSendTimers.size >= LOAD_SIM_MAX_DELAYED_SEND_TIMERS) {
+    return sendSimulatedBusUpdate(state, sendOpts);
+  }
+
+  return new Promise((resolve) => {
+    const timerId = setTimeout(() => {
+      state.delayedSendTimers.delete(timerId);
+      const isLoadStateActive = loadSimulationRunning && activeSimulatedBuses[state.busNumber] === state;
+      const isSystemStateActive = systemSimRunning && systemSimBusStates[state.busNumber] === state;
+      if (!isLoadStateActive && !isSystemStateActive) {
+        resolve(false);
+        return;
+      }
+      sendSimulatedBusUpdate(state, sendOpts).then(resolve).catch(() => resolve(false));
+    }, delayMs);
+    state.delayedSendTimers.add(timerId);
+  });
+}
+
+function maybeApplyLoadChaosTick(state) {
+  if (!state || !state.modeChaos) return;
+  const nowMs = Date.now();
+  if ((!state.spikeUntilMs || nowMs >= state.spikeUntilMs) && Math.random() < LOAD_SIM_CHAOS_SPEED_SPIKE_CHANCE) {
+    state.spikeUntilMs = nowMs + randomInt(1100, 2800);
+    state.spikeKmh = randomFloat(LOAD_SIM_CHAOS_SPIKE_MIN_KMH, LOAD_SIM_CHAOS_SPIKE_MAX_KMH);
+  }
+  if ((!state.freezeUntilMs || nowMs >= state.freezeUntilMs) && Math.random() < LOAD_SIM_CHAOS_FREEZE_CHANCE) {
+    state.freezeUntilMs = nowMs + randomInt(LOAD_SIM_CHAOS_FREEZE_MIN_MS, LOAD_SIM_CHAOS_FREEZE_MAX_MS);
+  }
+  if (
+    state.allowReverse &&
+    (!state.reverseUntilMs || nowMs >= state.reverseUntilMs) &&
+    Math.random() < LOAD_SIM_CHAOS_REVERSE_CHANCE
+  ) {
+    state.reverseUntilMs = nowMs + randomInt(LOAD_SIM_CHAOS_REVERSE_MIN_MS, LOAD_SIM_CHAOS_REVERSE_MAX_MS);
+  }
+}
+
+function dispatchLoadSimTickUpdates(state) {
+  if (!state) return;
+  const chaosOn = !!state.modeChaos;
+  const stressOn = !!state.modeStress;
+
+  if (chaosOn && Math.random() < LOAD_SIM_CHAOS_DROP_CHANCE) return;
+
+  const tickPlans = [];
+  const baseTimestampIso = new Date().toISOString();
+  tickPlans.push({ lastUpdateIso: baseTimestampIso });
+
+  if (stressOn && Math.random() < LOAD_SIM_STRESS_DOUBLE_SEND_CHANCE) {
+    tickPlans.push({ lastUpdateIso: baseTimestampIso });
+  }
+  if (chaosOn && Math.random() < LOAD_SIM_CHAOS_DUPLICATE_CHANCE) {
+    tickPlans.push({ lastUpdateIso: baseTimestampIso });
+  }
+
+  tickPlans.forEach((plan) => {
+    let delayMs = 0;
+    let timestampIso = plan.lastUpdateIso || new Date().toISOString();
+    if (chaosOn) {
+      delayMs = randomInt(LOAD_SIM_CHAOS_LATENCY_MIN_MS, LOAD_SIM_CHAOS_LATENCY_MAX_MS);
+      if (Math.random() < LOAD_SIM_CHAOS_OUT_OF_ORDER_CHANCE) {
+        timestampIso = new Date(Date.now() - randomInt(LOAD_SIM_OUT_OF_ORDER_MIN_MS, LOAD_SIM_OUT_OF_ORDER_MAX_MS)).toISOString();
+      }
+    }
+    queueSimulatedBusUpdate(state, { delayMs, lastUpdateIso: timestampIso });
+  });
+}
+
+function sendSimulatedBusUpdate(state, options = {}) {
+  if (!state) return Promise.resolve(false);
+  if (state.inFlight) {
+    state.pendingSend = true;
+    return Promise.resolve(false);
+  }
   state.inFlight = true;
+  state.pendingSend = false;
+  const lastUpdateIso = (options && typeof options.lastUpdateIso === 'string' && options.lastUpdateIso)
+    ? options.lastUpdateIso
+    : new Date().toISOString();
   const payload = {
     lat: state.lat,
     lng: state.lng,
     routeId: state.routeId,
     heading: state.heading,
-    lastUpdate: new Date().toISOString()
+    lastUpdate: lastUpdateIso
   };
   return fetch(`/api/bus/${state.busNumber}`, {
     method: 'POST',
@@ -1123,42 +1669,37 @@ function sendSimulatedBusUpdate(state) {
     body: JSON.stringify(payload)
   }).catch(() => {}).finally(() => {
     state.inFlight = false;
+    const isLoadStateActive = loadSimulationRunning && activeSimulatedBuses[state.busNumber] === state;
+    const isSystemStateActive = systemSimRunning && systemSimBusStates[state.busNumber] === state;
+    if (state.pendingSend && (isLoadStateActive || isSystemStateActive)) {
+      state.pendingSend = false;
+      queueMicrotask(() => { sendSimulatedBusUpdate(state); });
+    }
   });
 }
 
 function tickSimulatedBus(busNumber) {
   const state = activeSimulatedBuses[busNumber];
   if (!state || !loadSimulationRunning) return;
-  advanceSimulatedBus(state, LOAD_SIM_TICK_MS / 1000);
-  sendSimulatedBusUpdate(state);
+  if (state.modeChaos) maybeApplyLoadChaosTick(state);
+  advanceSimulatedBus(state, (state.tickMs || LOAD_SIM_TICK_MIN_MS) / 1000);
+  dispatchLoadSimTickUpdates(state);
 }
 
-function createSimulatedBusState(busNumber, route) {
-  const waypoints = sanitizeWaypoints(route);
+function createSimulatedBusState(busNumber, route, modeConfig = null) {
+  const routeTrack = sanitizeWaypoints(route);
+  const waypoints = buildContinuousTrack(routeTrack);
   if (waypoints.length < 2) return null;
 
-  const spawnIdx = Math.floor(Math.random() * waypoints.length);
-  const direction = Math.random() < 0.5 ? 1 : -1;
-  let segmentIdx = 0;
-  let t = 0;
-
-  if (direction >= 0) {
-    if (spawnIdx >= waypoints.length - 1) {
-      segmentIdx = waypoints.length - 2;
-      t = 1;
-    } else {
-      segmentIdx = spawnIdx;
-      t = 0;
-    }
-  } else {
-    if (spawnIdx <= 0) {
-      segmentIdx = 0;
-      t = 0;
-    } else {
-      segmentIdx = spawnIdx - 1;
-      t = 1;
-    }
-  }
+  const mode = modeConfig || {};
+  const stressOn = !!mode.stress;
+  const chaosOn = !!mode.chaos;
+  const segmentIdx = Math.floor(Math.random() * (waypoints.length - 1));
+  const t = Math.random();
+  const baseSpeedKmh = LOAD_SIM_MIN_SPEED_KMH + Math.random() * (LOAD_SIM_MAX_SPEED_KMH - LOAD_SIM_MIN_SPEED_KMH);
+  const tickMin = stressOn ? LOAD_SIM_STRESS_TICK_MIN_MS : LOAD_SIM_TICK_MIN_MS;
+  const tickMax = stressOn ? LOAD_SIM_STRESS_TICK_MAX_MS : LOAD_SIM_TICK_MAX_MS;
+  const tickMs = randomInt(tickMin, tickMax);
 
   const state = {
     busNumber,
@@ -1166,18 +1707,27 @@ function createSimulatedBusState(busNumber, route) {
     waypoints,
     segmentIdx,
     t,
-    direction,
-    lat: waypoints[spawnIdx][0],
-    lng: waypoints[spawnIdx][1],
+    lat: waypoints[segmentIdx][0],
+    lng: waypoints[segmentIdx][1],
     heading: 0,
     directionVector: { lat: 0, lng: 0 },
-    baseSpeedKmh: 10 + Math.random() * 8,
+    baseSpeedKmh: baseSpeedKmh,
+    speedJitterKmh: 0.6 + Math.random() * 1.4,
     speedPhase: Math.random() * Math.PI * 2,
-    speedPhaseStep: 0.08 + Math.random() * 0.1,
-    swayAmplitude: 1 + Math.random() * 2.5,
-    swayPhase: Math.random() * Math.PI * 2,
-    swayStep: 0.06 + Math.random() * 0.08,
-    inFlight: false
+    speedPhaseStep: 0.04 + Math.random() * 0.05,
+    directionSign: 1,
+    modeStress: stressOn,
+    modeChaos: chaosOn,
+    freezeUntilMs: 0,
+    reverseUntilMs: 0,
+    spikeUntilMs: 0,
+    spikeKmh: 0,
+    allowReverse: waypoints.length > 2,
+    delayedSendTimers: new Set(),
+    simMode: 'load',
+    tickMs,
+    inFlight: false,
+    pendingSend: false
   };
   updateSimulatedBusPose(state);
   return state;
@@ -1197,6 +1747,8 @@ async function stopLoadSimulation() {
   setLoadSimStatus('Stopping simulation...', false);
 
   busesToStop.forEach(busNumber => {
+    const state = activeSimulatedBuses[busNumber];
+    clearSimulatedBusDelayedTimers(state);
     const timer = loadSimulationTimers[busNumber];
     if (timer) clearInterval(timer);
     delete loadSimulationTimers[busNumber];
@@ -1218,6 +1770,7 @@ async function startLoadSimulation() {
 
   loadSimulationBusy = true;
   refreshLoadSimControls();
+  const modeConfig = getLoadSimModeConfig();
 
   const desiredCount = clampLoadSimCount(parseInt(loadSimCountInput.value, 10));
   loadSimCountInput.value = String(desiredCount);
@@ -1248,18 +1801,22 @@ async function startLoadSimulation() {
 
   loadSimulationRunning = true;
   refreshLoadSimControls();
-  setLoadSimStatus(`Starting ${desiredCount} transports...`, false);
+  const modeLabels = [];
+  if (modeConfig.stress) modeLabels.push('STRESS');
+  if (modeConfig.chaos) modeLabels.push('CHAOS');
+  const modeSuffix = modeLabels.length ? ` [${modeLabels.join(' + ')}]` : '';
+  setLoadSimStatus(`Starting ${desiredCount} transports${modeSuffix}...`, false);
 
   const setupTasks = [];
   for (let i = 0; i < desiredCount; i++) {
     const busNumber = LOAD_SIM_START_BUS_NUMBER + i;
     const route = pickRandomRoute(availableRoutes);
-    const state = createSimulatedBusState(busNumber, route);
+    const state = createSimulatedBusState(busNumber, route, modeConfig);
     if (!state) continue;
 
     activeSimulatedBuses[busNumber] = state;
     spawnedBusNumbers.push(busNumber);
-    loadSimulationTimers[busNumber] = setInterval(() => tickSimulatedBus(busNumber), LOAD_SIM_TICK_MS);
+    loadSimulationTimers[busNumber] = setInterval(() => tickSimulatedBus(busNumber), state.tickMs);
 
     const assignTask = fetch(`/api/bus/${busNumber}/route`, {
       method: 'POST',
@@ -1274,17 +1831,6 @@ async function startLoadSimulation() {
   refreshLoadSimControls();
 }
 
-async function osrmRoute(waypoints) {
-  if (waypoints.length < 2) return waypoints;
-  try {
-    const coords = waypoints.map(wp => `${wp[1]},${wp[0]}`).join(';');
-    const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?geometries=geojson`);
-    const data = await res.json();
-    if (data.routes && data.routes[0]) return data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
-  } catch(e) {}
-  return waypoints;
-}
-
 function clearRouteDisplay() {
   if (routePolyline) { map.removeLayer(routePolyline); routePolyline = null; }
   routeStopMarkers.forEach(m => map.removeLayer(m));
@@ -1297,10 +1843,11 @@ async function showRouteOnMap(routeId) {
   refreshAutoFollowUI();
   if (!routeId) return;
   const route = allRoutesData.find(r => String(r.id) === String(routeId));
-  if (!route || !route.waypoints || route.waypoints.length < 2) return;
+  const coords = sanitizeWaypoints(route);
+  if (!route || coords.length < 2) return;
 
   // Teleport simulator marker to route start as soon as a route is selected.
-  const routeStart = route.waypoints[0];
+  const routeStart = coords[0];
   if (Array.isArray(routeStart) && routeStart.length >= 2) {
     lat = Number(routeStart[0]);
     lng = Number(routeStart[1]);
@@ -1312,7 +1859,6 @@ async function showRouteOnMap(routeId) {
     try { map.panTo([lat, lng], { animate: true, duration: 0.25 }); } catch (e) {}
   }
 
-  const coords = await osrmRoute(route.waypoints);
   alignerRouteCoords = coords; // cache for aligner
   if (coords && coords.length >= 2) {
     lat = coords[0][0];
@@ -1404,7 +1950,7 @@ async function initRouteSelect() {
 // Speed controls - slider and number input are synced (both in km/h)
 const speedSlider = document.getElementById('speedSlider');
 const customSpeedInput = document.getElementById('customSpeed');
-let targetKmh = 50; // current speed in km/h
+let targetKmh = 15; // current speed in km/h
 
 function setSpeed(kmh) {
   kmh = Math.max(1, Math.min(200, Math.round(kmh)));
@@ -1717,6 +2263,24 @@ refreshLoadSimControls();
 loadSimCountInput.addEventListener('change', () => {
   loadSimCountInput.value = String(clampLoadSimCount(parseInt(loadSimCountInput.value, 10)));
 });
+if (loadSimStressCheck) {
+  loadSimStressCheck.addEventListener('change', () => {
+    if (loadSimulationRunning || loadSimulationBusy) {
+      loadSimStressCheck.checked = !loadSimStressCheck.checked;
+      return;
+    }
+    refreshLoadSimModeUi();
+  });
+}
+if (loadSimChaosCheck) {
+  loadSimChaosCheck.addEventListener('change', () => {
+    if (loadSimulationRunning || loadSimulationBusy) {
+      loadSimChaosCheck.checked = !loadSimChaosCheck.checked;
+      return;
+    }
+    refreshLoadSimModeUi();
+  });
+}
 startLoadSimBtn.addEventListener('click', () => {
   startLoadSimulation().catch(() => {
     loadSimulationBusy = false;
@@ -1754,6 +2318,11 @@ document.getElementById('startBtn').addEventListener('click', () => {
         document.getElementById('syncStatus').innerHTML = '<span class="status-dot"></span>Syncing...';
     }
     updateStartBtn();
+});
+
+window.addEventListener('beforeunload', () => {
+    try { stopStudentSimNetwork(); } catch (e) {}
+    try { stopSystemStudentSimulation(); } catch (e) {}
 });
 
 requestAnimationFrame(animate);

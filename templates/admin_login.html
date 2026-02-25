@@ -4,6 +4,7 @@
     <title>Admin Login — Campus Transport</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicons/favicon-admin-gold.svg' if require_gold_pin else 'favicons/favicon-admin.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/scrollbars.css') }}" />
     <style>
         :root {
             --bg: #0b0c14;
@@ -174,14 +175,41 @@
             border-color: rgba(215, 194, 255, 0.72);
             box-shadow: 0 0 0 1px rgba(215, 194, 255, 0.32);
         }
+        .role-links {
+            margin-top: 14px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .role-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid #2b3b58;
+            background: #162237;
+            color: #c6d3ec;
+            text-decoration: none;
+            font-size: 13px;
+            transition: transform .16s ease, border-color .16s ease, color .16s ease;
+            pointer-events: auto;
+        }
+        .role-link:hover {
+            transform: translateY(-1px);
+            border-color: #41598a;
+            color: #e6eef8;
+        }
     </style>
 </head>
-<body data-require-gold-pin="{{ (require_gold_pin or false) | tojson }}">
+<body
+    data-require-gold-pin="{{ (require_gold_pin or false) | tojson }}"
+    data-clear-pin-on-error="{{ (clear_pin_on_error or false) | tojson }}">
     <div class="box">
         <h1>{{ institute_name | default('Institute') }} — Admin</h1>
         <p class="muted">
             {% if require_gold_pin %}
-            Gold admin verification in progress. Enter your assigned 6-digit pin.
+            PIN verification in progress. Enter your assigned 6-digit pin.
             {% else %}
             Sign in using your admin username and password.
             {% endif %}
@@ -195,13 +223,13 @@
         {% if error_text %}
         <div class="error-box">{{ error_text }}</div>
         {% endif %}
-        <form method="POST" action="/admin/login" autocomplete="on">
+        <form id="adminAuthForm" method="POST" action="{{ url_for('admin_verify_pin') if require_gold_pin else url_for('admin_login') }}" autocomplete="on">
             <div id="primary-login-fields" {% if require_gold_pin %}hidden{% endif %}>
                 <label>Campus Transport System-Admin Login</label>
                 <input name="institute_name" placeholder="E.g. Your Institute" value="{{ institute_name | default('') }}" autocomplete="organization">
 
                 <label>Admin Username</label>
-                <input name="username" placeholder="admin" {% if not require_gold_pin %}required{% endif %} autocomplete="username" autocapitalize="off" spellcheck="false">
+                <input type="text" name="username" placeholder="admin" {% if not require_gold_pin %}required{% endif %} autocomplete="username" autocapitalize="off" spellcheck="false">
 
                 <label>Password</label>
                 <div style="display:flex; gap:8px; align-items:center">
@@ -214,14 +242,14 @@
                 <div class="pin-step-title">Account: <strong>{{ pending_gold_username or 'gold-admin' }}</strong></div>
                 <label>Assigned Login Pin</label>
                 <div class="pin-grid" id="loginPinGrid" aria-label="6-digit login pin">
-                    <input class="pin-cell" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-pin-index="0" autocomplete="one-time-code" data-lpignore="true" data-1p-ignore="true" autocapitalize="off" spellcheck="false">
-                    <input class="pin-cell" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-pin-index="1" autocomplete="one-time-code" data-lpignore="true" data-1p-ignore="true" autocapitalize="off" spellcheck="false">
-                    <input class="pin-cell" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-pin-index="2" autocomplete="one-time-code" data-lpignore="true" data-1p-ignore="true" autocapitalize="off" spellcheck="false">
-                    <input class="pin-cell" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-pin-index="3" autocomplete="one-time-code" data-lpignore="true" data-1p-ignore="true" autocapitalize="off" spellcheck="false">
-                    <input class="pin-cell" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-pin-index="4" autocomplete="one-time-code" data-lpignore="true" data-1p-ignore="true" autocapitalize="off" spellcheck="false">
-                    <input class="pin-cell" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-pin-index="5" autocomplete="one-time-code" data-lpignore="true" data-1p-ignore="true" autocapitalize="off" spellcheck="false">
+                    <input class="pin-cell" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-pin-index="0" autocomplete="off" data-lpignore="true" data-1p-ignore="true" autocapitalize="off" spellcheck="false">
+                    <input class="pin-cell" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-pin-index="1" autocomplete="off" data-lpignore="true" data-1p-ignore="true" autocapitalize="off" spellcheck="false">
+                    <input class="pin-cell" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-pin-index="2" autocomplete="off" data-lpignore="true" data-1p-ignore="true" autocapitalize="off" spellcheck="false">
+                    <input class="pin-cell" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-pin-index="3" autocomplete="off" data-lpignore="true" data-1p-ignore="true" autocapitalize="off" spellcheck="false">
+                    <input class="pin-cell" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-pin-index="4" autocomplete="off" data-lpignore="true" data-1p-ignore="true" autocapitalize="off" spellcheck="false">
+                    <input class="pin-cell" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-pin-index="5" autocomplete="off" data-lpignore="true" data-1p-ignore="true" autocapitalize="off" spellcheck="false">
                 </div>
-                <input id="loginPin" name="gold_login_pin" type="hidden" value="">
+                <input id="loginPin" name="gold_login_pin" type="hidden" value="" autocomplete="off">
                 <div class="note" style="margin-top:8px">Username and password accepted. Enter your assigned 6-digit login pin.</div>
             </div>
 
@@ -233,11 +261,12 @@
                 <div class="note" style="margin-top:6px">Enter the configured 6-digit signup pin.</div>
             </div>
             <input type="hidden" name="action" id="actionField" value="login">
-            <button type="button" class="primary-btn" onclick="submitLogin()">{% if require_gold_pin %}Verify Pin{% else %}Login{% endif %}</button>
+            <button type="submit" class="primary-btn" onclick="return preparePrimarySubmit()">{% if require_gold_pin %}Verify Pin{% else %}Login{% endif %}</button>
             <button type="button" class="secondary-btn" id="createBtn" onclick="submitSignup()" {% if require_gold_pin %}hidden{% endif %}>Create Account</button>
         </form>
         <script>
         const requireGoldPin = (document.body.dataset.requireGoldPin || 'false') === 'true';
+        const clearPinOnError = (document.body.dataset.clearPinOnError || 'false') === 'true';
 
         function toggleVisibility(inputId, btn){
             const el = document.getElementById(inputId);
@@ -299,7 +328,7 @@
             });
             focusPinCell(0);
         }
-        function submitLogin(){
+        function preparePrimarySubmit(){
             const actionField = document.getElementById('actionField');
             if(requireGoldPin){
                 const pin = syncLoginPinHidden();
@@ -307,17 +336,19 @@
                     alert('Enter the assigned 6-digit login pin');
                     const firstEmpty = getPinCells().findIndex((cell) => !(cell.value || '').trim());
                     focusPinCell(firstEmpty >= 0 ? firstEmpty : 0);
-                    return;
+                    return false;
                 }
                 actionField.value = 'verify_gold_pin';
             } else {
                 actionField.value = 'login';
             }
-            document.querySelector('form').submit();
+            return true;
         }
         function submitSignup(){
+            if(requireGoldPin) return;
             const fields = document.getElementById('signup-fields');
             const pinInput = document.getElementById('signupPin');
+            const form = document.getElementById('adminAuthForm');
             // First click: reveal pin field
             if(fields.style.display === 'none'){
                 fields.style.display = 'block';
@@ -330,23 +361,36 @@
                 return;
             }
             document.getElementById('actionField').value = 'signup';
-            document.querySelector('form').submit();
+            if(form && !form.checkValidity()){
+                form.reportValidity();
+                return;
+            }
+            form && form.submit();
         }
         document.addEventListener('DOMContentLoaded', () => {
-            const form = document.querySelector('form');
-            if(form){
-                form.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    submitLogin();
+            const form = document.getElementById('adminAuthForm');
+            if(form && requireGoldPin){
+                form.addEventListener('submit', () => {
+                    syncLoginPinHidden();
                 });
             }
             if(requireGoldPin){
                 initPinCells();
+                if(clearPinOnError){
+                    getPinCells().forEach((cell) => { cell.value = ''; });
+                    syncLoginPinHidden();
+                    focusPinCell(0);
+                }
             }
         });
         </script>
 
         <div class="note" style="margin-top:12px">Signup and login pins are managed in admin security settings.</div>
+        <div class="role-links">
+            <a class="role-link" href="/student" target="_blank" rel="noopener noreferrer">Student View</a>
+            <a class="role-link" href="/driver" target="_blank" rel="noopener noreferrer">Driver View</a>
+            <a class="role-link" href="/simulator" target="_blank" rel="noopener noreferrer">Simulator</a>
+        </div>
     </div>
 </body>
 </html>

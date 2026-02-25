@@ -1,0 +1,413 @@
+:root {
+    --glass-bg: rgba(120, 80, 255, 0.18);
+    --glass-bg-strong: rgba(120, 80, 255, 0.28);
+    --glass-border: rgba(255, 255, 255, 0.18);
+    --accent: #9b6dff;
+    --accent-glow: rgba(155, 109, 255, 0.6);
+    --text-light: rgba(255, 255, 255, 0.9);
+    --glass-overlay: rgba(5, 8, 20, 0.72);
+    --glass-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+}
+
+body.route-transfer-open {
+    overflow: hidden;
+}
+
+.glass-card {
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 28px;
+    box-shadow: var(--glass-shadow);
+    padding: 24px;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+body button.glass-pill {
+    height: 38px;
+    padding: 0 18px;
+    border-radius: 999px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    color: var(--text-light);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+body button.glass-pill:hover {
+    transform: translateY(-1px);
+    border-color: rgba(195, 167, 255, 0.5);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 0 22px rgba(155, 109, 255, 0.36);
+}
+
+body button.glass-pill:active {
+    transform: translateY(0);
+    box-shadow: inset 0 0 16px rgba(155, 109, 255, 0.35), 0 0 14px rgba(155, 109, 255, 0.28);
+}
+
+body button.glass-pill:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+body button.glass-pill.glass-pill-primary {
+    border-color: rgba(204, 184, 255, 0.6);
+    background: linear-gradient(150deg, rgba(155, 109, 255, 0.58), rgba(155, 109, 255, 0.22));
+    box-shadow: 0 0 24px rgba(155, 109, 255, 0.26);
+}
+
+.glass-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    background: var(--glass-overlay);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.glass-modal-overlay[hidden] {
+    display: none !important;
+}
+
+.glass-modal {
+    width: min(680px, calc(100vw - 24px));
+    max-height: calc(100dvh - 24px);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow: hidden;
+}
+
+.route-transfer-modal {
+    width: min(640px, calc(100vw - 24px));
+    max-height: calc(100dvh - 24px);
+    gap: 10px;
+    padding: 20px;
+}
+
+.glass-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.glass-modal-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-light);
+}
+
+.glass-modal-note {
+    font-size: 12px;
+    color: rgba(229, 224, 255, 0.92);
+}
+
+.glass-modal-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+}
+
+.glass-route-list {
+    max-height: min(42vh, 300px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    background: rgba(10, 12, 30, 0.45);
+}
+
+.route-transfer-modal .glass-route-list {
+    flex: 1 1 auto;
+    min-height: 120px;
+    max-height: none;
+}
+
+.glass-route-empty {
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px dashed rgba(207, 185, 255, 0.35);
+    color: rgba(226, 220, 244, 0.8);
+    font-size: 12px;
+    text-align: center;
+}
+
+.glass-route-preview-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 10px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(12, 16, 35, 0.35);
+}
+
+.glass-route-preview-name {
+    min-width: 0;
+    flex: 1;
+    color: var(--text-light);
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.glass-route-preview-meta {
+    flex: 0 0 auto;
+    font-size: 11px;
+    color: rgba(220, 214, 241, 0.76);
+}
+
+.glass-checkbox {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(12, 16, 35, 0.35);
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.glass-checkbox:hover {
+    border-color: rgba(200, 174, 255, 0.38);
+    background: rgba(18, 22, 48, 0.45);
+}
+
+.glass-checkbox input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.checkbox-ui {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    background: var(--glass-bg-strong);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    flex: 0 0 20px;
+    position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.checkbox-ui::after {
+    content: "";
+    position: absolute;
+    top: 48%;
+    left: 50%;
+    width: 6px;
+    height: 10px;
+    border: solid #080808;
+    border-width: 0 2px 2px 0;
+    transform: translate(-50%, -55%) rotate(45deg) scale(0.2);
+    opacity: 0;
+    transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.checkbox-label {
+    min-width: 0;
+    flex: 1;
+    color: var(--text-light);
+    font-size: 13px;
+    line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.glass-checkbox input[type="checkbox"]:checked + .checkbox-ui {
+    background: linear-gradient(145deg, rgba(176, 140, 255, 0.95), rgba(145, 103, 255, 0.8));
+    border-color: rgba(220, 201, 255, 0.88);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 0 18px rgba(155, 109, 255, 0.55);
+    transform: scale(1.04);
+}
+
+.glass-checkbox input[type="checkbox"]:checked + .checkbox-ui::after {
+    opacity: 1;
+    transform: translate(-50%, -55%) rotate(45deg) scale(1);
+}
+
+.glass-file-input-wrap {
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    background: rgba(11, 16, 36, 0.48);
+    padding: 10px;
+}
+
+body input.glass-file-input {
+    width: 100%;
+    color: var(--text-light);
+    font-size: 13px;
+    border: 0;
+    background: transparent;
+}
+
+body input.glass-file-input::file-selector-button {
+    margin-right: 10px;
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid var(--glass-border);
+    color: var(--text-light);
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    cursor: pointer;
+}
+
+body input.glass-file-input::file-selector-button:hover {
+    box-shadow: 0 0 18px rgba(155, 109, 255, 0.3);
+}
+
+.route-transfer-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.route-transfer-modal button.glass-pill.glass-pill-primary {
+    margin-left: auto;
+}
+
+.route-transfer-modal .glass-modal-actions {
+    margin-top: auto;
+}
+
+body input.glass-slider {
+    --glass-slider-pct: 50%;
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    min-width: 0;
+    height: 20px;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+}
+
+body input.glass-slider:focus {
+    outline: none;
+}
+
+body input.glass-slider::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: linear-gradient(
+        90deg,
+        rgba(181, 149, 255, 0.96) 0%,
+        rgba(155, 109, 255, 0.93) var(--glass-slider-pct),
+        rgba(155, 109, 255, 0.2) var(--glass-slider-pct),
+        rgba(155, 109, 255, 0.08) 100%
+    );
+    box-shadow: inset 0 0 10px rgba(155, 109, 255, 0.26), 0 0 12px rgba(155, 109, 255, 0.22);
+}
+
+body input.glass-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.46);
+    background: linear-gradient(145deg, #b891ff 0%, #8f60ff 100%);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 0 20px var(--accent-glow);
+    margin-top: -8px;
+    transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+body input.glass-slider:active::-webkit-slider-thumb {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2), 0 0 24px rgba(155, 109, 255, 0.78);
+}
+
+body input.glass-slider::-moz-range-track {
+    height: 6px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(155, 109, 255, 0.12);
+    box-shadow: inset 0 0 10px rgba(155, 109, 255, 0.26), 0 0 12px rgba(155, 109, 255, 0.22);
+}
+
+body input.glass-slider::-moz-range-progress {
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(181, 149, 255, 0.96), rgba(155, 109, 255, 0.92));
+}
+
+body input.glass-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.46);
+    background: linear-gradient(145deg, #b891ff 0%, #8f60ff 100%);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 0 20px var(--accent-glow);
+    transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+body input.glass-slider:active::-moz-range-thumb {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2), 0 0 24px rgba(155, 109, 255, 0.78);
+}
+
+@media (max-width: 720px) {
+    .glass-card {
+        border-radius: 22px;
+        padding: 18px;
+    }
+
+    .glass-modal {
+        width: calc(100vw - 16px);
+        max-height: calc(100dvh - 16px);
+    }
+
+    .route-transfer-modal {
+        width: calc(100vw - 16px);
+        max-height: calc(100dvh - 16px);
+        gap: 8px;
+        padding: 16px;
+    }
+
+    .glass-modal-actions button.glass-pill {
+        flex: 1 1 calc(50% - 8px);
+        min-width: 0;
+    }
+
+    .glass-route-list {
+        max-height: none;
+    }
+
+    .route-transfer-modal button.glass-pill.glass-pill-primary {
+        margin-left: 0;
+    }
+}

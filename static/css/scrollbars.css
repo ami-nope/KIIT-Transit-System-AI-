@@ -1,0 +1,44 @@
+:root {
+    --sb-size: 10px;
+    --sb-track: rgba(8, 10, 18, 0.62);
+    --sb-thumb: rgba(136, 108, 232, 0.62);
+    --sb-thumb-hover: rgba(168, 140, 255, 0.78);
+}
+
+html {
+    scroll-behavior: auto !important;
+    overscroll-behavior: none;
+    scrollbar-gutter: stable both-edges;
+}
+
+body,
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--sb-thumb) var(--sb-track);
+}
+
+*::-webkit-scrollbar {
+    width: var(--sb-size);
+    height: var(--sb-size);
+    background: transparent;
+}
+
+*::-webkit-scrollbar-track {
+    background: var(--sb-track);
+    border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    background: linear-gradient(180deg, var(--sb-thumb), rgba(100, 74, 194, 0.72));
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--sb-thumb-hover), rgba(124, 92, 218, 0.86));
+}
+
+*::-webkit-scrollbar-corner {
+    background: transparent;
+}
