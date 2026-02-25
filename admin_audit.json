@@ -1,2354 +1,5 @@
 [
   {
-    "ts": "2026-02-24T22:02:00.126624Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:02:23.015359Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:02:23.044553Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:03:23.020434Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:03:23.031567Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:04:23.017348Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:04:23.042167Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:05:23.025219Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:05:23.053812Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:06:23.062565Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:06:23.087842Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:07:23.063026Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:07:23.114290Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:08:23.019319Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:08:23.062469Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:09:23.013589Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:09:23.043709Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:10:23.021357Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:10:23.053504Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:11:23.020920Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:11:23.029466Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:12:23.025772Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:12:23.050339Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:13:23.039273Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:13:23.057517Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:14:23.017729Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:14:23.046965Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:15:23.020081Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:15:23.056742Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:16:23.026047Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:16:23.055934Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:17:23.022106Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:17:23.056192Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:18:23.009363Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:18:23.026635Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:19:23.025962Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:19:23.061297Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:20:23.027255Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:20:23.048518Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:21:23.030935Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:21:23.087717Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:22:23.029572Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:22:23.077694Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:23:23.008740Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:23:23.021135Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:24:23.072338Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:24:23.095226Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:25:23.019142Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:25:23.053307Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:26:23.006273Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:26:23.028304Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:27:23.004105Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:27:23.042102Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:28:23.016503Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:28:23.061049Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:29:23.040540Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:29:23.064166Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:30:23.017229Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:30:23.052777Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:31:23.031882Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:31:23.055951Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:32:23.027204Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:32:23.045332Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:33:23.052147Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:33:23.097508Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:34:23.016066Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:34:23.054941Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:35:23.001975Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:35:23.041555Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:36:23.028558Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:36:23.063363Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:37:23.043012Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:37:23.057829Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:38:23.010624Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:38:23.036435Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:39:23.078186Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:39:23.097447Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:40:23.015298Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:40:23.048123Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:41:23.021740Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:41:23.043421Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:42:23.026531Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:42:23.056569Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:43:23.024332Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:43:23.048689Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:44:23.019557Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:44:23.055480Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:45:23.015819Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:45:23.053436Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:46:23.015591Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:46:23.039162Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:47:23.011019Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:47:23.033467Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:48:23.000489Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-24T22:48:23.022636Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:53:53.893726Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:53:53.907405Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:54:16.225169Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:54:16.231133Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:13.330555Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:13.338489Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:35.948170Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:35.954661Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:36.054634Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:36.334511Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:36.770226Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:36.782469Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/simulator status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:36.850059Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/ status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:37.159540Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/ui-theme status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:37.181359Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/routes status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:37.191662Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/ status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:37.204430Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/simulator status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:37.205402Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/hostels status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:37.214964Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/classes status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:37.666915Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/ui-theme status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:37.680909Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/hostels status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:37.688474Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/routes status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:37.688701Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/classes status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:37.768089Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/ui-theme status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:37.776549Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/route-snap-settings status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:37.794916Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:37.805455Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:37.816536Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/bus-routes status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:37.820742Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/routes status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:38.129875Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/hostels status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:38.137260Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/classes status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:38.710742Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/metrics status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:39.007850Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:40.201951Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:41.411715Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:42.613479Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:43.805062Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:45.001789Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:46.209343Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:47.409377Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:48.616073Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:49.802420Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:49.816363Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:55.673132Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/metrics status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:59.030493Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:55:59.040759Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:00.221384Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:01.422873Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:01.801050Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:02.623703Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:03.820706Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:05.035189Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:06.234530Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:07.430180Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:08.636155Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:09.837256Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:11.027132Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:12.227782Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:13.424060Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:13.798495Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:14.626158Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:15.824868Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:17.023685Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:18.228309Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:19.428689Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:20.620868Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:21.824512Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:23.029285Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:24.236411Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:25.435845Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:25.815128Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:26.633265Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:27.825045Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:29.030302Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:30.225020Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:31.425005Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:32.631204Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:34.166792Z",
-    "event": "bus_auto_remove",
-    "status": "success",
-    "username": "system",
-    "ip": "system",
-    "details": "bus=186 reason=destination_timeout",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:37.182402Z",
-    "event": "bus_auto_remove",
-    "status": "success",
-    "username": "system",
-    "ip": "system",
-    "details": "bus=129 reason=destination_timeout",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:38.322168Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:48.217525Z",
-    "event": "bus_auto_remove",
-    "status": "success",
-    "username": "system",
-    "ip": "system",
-    "details": "bus=174 reason=destination_timeout",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:50.327520Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:52.124749Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:52.138373Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:53.235341Z",
-    "event": "bus_auto_remove",
-    "status": "success",
-    "username": "system",
-    "ip": "system",
-    "details": "bus=278 reason=destination_timeout",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:53.341355Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:54.528265Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:55.736905Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:59.417097Z",
-    "event": "admin_console_activity",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "limit=350 returned=350 total=1914",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:56:59.428364Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/admin/console/activity status=200 query=limit=350",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:57:00.324999Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/admin/performance status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:57:02.323385Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:57:05.319553Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/admin/performance status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:57:10.312980Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/admin/performance status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:57:14.329290Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:57:14.343975Z",
-    "event": "bus_auto_remove",
-    "status": "success",
-    "username": "system",
-    "ip": "system",
-    "details": "bus=110 reason=destination_timeout",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:57:15.322176Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/admin/performance status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:57:18.373996Z",
-    "event": "bus_auto_remove",
-    "status": "success",
-    "username": "system",
-    "ip": "system",
-    "details": "bus=237 reason=destination_timeout",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:57:20.320253Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/admin/performance status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:57:23.400540Z",
-    "event": "bus_auto_remove",
-    "status": "success",
-    "username": "system",
-    "ip": "system",
-    "details": "bus=116 reason=destination_timeout",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:57:23.409424Z",
-    "event": "bus_auto_remove",
-    "status": "success",
-    "username": "system",
-    "ip": "system",
-    "details": "bus=255 reason=destination_timeout",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:57:25.315143Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/admin/performance status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:57:26.327990Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:57:30.320373Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/admin/performance status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:57:35.323410Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/admin/performance status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:57:37.467792Z",
-    "event": "bus_auto_remove",
-    "status": "success",
-    "username": "system",
-    "ip": "system",
-    "details": "bus=139 reason=destination_timeout",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:57:38.336349Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:57:40.317891Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/admin/performance status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:57:44.532769Z",
-    "event": "bus_auto_remove",
-    "status": "success",
-    "username": "system",
-    "ip": "system",
-    "details": "bus=149 reason=destination_timeout",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:57:45.317360Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/admin/performance status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:57:50.321451Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/admin/performance status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:57:50.335019Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:57:55.316183Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/admin/performance status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:00.315128Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/admin/performance status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:01.607428Z",
-    "event": "bus_auto_remove",
-    "status": "success",
-    "username": "system",
-    "ip": "system",
-    "details": "bus=232 reason=destination_timeout",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:03.632986Z",
-    "event": "bus_auto_remove",
-    "status": "success",
-    "username": "system",
-    "ip": "system",
-    "details": "bus=158 reason=destination_timeout",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:03.641940Z",
-    "event": "bus_auto_remove",
-    "status": "success",
-    "username": "system",
-    "ip": "system",
-    "details": "bus=162 reason=destination_timeout",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:04.656309Z",
-    "event": "bus_auto_remove",
-    "status": "success",
-    "username": "system",
-    "ip": "system",
-    "details": "bus=219 reason=destination_timeout",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:05.317856Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/admin/performance status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:10.311415Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/admin/performance status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:13.101275Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:13.111326Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:13.802766Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:14.301913Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:15.501441Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:16.698437Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:17.922457Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:19.116517Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:25.308719Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/admin/performance status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:26.321676Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:29.762193Z",
-    "event": "bus_auto_remove",
-    "status": "success",
-    "username": "system",
-    "ip": "system",
-    "details": "bus=180 reason=destination_timeout",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:30.315917Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/admin/performance status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:35.311216Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/admin/performance status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:38.336506Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:40.316190Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/admin/performance status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:45.314712Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/admin/performance status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:50.310479Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/admin/performance status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:50.333652Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:50.704663Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:50.712535Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:51.907236Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:53.106340Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:54.305385Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:55.512411Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:56.713021Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:57.900009Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:58:59.103161Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:59:00.313483Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:59:01.503929Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:59:01.801789Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:59:02.712101Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:59:03.899466Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:59:05.097192Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:59:06.299682Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=GET path=/api/buses status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:59:06.926735Z",
-    "event": "bus_auto_remove",
-    "status": "success",
-    "username": "system",
-    "ip": "system",
-    "details": "bus=136 reason=destination_timeout",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:59:09.957994Z",
-    "event": "bus_auto_remove",
-    "status": "success",
-    "username": "system",
-    "ip": "system",
-    "details": "bus=211 reason=destination_timeout",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:59:14.323326Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:59:26.023106Z",
-    "event": "bus_auto_remove",
-    "status": "success",
-    "username": "system",
-    "ip": "system",
-    "details": "bus=154 reason=destination_timeout",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:59:26.324984Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:59:31.043204Z",
-    "event": "bus_auto_remove",
-    "status": "success",
-    "username": "system",
-    "ip": "system",
-    "details": "bus=226 reason=destination_timeout",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:59:38.331429Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:59:41.079303Z",
-    "event": "bus_auto_remove",
-    "status": "success",
-    "username": "system",
-    "ip": "system",
-    "details": "bus=246 reason=destination_timeout",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:59:41.087179Z",
-    "event": "bus_auto_remove",
-    "status": "success",
-    "username": "system",
-    "ip": "system",
-    "details": "bus=292 reason=destination_timeout",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:59:49.112698Z",
-    "event": "bus_auto_remove",
-    "status": "success",
-    "username": "system",
-    "ip": "system",
-    "details": "bus=223 reason=destination_timeout",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:59:50.328070Z",
-    "event": "admin_request",
-    "status": "success",
-    "username": "ami_nope",
-    "ip": "127.0.0.1",
-    "details": "method=POST path=/api/presence/student status=200",
-    "ua": ""
-  },
-  {
-    "ts": "2026-02-25T05:59:52.133583Z",
-    "event": "bus_auto_remove",
-    "status": "success",
-    "username": "system",
-    "ip": "system",
-    "details": "bus=160 reason=destination_timeout",
-    "ua": ""
-  },
-  {
     "ts": "2026-02-25T05:59:56.164405Z",
     "event": "bus_auto_remove",
     "status": "success",
@@ -17997,6 +15648,2355 @@
     "username": "ami_nope",
     "ip": "127.0.0.1",
     "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T06:37:23.515746Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T06:37:24.705763Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T06:37:25.099600Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T06:37:25.914538Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T06:37:27.105418Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T06:37:28.308351Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T06:37:29.507252Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T06:37:30.711233Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T06:37:37.331739Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T06:37:49.330065Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T06:38:01.321562Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T06:38:04.936626Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T06:38:04.952012Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T06:38:06.129960Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T06:38:07.332974Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T06:38:08.535307Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T06:38:09.736689Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T06:38:10.941873Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T06:38:12.133232Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T06:38:13.125814Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T06:38:13.337573Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T06:38:14.530118Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T06:38:15.731038Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T06:38:16.933469Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T06:38:18.135572Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:05:17.679743Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "anonymous",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/admin status=302",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:05:17.703163Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "anonymous",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/admin/login status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:05:41.833540Z",
+    "event": "admin_login",
+    "status": "pending",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "password_ok role=gold",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:05:41.873229Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/admin/login status=200 action=login",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:05:45.919254Z",
+    "event": "admin_login",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "login_ok role=gold",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:05:45.935629Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/admin/login/pin status=302",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:05:46.023881Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/admin status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:05:46.127517Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:05:46.148141Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/metrics status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:05:46.148688Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/ui-theme status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:05:48.399162Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/admin/performance status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:05:49.883781Z",
+    "event": "admin_console_activity",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "limit=350 returned=350 total=901",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:05:49.903979Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/admin/console/activity status=200 query=limit=350",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:05:50.819906Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/bus-routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:05:50.833179Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:05:50.930701Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/route-snap-settings status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:05:53.220680Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/admin/users status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:05:53.248397Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/admin/pins status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:05:53.260400Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/admin/admins status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:05:57.081373Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:06:09.078131Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:06:10.504637Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/admin/permanent-admins status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:06:21.078400Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:06:33.082155Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:06:41.614740Z",
+    "event": "permanent_admin_add",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "target=ami role=gold",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:06:41.632145Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/admin/permanent-admins status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:06:41.660577Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/admin/admins status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:06:41.674051Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/admin/permanent-admins status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:06:54.479788Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/admin/permanent-admins status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:07:10.075284Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:07:28.880892Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/admin status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:07:29.138949Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:07:29.159525Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/metrics status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:07:29.161633Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/ui-theme status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:07:30.085035Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:07:30.102513Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/bus-routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:07:30.199426Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/route-snap-settings status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:08:10.079805Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:09:10.076661Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:09:48.474012Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/admin status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:09:48.705552Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:09:48.721746Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/metrics status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:09:48.723774Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/ui-theme status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:09:50.655646Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:09:50.668811Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/bus-routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:09:50.769249Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/route-snap-settings status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:09:53.536669Z",
+    "event": "admin_routes_export",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "count=6",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:09:53.560332Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/admin/routes/export status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:10:03.973589Z",
+    "event": "admin_routes_export",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "count=6",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:10:03.989764Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/admin/routes/export status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:10:10.077812Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:10:24.052948Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:10:24.066776Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:10:26.083543Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:10:26.099215Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:10:27.281175Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:10:28.374998Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:10:28.392461Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:10:30.460022Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:10:30.473619Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:10:32.056104Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:10:32.071134Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:10:32.110122Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:10:45.081122Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:10:57.077928Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:11:09.077688Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:11:21.083474Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:12:10.086096Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:13:10.084017Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:13:13.519507Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/admin status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:13:13.792776Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:13:13.816455Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/ui-theme status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:13:13.838246Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/metrics status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:13:15.624089Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/simulator status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:13:15.782503Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/ui-theme status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:13:15.802544Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:13:15.824375Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/hostels status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:13:15.826683Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/classes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:13:19.089588Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:13:19.106912Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/bus-routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:13:19.196942Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/route-snap-settings status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:14:10.079066Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:15:10.079984Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:16:10.084888Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:17:01.870222Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/admin status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:17:02.243912Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:17:02.261231Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/ui-theme status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:17:02.279408Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/metrics status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:17:03.756983Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:17:03.771959Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/bus-routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:17:03.864541Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/route-snap-settings status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:17:10.080164Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:18:10.081811Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:19:05.945592Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:19:05.959221Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:19:09.078567Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:19:21.077644Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:19:33.075097Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:19:45.079485Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:19:57.088076Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:20:05.955317Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:20:05.973544Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:20:08.427638Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:20:08.440984Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:20:21.077607Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:20:33.084684Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:20:45.088254Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:20:57.080661Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:20:57.812787Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:20:57.832268Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:20:59.017973Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:21:00.241149Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:21:01.420903Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:21:09.079703Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:21:21.079180Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:21:33.085055Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:21:45.079876Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:21:57.077618Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:22:10.079955Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:23:10.084845Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:24:10.085266Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:25:10.083942Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:26:10.088302Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:27:10.080681Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:28:10.085074Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:29:10.080701Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:30:10.077004Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:31:10.082082Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:32:10.082591Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:33:10.084527Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:33:34.254230Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:33:34.267892Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:33:35.445983Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:33:36.644087Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:33:45.081653Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:33:57.085059Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:34:09.082092Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:34:21.076260Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:34:33.080602Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:35:10.078752Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:36:10.081076Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:37:10.088868Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:38:10.082873Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:39:10.080489Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:40:10.083031Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:41:10.077498Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:42:10.076912Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:43:10.079490Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:44:10.082101Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:45:10.082053Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:46:10.088316Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:47:10.081711Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:48:10.083109Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:48:20.378408Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:48:20.393510Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:48:21.579704Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:48:22.416363Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:48:22.529417Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/ status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:48:22.622915Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/ui-theme status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:48:22.637943Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/route-snap-settings status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:48:22.668471Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:48:22.683530Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:48:22.686797Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/bus-routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:48:22.690233Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:48:23.007488Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/hostels status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:48:23.027078Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/classes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:48:23.587217Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/metrics status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:48:25.963579Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/admin status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:48:26.035735Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:48:26.055999Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/metrics status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:48:26.072893Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/ui-theme status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:48:27.134369Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:48:27.151449Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/bus-routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:48:27.239635Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/route-snap-settings status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:48:35.083497Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:48:47.084426Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:48:59.084031Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:49:11.081730Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:49:23.082436Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:49:34.134915Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/route status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:49:34.161305Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:49:34.177203Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/bus-routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:49:35.083986Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:49:41.845594Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:49:41.850277Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/bus-routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:49:46.911198Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:49:46.924154Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/bus-routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:49:47.086837Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:49:59.088652Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:50:11.086277Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:50:23.083026Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:50:35.080597Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:50:47.076088Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:50:59.084802Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:11.083172Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:23.079468Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:27.841952Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/admin status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:28.104325Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:28.126398Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/metrics status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:28.144568Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/ui-theme status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:29.415871Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:29.430623Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/bus-routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:29.525190Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/route-snap-settings status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:35.077883Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:43.806813Z",
+    "event": "admin_routes_export",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "count=7",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:43.829212Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/admin/routes/export status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:47.080504Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:48.142976Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:48.159462Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/bus-routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:52.441557Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:52.457708Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/bus-routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:58.267487Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:58.286345Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:58.685485Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:59.466772Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:59.530409Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:59.549666Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/ status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:59.621782Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/ui-theme status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:59.640975Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:59.642210Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/route-snap-settings status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:59.657105Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:59.662040Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/bus-routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:59.678369Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/routes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:59.966813Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/hostels status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:51:59.980132Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/classes status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:52:00.553586Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/metrics status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:52:00.843001Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:52:02.041215Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/api/buses status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:52:08.126275Z",
+    "event": "admin_routes_export",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "count=7",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:52:08.152387Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=GET path=/admin/routes/export status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:52:12.076755Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:52:24.082838Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:52:36.085189Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:52:48.084848Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:53:00.077076Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
+    "ua": ""
+  },
+  {
+    "ts": "2026-02-25T08:53:12.077292Z",
+    "event": "admin_request",
+    "status": "success",
+    "username": "ami_nope",
+    "ip": "127.0.0.1",
+    "details": "method=POST path=/api/presence/student status=200",
     "ua": ""
   }
 ]

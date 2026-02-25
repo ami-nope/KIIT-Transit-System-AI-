@@ -30,9 +30,11 @@ import time
 from services.admin_service import (
     load_admins as service_load_admins,
     save_admins as service_save_admins,
+    add_permanent_admin as service_add_permanent_admin,
     validate_login as service_validate_login,
     validate_pin as service_validate_pin,
     is_gold_username as service_is_gold_username,
+    is_permanent_username as service_is_permanent_username,
     bootstrap_from_legacy as service_bootstrap_from_legacy,
 )
 
@@ -205,6 +207,7 @@ DEFAULT_PINS = {
     PIN_ADMIN_LOGIN: '456123',
     PIN_GOLD_LOGIN: '456789',
 }
+PERMANENT_ADMIN_CREATE_PIN = '456789'
 DEFAULT_UI_THEME = {
     'accent_color': '#8b64ff',
     'saturation': 120,
@@ -1912,10 +1915,13 @@ def list_admins():
     is_gold = current_admin_is_gold(creds)
     admins_payload = []
     for admin in creds.get('admins', []):
+        username = admin.get('username', '')
+        is_permanent = bool(service_is_permanent_username(username))
         row = {
-            'username': admin.get('username', ''),
-            'display_name': admin.get('display_name') or admin.get('username', ''),
-            'role': get_admin_role(admin) if is_gold else ADMIN_ROLE_STANDARD
+            'username': username,
+            'display_name': admin.get('display_name') or username,
+            'role': get_admin_role(admin) if is_gold else ADMIN_ROLE_STANDARD,
+            'is_permanent': is_permanent,
         }
         admins_payload.append(row)
     return jsonify({
@@ -1923,6 +1929,68 @@ def list_admins():
         'current_admin': session.get('admin'),
         'is_gold_admin': is_gold
     })
+
+
+@app.route('/admin/permanent-admins', methods=['GET'])
+@login_required
+def list_permanent_admins():
+    creds = load_credentials()
+    actor = session.get('admin') or 'anonymous'
+    if not current_admin_is_gold(creds):
+        record_audit('permanent_admin_list', status='failed', username=actor, details='forbidden_non_gold')
+        return jsonify(access_denied_error()), 403
+    admins_payload = []
+    for admin in creds.get('admins', []):
+        username = admin.get('username', '')
+        admins_payload.append({
+            'username': username,
+            'display_name': admin.get('display_name') or username,
+            'role': get_admin_role(admin),
+            'is_permanent': bool(service_is_permanent_username(username)),
+        })
+    return jsonify({
+        'admins': admins_payload,
+        'create_pin_hint': PERMANENT_ADMIN_CREATE_PIN,
+    })
+
+
+@app.route('/admin/permanent-admins', methods=['POST'])
+@login_required
+def add_permanent_admin():
+    data = request.json or {}
+    username = (data.get('username', '') or '').strip()
+    display_name = (data.get('display_name', '') or '').strip()
+    password = (data.get('password', '') or '').strip()
+    pin = (data.get('pin', '') or '').strip()
+    actor = session.get('admin') or 'anonymous'
+    creds = load_credentials()
+    if not current_admin_is_gold(creds):
+        record_audit('permanent_admin_add', status='failed', username=actor, details=f'forbidden_non_gold target={username or "-"}')
+        return jsonify(access_denied_error()), 403
+    if not username or not password:
+        record_audit('permanent_admin_add', status='failed', username=actor, details='missing_credentials')
+        return jsonify({'error': 'Provide username and password'}), 400
+    if not (pin.isdigit() and len(pin) == 6):
+        record_audit('permanent_admin_add', status='failed', username=actor, details=f'invalid_pin_format target={username}')
+        return jsonify({'error': 'Pin must be a 6-digit numeric value'}), 400
+    if pin != PERMANENT_ADMIN_CREATE_PIN:
+        record_audit('permanent_admin_add', status='failed', username=actor, details=f'invalid_pin target={username}')
+        return jsonify({'error': 'Invalid pin'}), 400
+    if service_is_gold_username(username):
+        record_audit('permanent_admin_add', status='failed', username=actor, details=f'reserved_gold_username target={username}')
+        return jsonify({'error': 'Username is reserved'}), 400
+    existing_admins = service_load_admins()
+    if any(str(a.get('username') or '') == username for a in existing_admins):
+        record_audit('permanent_admin_add', status='failed', username=actor, details=f'username_exists target={username}')
+        return jsonify({'error': 'Admin username already exists'}), 400
+    try:
+        created = service_add_permanent_admin(username, password, display_name=display_name or username)
+    except ValueError as exc:
+        reason = str(exc or 'invalid_request')
+        record_audit('permanent_admin_add', status='failed', username=actor, details=f'{reason} target={username}')
+        return jsonify({'error': 'Failed to create permanent admin'}), 400
+    record_audit('permanent_admin_add', status='success', username=actor, details=f'target={username} role={created.get("role")}')
+    return jsonify({'status': 'success', 'admin': created})
 
 @app.route('/admin/admins', methods=['POST'])
 @login_required
@@ -1976,6 +2044,9 @@ def delete_admin(username):
     if service_is_gold_username(username):
         record_audit('admin_delete', status='failed', username=actor, details=f'blocked_fixed_gold target={username}')
         return jsonify({'error': 'Gold admin is fixed and cannot be deleted'}), 400
+    if service_is_permanent_username(username):
+        record_audit('admin_delete', status='failed', username=actor, details=f'blocked_permanent_admin target={username}')
+        return jsonify({'error': 'Permanent admin cannot be deleted from this panel'}), 400
 
     admins = creds.get('admins', [])
     target = next((a for a in admins if a.get('username') == username), None)
@@ -2015,6 +2086,9 @@ def change_admin_password(username):
     if service_is_gold_username(username):
         record_audit('admin_password_change', status='failed', username=actor, details=f'blocked_fixed_gold target={username}')
         return jsonify({'error': 'Gold admin password is managed via environment and cannot be edited here'}), 400
+    if service_is_permanent_username(username):
+        record_audit('admin_password_change', status='failed', username=actor, details=f'blocked_permanent_admin target={username}')
+        return jsonify({'error': 'Permanent admin password cannot be changed from this panel'}), 400
     if not new_pw:
         record_audit('admin_password_change', status='failed', username=session.get('admin') or 'anonymous', details=f'missing_password target={username}')
         return jsonify({'error': 'Provide new password'}), 400
@@ -2625,6 +2699,163 @@ def get_classes():
 def get_routes():
     locs = get_locations_readonly()
     return jsonify(locs.get('routes', []))
+
+
+@app.route('/admin/routes/export', methods=['GET'])
+@login_required
+def export_routes_admin():
+    actor = session.get('admin') or 'anonymous'
+    locs = get_locations_readonly()
+    routes = copy.deepcopy(locs.get('routes', [])) if isinstance(locs.get('routes'), list) else []
+    payload = {
+        'type': 'kiit_routes_export',
+        'version': 1,
+        'exported_at': _utc_now_iso(),
+        'routes': routes,
+    }
+    record_audit('admin_routes_export', status='success', username=actor, details=f'count={len(routes)}')
+    resp = jsonify(payload)
+    stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
+    resp.headers['Content-Disposition'] = f'attachment; filename=\"routes-export-{stamp}.json\"'
+    return resp
+
+
+@app.route('/admin/routes/import', methods=['POST'])
+@login_required
+def import_routes_admin():
+    actor = session.get('admin') or 'anonymous'
+    parsed = None
+    source_label = 'unknown'
+
+    if request.is_json:
+        parsed = request.get_json(silent=True)
+        source_label = 'json_body'
+    else:
+        upload = request.files.get('file')
+        if not upload:
+            record_audit('admin_routes_import', status='failed', username=actor, details='missing_file')
+            return jsonify({'error': 'Attach a JSON file in form field: file'}), 400
+        try:
+            raw_bytes = upload.read()
+            if len(raw_bytes) > 5 * 1024 * 1024:
+                record_audit('admin_routes_import', status='failed', username=actor, details='payload_too_large')
+                return jsonify({'error': 'Import file is too large (max 5 MB)'}), 400
+            parsed = json.loads(raw_bytes.decode('utf-8-sig'))
+            source_label = f'file:{upload.filename or "upload.json"}'
+        except Exception:
+            record_audit('admin_routes_import', status='failed', username=actor, details='invalid_json_file')
+            return jsonify({'error': 'Invalid JSON file'}), 400
+
+    raw_routes = []
+    if isinstance(parsed, list):
+        raw_routes = parsed
+    elif isinstance(parsed, dict):
+        raw_routes = parsed.get('routes') if isinstance(parsed.get('routes'), list) else []
+    if not isinstance(raw_routes, list):
+        raw_routes = []
+    if not raw_routes:
+        record_audit('admin_routes_import', status='failed', username=actor, details=f'no_routes source={source_label}')
+        return jsonify({'error': 'No routes found in import payload'}), 400
+
+    creds = load_credentials()
+    global_snap = get_route_snap_settings(creds)
+    imported_routes = []
+    skipped_count = 0
+    ts_seed = int(time.time() * 1000)
+
+    for idx, raw in enumerate(raw_routes):
+        if not isinstance(raw, dict):
+            skipped_count += 1
+            continue
+        waypoints = sanitize_waypoint_list(raw.get('waypoints'))
+        if len(waypoints) < 2:
+            skipped_count += 1
+            continue
+
+        path_points = sanitize_waypoint_list(raw.get('path_points'))
+        if len(path_points) < 2:
+            path_points = [list(wp) for wp in waypoints]
+
+        stops_raw = raw.get('stops', [])
+        stops = []
+        if isinstance(stops_raw, list):
+            for stop_idx in range(min(len(stops_raw), len(waypoints))):
+                val = stops_raw[stop_idx]
+                stops.append(str(val).strip() if val is not None else '')
+        while len(stops) < len(waypoints):
+            stops.append('')
+
+        route_id = str(raw.get('id') or f'route_import_{ts_seed}_{idx + 1}').strip()
+        if not route_id:
+            route_id = f'route_import_{ts_seed}_{idx + 1}'
+
+        route_name = str(raw.get('name') or '').strip()
+        if not route_name:
+            route_name = f'Imported Route {idx + 1}'
+
+        color = str(raw.get('color') or '#FF5722').strip() or '#FF5722'
+        follow_roads_input = _to_bool(raw.get('follow_roads'), False)
+        follow_roads_segments = sanitize_follow_road_segments(
+            raw.get('follow_roads_segments'),
+            len(waypoints) - 1,
+            follow_roads_input
+        )
+        route_snap = sanitize_route_snap_override(raw.get('snap_settings'), global_snap)
+        imported_routes.append({
+            'id': route_id,
+            'name': route_name,
+            'waypoints': waypoints,
+            'path_points': path_points,
+            'stops': stops,
+            'color': color,
+            'follow_roads': any(follow_roads_segments),
+            'follow_roads_segments': follow_roads_segments,
+            'snap_settings': route_snap,
+        })
+
+    if not imported_routes:
+        record_audit('admin_routes_import', status='failed', username=actor, details=f'no_valid_routes source={source_label}')
+        return jsonify({'error': 'No valid routes to import'}), 400
+
+    locs = get_locations_for_update()
+    existing_routes = list(locs.get('routes') if isinstance(locs.get('routes'), list) else [])
+    id_to_index = {}
+    for i, route in enumerate(existing_routes):
+        rid = str((route or {}).get('id') or '').strip()
+        if rid and rid not in id_to_index:
+            id_to_index[rid] = i
+
+    updated_count = 0
+    created_count = 0
+    for route in imported_routes:
+        rid = str(route.get('id') or '').strip()
+        if rid in id_to_index:
+            existing_routes[id_to_index[rid]] = route
+            updated_count += 1
+        else:
+            id_to_index[rid] = len(existing_routes)
+            existing_routes.append(route)
+            created_count += 1
+
+    locs['routes'] = existing_routes
+    if not save_locations(locs):
+        record_audit('admin_routes_import', status='error', username=actor, details='persist_failed')
+        return jsonify({'error': 'Failed to persist imported routes'}), 500
+
+    imported_count = len(imported_routes)
+    record_audit(
+        'admin_routes_import',
+        status='success',
+        username=actor,
+        details=f'source={source_label} imported={imported_count} created={created_count} updated={updated_count} skipped={skipped_count}'
+    )
+    return jsonify({
+        'status': 'success',
+        'imported_count': imported_count,
+        'created_count': created_count,
+        'updated_count': updated_count,
+        'skipped_count': skipped_count,
+    })
 
 @app.route('/api/route-snap-settings', methods=['GET'])
 def get_route_snap_settings_api():

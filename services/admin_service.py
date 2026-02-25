@@ -37,6 +37,12 @@ _CACHE_READY = False
 _STORAGE_MODE = None  # 'plain' | 'encrypted'
 _STORAGE_PATH = None
 
+_PERMANENT_CACHE_LOCK = threading.Lock()
+_PERMANENT_CACHE = []
+_PERMANENT_CACHE_MTIME = None
+_PERMANENT_CACHE_READY = False
+_PERMANENT_STORAGE_PATH = None
+
 
 def _project_root():
     return Path(__file__).resolve().parent.parent
@@ -142,6 +148,20 @@ def _resolve_storage():
     return _STORAGE_PATH, _STORAGE_MODE
 
 
+def _resolve_permanent_storage():
+    global _PERMANENT_STORAGE_PATH
+    if _PERMANENT_STORAGE_PATH is not None:
+        return _PERMANENT_STORAGE_PATH
+    preferred = Path('/var/data/permanent_admins.enc')
+    if _path_exists_and_usable(preferred):
+        _PERMANENT_STORAGE_PATH = preferred
+        return _PERMANENT_STORAGE_PATH
+    fallback = _project_root() / 'permanent_admins.enc'
+    fallback.parent.mkdir(parents=True, exist_ok=True)
+    _PERMANENT_STORAGE_PATH = fallback
+    return _PERMANENT_STORAGE_PATH
+
+
 def _read_payload_from_storage():
     path_obj, mode = _resolve_storage()
     if not path_obj.exists():
@@ -151,6 +171,17 @@ def _read_payload_from_storage():
             with path_obj.open('r', encoding='utf-8') as f:
                 parsed = json.load(f)
                 return parsed if isinstance(parsed, dict) else {'admins': []}
+        with path_obj.open('rb') as f:
+            return _decrypt_payload(f.read())
+    except Exception:
+        return {'admins': []}
+
+
+def _read_permanent_payload_from_storage():
+    path_obj = _resolve_permanent_storage()
+    if not path_obj.exists():
+        return {'admins': []}
+    try:
         with path_obj.open('rb') as f:
             return _decrypt_payload(f.read())
     except Exception:
@@ -175,9 +206,130 @@ def _write_payload_to_storage(payload):
     _atomic_write_bytes(path_obj, encrypted)
 
 
+def _write_permanent_payload_to_storage(payload):
+    path_obj = _resolve_permanent_storage()
+    safe_payload = payload if isinstance(payload, dict) else {'admins': []}
+    encrypted = _encrypt_payload(safe_payload)
+    _atomic_write_bytes(path_obj, encrypted)
+
+
 def _normalize_role(raw_role):
     role = str(raw_role or ADMIN_ROLE_STANDARD).strip().lower()
     return ADMIN_ROLE_GOLD if role == ADMIN_ROLE_GOLD else ADMIN_ROLE_STANDARD
+
+
+def _normalize_permanent_admin_entry(raw):
+    if not isinstance(raw, dict):
+        return None
+    username = str(raw.get('username') or '').strip()
+    if not username:
+        return None
+    if username == _gold_username():
+        return None
+    display_name = str(raw.get('display_name') or username).strip() or username
+    password_hash = str(raw.get('password_hash') or '').strip()
+    if not password_hash:
+        legacy_pw = str(raw.get('password') or raw.get('password_plain') or '').strip()
+        if not legacy_pw:
+            return None
+        password_hash = generate_password_hash(legacy_pw)
+    return {
+        'username': username,
+        'display_name': display_name,
+        'password_hash': password_hash,
+        'role': ADMIN_ROLE_GOLD,
+    }
+
+
+def _normalize_permanent_admins(raw_admins):
+    out = []
+    seen = set()
+    for item in raw_admins if isinstance(raw_admins, list) else []:
+        normalized = _normalize_permanent_admin_entry(item)
+        if not normalized:
+            continue
+        key = normalized['username']
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(normalized)
+    return out
+
+
+def _refresh_permanent_cache(force=False):
+    global _PERMANENT_CACHE_MTIME, _PERMANENT_CACHE, _PERMANENT_CACHE_READY
+    path_obj = _resolve_permanent_storage()
+    current_mtime = _get_mtime(path_obj)
+    with _PERMANENT_CACHE_LOCK:
+        if _PERMANENT_CACHE_READY and not force and _PERMANENT_CACHE_MTIME == current_mtime:
+            return copy.deepcopy(_PERMANENT_CACHE)
+    payload = _read_permanent_payload_from_storage()
+    normalized = _normalize_permanent_admins(payload.get('admins'))
+    with _PERMANENT_CACHE_LOCK:
+        _PERMANENT_CACHE = copy.deepcopy(normalized)
+        _PERMANENT_CACHE_MTIME = _get_mtime(path_obj)
+        _PERMANENT_CACHE_READY = True
+        return copy.deepcopy(_PERMANENT_CACHE)
+
+
+def _permanent_usernames():
+    return {str(a.get('username') or '') for a in _refresh_permanent_cache(force=False)}
+
+
+def load_permanent_admins(force=False):
+    return _refresh_permanent_cache(force=force)
+
+
+def save_permanent_admins(admin_rows):
+    global _PERMANENT_CACHE_MTIME, _PERMANENT_CACHE, _PERMANENT_CACHE_READY
+    safe_rows = _normalize_permanent_admins(admin_rows)
+    if _PERMANENT_CACHE_READY:
+        with _PERMANENT_CACHE_LOCK:
+            current = copy.deepcopy(_PERMANENT_CACHE)
+    else:
+        current = _refresh_permanent_cache(force=True)
+    if current == safe_rows:
+        return True
+    _write_permanent_payload_to_storage({'admins': safe_rows})
+    with _PERMANENT_CACHE_LOCK:
+        _PERMANENT_CACHE = copy.deepcopy(safe_rows)
+        _PERMANENT_CACHE_MTIME = _get_mtime(_resolve_permanent_storage())
+        _PERMANENT_CACHE_READY = True
+    return True
+
+
+def add_permanent_admin(username, password, display_name=None):
+    uname = str(username or '').strip()
+    pwd = str(password or '')
+    name = str(display_name or uname).strip() or uname
+    if not uname or not pwd:
+        raise ValueError('missing_credentials')
+    if uname == _gold_username():
+        raise ValueError('reserved_gold_username')
+    rows = _refresh_permanent_cache(force=False)
+    if any(str(row.get('username') or '') == uname for row in rows):
+        raise ValueError('username_exists')
+    rows.append({
+        'username': uname,
+        'display_name': name,
+        'password_hash': generate_password_hash(pwd),
+        'role': ADMIN_ROLE_GOLD,
+    })
+    save_permanent_admins(rows)
+    return {
+        'username': uname,
+        'display_name': name,
+        'role': ADMIN_ROLE_GOLD,
+    }
+
+
+def is_permanent_username(username):
+    uname = str(username or '').strip()
+    if not uname:
+        return False
+    if uname == _gold_username():
+        return True
+    return uname in _permanent_usernames()
 
 
 def _normalize_admin_entry(raw):
@@ -186,7 +338,7 @@ def _normalize_admin_entry(raw):
     username = str(raw.get('username') or '').strip()
     if not username:
         return None
-    if username == _gold_username():
+    if username == _gold_username() or username in _permanent_usernames():
         return None
 
     display_name = str(raw.get('display_name') or username).strip() or username
@@ -255,8 +407,13 @@ def _refresh_cache(force=False):
 
 
 def load_admins(force=False):
-    non_gold = _refresh_cache(force=force)
-    return [_gold_record()] + non_gold
+    permanent = _refresh_permanent_cache(force=force)
+    permanent_usernames = {str(item.get('username') or '') for item in permanent}
+    non_gold = [
+        row for row in _refresh_cache(force=force)
+        if str(row.get('username') or '') not in permanent_usernames
+    ]
+    return [_gold_record()] + permanent + non_gold
 
 
 def save_admins(admin_rows):
@@ -308,6 +465,20 @@ def validate_login(username, password):
                 admin = _gold_record()
                 return {'ok': True, 'admin': admin, 'role': ADMIN_ROLE_GOLD, 'message': 'password_ok'}
         return {'ok': False, 'error': 'invalid_password', 'message': 'Invalid password.', 'admin': None}
+
+    permanent_admin = next(
+        (a for a in _refresh_permanent_cache(force=False) if str(a.get('username') or '') == uname),
+        None
+    )
+    if permanent_admin:
+        pw_hash = str(permanent_admin.get('password_hash') or '').strip()
+        if not pw_hash:
+            return {'ok': False, 'error': 'invalid_password', 'message': 'Invalid password.', 'admin': None}
+        if not check_password_hash(pw_hash, pwd):
+            return {'ok': False, 'error': 'invalid_password', 'message': 'Invalid password.', 'admin': None}
+        admin_copy = copy.deepcopy(permanent_admin)
+        admin_copy['role'] = ADMIN_ROLE_GOLD
+        return {'ok': True, 'admin': admin_copy, 'role': ADMIN_ROLE_GOLD, 'message': 'password_ok'}
 
     non_gold = _refresh_cache(force=False)
     admin = next((a for a in non_gold if str(a.get('username') or '') == uname), None)

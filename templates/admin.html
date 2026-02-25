@@ -409,6 +409,91 @@
         .topbar-actions > * {
             margin-right: 0 !important;
         }
+        .admin-student-shell {
+            display: grid;
+            grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
+            gap: 14px;
+            align-items: start;
+            min-height: 0;
+        }
+        .admin-shell-sidebar {
+            min-height: 0;
+        }
+        .admin-shell-tiles {
+            display: grid;
+            gap: 10px;
+            align-content: start;
+        }
+        .admin-shell-tile {
+            border-radius: 16px;
+            border: 1px solid rgba(140, 160, 196, 0.25);
+            background: linear-gradient(165deg, rgba(18, 28, 45, 0.62), rgba(11, 18, 31, 0.42));
+            box-shadow:
+                0 10px 24px rgba(3, 8, 20, 0.26),
+                inset 0 1px 0 rgba(255,255,255,0.08);
+            min-height: 86px;
+            backdrop-filter: blur(8px) saturate(120%);
+            -webkit-backdrop-filter: blur(8px) saturate(120%);
+        }
+        .admin-shell-tile-main {
+            min-height: 126px;
+        }
+        .admin-shell-tile-wide {
+            min-height: 94px;
+        }
+        .admin-shell-tile-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+        .admin-shell-main {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .admin-shell-surface {
+            border-radius: 16px;
+            border: 1px solid rgba(140, 160, 196, 0.26);
+            background: linear-gradient(165deg, rgba(16, 23, 38, 0.64), rgba(8, 13, 23, 0.46));
+            box-shadow:
+                0 12px 28px rgba(3, 8, 20, 0.32),
+                inset 0 1px 0 rgba(255,255,255,0.08);
+            padding: 12px;
+        }
+        .admin-shell-surface > .controls {
+            margin-bottom: 0;
+        }
+        .admin-shell-map {
+            height: 500px;
+            border-radius: 16px;
+            border: 2px solid rgba(102,126,234,0.3);
+            box-shadow:
+                0 0 0 1px rgba(120, 142, 190, 0.14),
+                0 14px 34px rgba(4, 12, 28, 0.34);
+            overflow: hidden;
+            background: #05060a;
+        }
+        .admin-buildings-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(280px, 1fr);
+            gap: 16px;
+            align-items: start;
+        }
+        .admin-buildings-col {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        body.gold-admin .admin-shell-tile,
+        body.gold-admin .admin-shell-surface {
+            border-color: rgba(212, 164, 48, 0.34);
+            background:
+                linear-gradient(165deg, rgba(44, 32, 12, 0.66), rgba(24, 17, 7, 0.52));
+            box-shadow:
+                0 12px 26px rgba(16, 10, 3, 0.34),
+                inset 0 1px 0 rgba(255, 244, 212, 0.11);
+        }
         .field-group { margin-bottom:12px }
         .field-label { font-size:12px; color:#9aa4b2; margin-bottom:4px; display:block; font-weight:600 }
         /* Solid surface overrides for standard admin mode */
@@ -417,7 +502,9 @@
         body:not(.gold-admin) .stops-list,
         body:not(.gold-admin) .route-card,
         body:not(.gold-admin) .perf-card,
-        body:not(.gold-admin) .audit-wrap {
+        body:not(.gold-admin) .audit-wrap,
+        body:not(.gold-admin) .admin-shell-surface,
+        body:not(.gold-admin) .admin-shell-tile {
             background: #0d111b;
             border-color: #243149;
         }
@@ -466,8 +553,423 @@
         }
         
         /* Route Builder */
-        #routeMap { height:500px; border-radius:8px; margin-bottom:16px; border:2px solid rgba(102,126,234,0.3) }
-        .route-builder { display:grid; grid-template-columns:1.2fr 1fr; gap:20px; margin-bottom:20px }
+        #routeMap {
+            width: 100%;
+            height: 500px;
+            min-height: 500px;
+            border-radius: 16px;
+            border: 2px solid rgba(102,126,234,0.28);
+            box-shadow:
+                0 0 0 1px rgba(120, 142, 190, 0.14),
+                0 14px 34px rgba(4, 12, 28, 0.34);
+            background: #05060a;
+        }
+        #routeMap.leaflet-container {
+            cursor: default;
+        }
+        #routeMap.route-edit-active.leaflet-container {
+            cursor: crosshair;
+        }
+        #routeMap.route-edit-active.precision-dot-enabled.leaflet-container {
+            cursor: none !important;
+        }
+        #routeMap.route-edit-active.precision-dot-enabled .leaflet-pane,
+        #routeMap.route-edit-active.precision-dot-enabled .leaflet-pane * {
+            cursor: none !important;
+        }
+        #routeMap.route-edit-active.precision-dot-enabled .leaflet-control-container,
+        #routeMap.route-edit-active.precision-dot-enabled .leaflet-control-container * {
+            cursor: pointer !important;
+        }
+        #routeMap .route-cursor-dot {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 12px;
+            height: 12px;
+            margin-left: -6px;
+            margin-top: -6px;
+            border-radius: 999px;
+            border: 1.5px solid rgba(151, 188, 255, 0.95);
+            background: rgba(240, 248, 255, 0.92);
+            box-shadow:
+                0 0 0 1px rgba(7, 15, 28, 0.45),
+                0 0 10px rgba(120, 169, 255, 0.38);
+            pointer-events: none;
+            z-index: 1100;
+            will-change: transform;
+            transform: translate3d(-9999px, -9999px, 0);
+        }
+        #routeMap .route-cursor-dot::before {
+            content: '';
+            position: absolute;
+            inset: 3px;
+            border-radius: 999px;
+            background: rgba(4, 9, 18, 0.86);
+        }
+        #routeMap .route-cursor-dot::after {
+            content: '';
+            position: absolute;
+            inset: -8px;
+            border-radius: 999px;
+            border: 1px solid rgba(151, 188, 255, 0.58);
+            opacity: 0.68;
+            transform-origin: center;
+            animation: routeCursorPulse 1.28s ease-out infinite;
+        }
+        #routeMap .route-cursor-dot.active::after {
+            border-color: rgba(192, 219, 255, 0.84);
+            opacity: 0.95;
+            animation-duration: 0.88s;
+        }
+        @keyframes routeCursorPulse {
+            0% { transform: scale(0.78); opacity: 0.64; }
+            70% { transform: scale(1.28); opacity: 0.12; }
+            100% { transform: scale(1.42); opacity: 0; }
+        }
+        @keyframes routeButtonFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-1px); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            #routeMap .route-cursor-dot::after {
+                animation: none;
+                opacity: 0.4;
+                transform: scale(1);
+            }
+            .route-tablet-btn,
+            .route-routes-btn,
+            .route-create-btn {
+                animation: none !important;
+            }
+            .route-tablet-btn::before {
+                display: none;
+            }
+        }
+        body.gold-admin #routeMap .route-cursor-dot {
+            border-color: rgba(241, 210, 128, 0.95);
+            background: rgba(255, 244, 211, 0.92);
+            box-shadow:
+                0 0 0 1px rgba(55, 36, 6, 0.56),
+                0 0 10px rgba(235, 188, 79, 0.34);
+        }
+        body.gold-admin #routeMap .route-cursor-dot::after {
+            border-color: rgba(243, 211, 132, 0.55);
+        }
+        body.gold-admin #routeMap .route-cursor-dot.active::after {
+            border-color: rgba(252, 229, 163, 0.84);
+        }
+        .route-builder {
+            display: grid;
+            grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
+            gap: 14px;
+            margin-bottom: 20px;
+            min-height: 0;
+            align-items: start;
+        }
+        .route-sidebar {
+            min-height: 0;
+            align-self: stretch;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .route-sidebar-empty {
+            min-height: 560px;
+            display: grid;
+            grid-template-rows: auto auto auto auto;
+            gap: 10px;
+            align-content: start;
+        }
+        .route-empty-card,
+        .route-empty-tile {
+            border-radius: 16px;
+            border: 1px solid rgba(140, 160, 196, 0.25);
+            background:
+                linear-gradient(165deg, rgba(18, 28, 45, 0.62), rgba(11, 18, 31, 0.42));
+            box-shadow:
+                0 10px 24px rgba(3, 8, 20, 0.26),
+                inset 0 1px 0 rgba(255,255,255,0.08);
+            min-height: 86px;
+            backdrop-filter: blur(8px) saturate(120%);
+            -webkit-backdrop-filter: blur(8px) saturate(120%);
+        }
+        .route-empty-card-main {
+            min-height: 126px;
+        }
+        .route-empty-card-wide {
+            min-height: 82px;
+        }
+        .route-empty-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+        .route-empty-tile {
+            min-height: 72px;
+        }
+        .route-creation-pane.route-panel {
+            margin: 0;
+            height: 100%;
+            max-height: min(78vh, 860px);
+            border-radius: 16px;
+            border-color: rgba(140, 160, 196, 0.28);
+            background: linear-gradient(165deg, rgba(16, 23, 38, 0.7), rgba(8, 13, 23, 0.52));
+            box-shadow:
+                0 12px 28px rgba(3, 8, 20, 0.32),
+                inset 0 1px 0 rgba(255,255,255,0.08);
+        }
+        .route-map-column {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .route-map-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .route-view-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .route-map-section {
+            background: rgba(11, 19, 34, 0.54);
+            border: 1px solid rgba(120, 140, 180, 0.24);
+            border-radius: 16px;
+            padding: 12px;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+        .route-map-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 0 2px;
+        }
+        .route-io-status {
+            min-height: 16px;
+            font-size: 11px;
+            color: #9aa4b2;
+            padding: 0 4px;
+        }
+        .route-routes-btn,
+        .route-create-btn,
+        .route-tablet-btn {
+            position: relative;
+            overflow: hidden;
+            border-radius: 18px;
+            min-height: 36px;
+            padding: 0 18px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            border: 1px solid rgba(150, 172, 210, 0.35);
+            color: #dbe8ff;
+            background: linear-gradient(145deg, rgba(196, 222, 255, 0.16), rgba(78, 106, 150, 0.12));
+            box-shadow:
+                0 8px 24px rgba(3, 10, 26, 0.28),
+                inset 0 1px 0 rgba(255,255,255,0.26),
+                inset 0 -1px 0 rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px) saturate(130%);
+            -webkit-backdrop-filter: blur(10px) saturate(130%);
+            transition: transform 120ms ease, box-shadow 160ms ease, border-color 160ms ease;
+            animation: routeButtonFloat 4s ease-in-out infinite;
+        }
+        .route-create-btn {
+            animation-delay: 0.42s;
+        }
+        .route-tablet-btn {
+            min-width: 150px;
+            animation-delay: 0.2s;
+        }
+        .route-tablet-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(120deg, transparent 20%, rgba(255,255,255,0.28) 46%, transparent 72%);
+            transform: translateX(-140%);
+            opacity: 0.6;
+            pointer-events: none;
+            transition: transform 360ms ease, opacity 360ms ease;
+        }
+        .route-routes-btn:hover,
+        .route-create-btn:hover,
+        .route-tablet-btn:hover {
+            transform: translateY(-2px);
+            border-color: rgba(179, 204, 255, 0.56);
+            box-shadow:
+                0 12px 30px rgba(3, 10, 26, 0.34),
+                inset 0 1px 0 rgba(255,255,255,0.33),
+                inset 0 -1px 0 rgba(0,0,0,0.24);
+        }
+        .route-tablet-btn:hover::before {
+            transform: translateX(110%);
+            opacity: 0.95;
+        }
+        .route-routes-btn:active,
+        .route-create-btn:active,
+        .route-tablet-btn:active {
+            transform: translateY(0);
+        }
+        .route-routes-btn:disabled,
+        .route-create-btn:disabled,
+        .route-tablet-btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none;
+            animation: none;
+        }
+        .route-live-badge {
+            display: inline-flex;
+            align-items: center;
+            min-height: 32px;
+            padding: 0 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            color: #c7d2fe;
+            border: 1px solid rgba(102,126,234,0.3);
+            background: rgba(102,126,234,0.14);
+        }
+        .route-list-overlay,
+        .route-create-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1300;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: rgba(5, 10, 20, 0.72);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+        .route-list-overlay[hidden],
+        .route-create-overlay[hidden] {
+            display: none !important;
+        }
+        .route-list-dialog,
+        .route-create-dialog {
+            border-radius: 16px;
+            border: 1px solid rgba(148, 171, 211, 0.32);
+            background: linear-gradient(175deg, rgba(12, 20, 36, 0.96), rgba(8, 14, 26, 0.94));
+            box-shadow: 0 22px 64px rgba(0,0,0,0.46);
+        }
+        .route-list-dialog {
+            width: min(980px, calc(100vw - 40px));
+            max-height: min(82vh, 800px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .route-list-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(148, 171, 211, 0.2);
+        }
+        .route-list-title {
+            margin: 0;
+            font-size: 15px;
+            color: #e6eef8;
+        }
+        .route-overlay-close {
+            border-radius: 12px;
+            min-height: 32px;
+            padding: 0 12px;
+        }
+        .route-list-body {
+            padding: 12px 16px 16px;
+            overflow: auto;
+        }
+        .routes-grid.routes-grid-overlay {
+            margin-top: 0;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 10px;
+        }
+        .route-create-dialog {
+            width: min(460px, calc(100vw - 32px));
+            padding: 16px;
+        }
+        .route-create-title {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            color: #e6eef8;
+        }
+        .route-create-sub {
+            margin: 0 0 14px 0;
+            font-size: 12px;
+            color: #9aa4b2;
+        }
+        .route-create-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .route-create-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        body.gold-admin .route-map-section {
+            background: rgba(30, 23, 10, 0.5);
+            border-color: rgba(212, 164, 48, 0.34);
+        }
+        body.gold-admin .route-empty-card,
+        body.gold-admin .route-empty-tile,
+        body.gold-admin .route-creation-pane.route-panel {
+            border-color: rgba(212, 164, 48, 0.34);
+            background:
+                linear-gradient(165deg, rgba(44, 32, 12, 0.66), rgba(24, 17, 7, 0.52));
+            box-shadow:
+                0 12px 26px rgba(16, 10, 3, 0.34),
+                inset 0 1px 0 rgba(255, 244, 212, 0.11);
+        }
+        body.gold-admin .route-routes-btn,
+        body.gold-admin .route-create-btn,
+        body.gold-admin .route-tablet-btn {
+            color: #fff1c7;
+            border-color: rgba(232, 195, 95, 0.54);
+            background: linear-gradient(145deg, rgba(247, 219, 139, 0.27), rgba(158, 116, 33, 0.2));
+            box-shadow:
+                0 10px 26px rgba(22, 14, 3, 0.42),
+                inset 0 1px 0 rgba(255, 248, 219, 0.42),
+                inset 0 -1px 0 rgba(69, 42, 7, 0.35);
+            backdrop-filter: blur(12px) saturate(135%);
+            -webkit-backdrop-filter: blur(12px) saturate(135%);
+        }
+        body.gold-admin .route-routes-btn:hover,
+        body.gold-admin .route-create-btn:hover,
+        body.gold-admin .route-tablet-btn:hover {
+            border-color: rgba(248, 222, 149, 0.78);
+            box-shadow:
+                0 14px 34px rgba(22, 14, 3, 0.5),
+                inset 0 1px 0 rgba(255, 248, 219, 0.5),
+                inset 0 -1px 0 rgba(69, 42, 7, 0.42);
+        }
+        body.gold-admin .route-live-badge {
+            color: #ffe6a6;
+            border-color: rgba(212, 164, 48, 0.36);
+            background: rgba(212, 164, 48, 0.2);
+        }
+        body.gold-admin .route-list-dialog,
+        body.gold-admin .route-create-dialog {
+            border-color: rgba(212, 164, 48, 0.34);
+            background: linear-gradient(170deg, rgba(32, 24, 10, 0.96), rgba(22, 16, 7, 0.94));
+        }
+        body.gold-admin .route-list-head {
+            border-bottom-color: rgba(212, 164, 48, 0.2);
+        }
         @media (max-width:1000px) {
             .topbar {
                 flex-direction: column;
@@ -477,50 +979,66 @@
             .topbar-actions {
                 justify-content: flex-start;
             }
-            .route-builder { grid-template-columns:1fr }
-            .route-side-column { height: auto; }
-            .route-panel { overflow: visible; }
+            .route-builder {
+                grid-template-columns: 1fr;
+            }
+            .route-sidebar {
+                min-height: 0;
+            }
+            .route-sidebar-empty {
+                min-height: 0;
+                grid-template-rows: none;
+            }
+            .route-creation-pane.route-panel {
+                max-height: none;
+                overflow: visible;
+            }
         }
-        .route-side-column {
-            min-height: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            height: 500px;
+        @media (max-width:760px) {
+            #routeMap {
+                height: 420px;
+                min-height: 420px;
+            }
+            .route-view-actions,
+            .route-map-toolbar {
+                width: 100%;
+                gap: 8px;
+            }
+            .route-routes-btn,
+            .route-create-btn,
+            .route-tablet-btn {
+                flex: 1;
+                justify-content: center;
+                text-align: center;
+                min-width: 0;
+            }
+            .route-list-overlay,
+            .route-create-overlay {
+                padding: 10px;
+            }
+            .route-list-dialog {
+                width: calc(100vw - 20px);
+                max-height: calc(100vh - 20px);
+            }
         }
-        .route-routes-tile {
-            min-height: 150px;
-            max-height: min(32vh, 280px);
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: #0f0f23;
-            padding: 10px;
-            overflow: hidden;
+        @media (max-width:1000px) {
+            .admin-student-shell {
+                grid-template-columns: 1fr;
+            }
+            .admin-shell-sidebar {
+                display: none;
+            }
+            .admin-buildings-layout {
+                grid-template-columns: 1fr;
+            }
         }
-        .route-routes-head {
-            margin: 0;
-            font-size: 14px;
-            font-weight: 700;
-            color: #e6eef8;
-        }
-        .routes-grid.routes-grid-compact {
-            margin-top: 0;
-            grid-template-columns: 1fr;
-            gap: 8px;
-            min-height: 0;
-            overflow: auto;
-            padding-right: 4px;
-            align-content: start;
-        }
-        .routes-grid.routes-grid-compact .route-card {
-            padding: 10px;
-        }
-        .routes-grid.routes-grid-compact .route-actions button {
-            font-size: 11px;
-            padding: 5px 6px;
+        @media (max-width:760px) {
+            .admin-shell-map {
+                height: 420px;
+            }
+            .admin-shell-surface {
+                padding: 10px;
+            }
         }
         
         .route-panel {
@@ -531,6 +1049,7 @@
             flex: 1;
             min-height: 0;
             overflow: auto;
+            max-height: min(64vh, 760px);
         }
         .step-indicator { display:flex; gap:10px; margin-bottom:18px }
         .step { padding:8px 12px; border-radius:6px; font-size:12px; text-align:center; flex:1; background:#0d1117; color:#9aa4b2; font-weight:500 }
@@ -696,6 +1215,17 @@
             border-radius: 8px;
             border: 1px solid rgba(102,126,234,0.20);
             background: rgba(102,126,234,0.05);
+        }
+        .follow-road-actions {
+            margin-top: 8px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .follow-road-actions .route-tablet-btn {
+            min-height: 28px;
+            padding: 0 12px;
+            font-size: 10.5px;
+            min-width: 0;
         }
         .follow-road-feedback {
             margin-top: 8px;
@@ -985,6 +1515,96 @@
             .perf-detail-modal { padding: 12px; }
             .perf-detail-dialog { height: min(86vh, 760px); }
         }
+        body.permanent-admins-open { overflow: hidden; }
+        .permanent-admins-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1300;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(2, 6, 14, 0.82);
+            backdrop-filter: blur(4px);
+            padding: 16px;
+        }
+        .permanent-admins-modal[hidden] { display: none !important; }
+        .permanent-admins-dialog {
+            width: min(860px, 96vw);
+            max-height: min(86vh, 760px);
+            overflow: auto;
+            background: #0b1220;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 12px;
+            box-shadow: 0 28px 80px rgba(0,0,0,0.58);
+            padding: 14px;
+        }
+        body.gold-admin .permanent-admins-dialog {
+            background: #161107;
+            border-color: rgba(212,164,48,0.35);
+            box-shadow: 0 28px 80px rgba(0,0,0,0.60), 0 0 0 1px rgba(212,164,48,0.16) inset;
+        }
+        .permanent-admins-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .permanent-admins-title {
+            margin: 0;
+            color: #e6eef8;
+            font-size: 16px;
+        }
+        .permanent-admins-subtitle {
+            margin-top: 4px;
+            color: #9aa4b2;
+            font-size: 12px;
+        }
+        .permanent-admins-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .permanent-admins-form input {
+            min-width: 170px;
+        }
+        .permanent-admins-status {
+            font-size: 12px;
+            color: #b9c3d2;
+            margin-bottom: 8px;
+            min-height: 16px;
+        }
+        .perm-pill {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+        .perm-pill.fixed {
+            background: rgba(212,164,48,0.16);
+            border: 1px solid rgba(212,164,48,0.44);
+            color: #f2d27a;
+        }
+        .perm-pill.flex {
+            background: rgba(148,163,184,0.12);
+            border: 1px solid rgba(148,163,184,0.34);
+            color: #c6d0df;
+        }
+        @media (max-width: 768px) {
+            .permanent-admins-modal { padding: 10px; }
+            .permanent-admins-form input,
+            .permanent-admins-form button {
+                width: 100%;
+            }
+            .permanent-admins-dialog {
+                width: 100%;
+                max-height: 90vh;
+            }
+        }
         .audit-wrap {
             background:#0f0f23;
             border:1px solid rgba(255,255,255,0.06);
@@ -1018,7 +1638,22 @@
             </div>
             <div class="admin-content">
                 <div id="adminHome" class="tab-content active">
-                    <div class="topbar">
+                    <div class="admin-student-shell">
+                        <aside class="admin-shell-sidebar" aria-hidden="true">
+                            <div class="admin-shell-tiles">
+                                <div class="admin-shell-tile admin-shell-tile-main"></div>
+                                <div class="admin-shell-tile-grid">
+                                    <div class="admin-shell-tile"></div>
+                                    <div class="admin-shell-tile"></div>
+                                    <div class="admin-shell-tile"></div>
+                                    <div class="admin-shell-tile"></div>
+                                </div>
+                                <div class="admin-shell-tile admin-shell-tile-wide"></div>
+                                <div class="admin-shell-tile admin-shell-tile-wide"></div>
+                            </div>
+                        </aside>
+                        <section class="admin-shell-main">
+                    <div class="topbar admin-shell-surface">
             <div>
                 <div style="font-weight:700; font-size:14px; color:#e6eef8">CAMPUS TRANSPORT SYSTEM</div>
                 <h1>Admin Panel</h1>
@@ -1082,6 +1717,7 @@
                 </div>
                 <input id="adminPin" placeholder="Role signup pin (6 digits)" style="min-width:220px">
                 <button class="ok" onclick="addAdmin()">+ Add Admin</button>
+                <button type="button" onclick="openPermanentAdminsOverlay()" style="background:#8f6a19;color:#fff3d0">Permanent Admins</button>
             </div>
             <div id="manageAdminsHint" class="note" style="margin-bottom:8px;color:#b9c3d2">{% if is_gold_admin %}You can create admins using the active signup pins.{% else %}Admin account management is restricted for this account.{% endif %}</div>
             <div id="pinManager" style="display:none; margin:12px 0; padding:12px; border-radius:10px; border:1px solid rgba(212, 164, 48, 0.35); background:rgba(212, 164, 48, 0.08)">
@@ -1109,6 +1745,8 @@
             <div id="adminsTable"></div>
             <button onclick="hideUsersSection()" style="margin-top:12px;background:#ff7b8a;color:#fff;padding:8px 16px;border-radius:8px;border:none;cursor:pointer">Close</button>
         </div>
+                        </section>
+                    </div>
                 </div>
         <script>
         const _adminBootstrapEl = document.body;
@@ -1121,6 +1759,7 @@
             _adminBootstrapEl.dataset.canAccessSecureAdmin === '1'
         );
         const adminPasswordCache = {};
+        const PERMANENT_ADMIN_DEFAULT_PIN = '456789';
 
         function escapeHtml(v) {
             return String(v ?? '')
@@ -1273,6 +1912,100 @@
             document.getElementById('usersSection').style.display = 'none';
         }
 
+        function setPermanentAdminsStatus(msg, isError = false) {
+            const el = document.getElementById('permanentAdminsStatus');
+            if (!el) return;
+            el.textContent = msg || '';
+            el.style.color = isError ? '#ff7b8a' : '#b9c3d2';
+        }
+
+        function closePermanentAdminsOverlay() {
+            const modal = document.getElementById('permanentAdminsModal');
+            if (!modal) return;
+            modal.hidden = true;
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('permanent-admins-open');
+        }
+
+        function openPermanentAdminsOverlay() {
+            if (!CAN_ACCESS_SECURE_ADMIN) { alert('Access denied.'); return; }
+            bindPermanentAdminsModalEvents();
+            const modal = document.getElementById('permanentAdminsModal');
+            if (!modal) return;
+            const pinInput = document.getElementById('permanentAdminPin');
+            if (pinInput && !String(pinInput.value || '').trim()) {
+                pinInput.value = PERMANENT_ADMIN_DEFAULT_PIN;
+            }
+            modal.hidden = false;
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('permanent-admins-open');
+            loadPermanentAdminsOverlay();
+        }
+
+        async function loadPermanentAdminsOverlay() {
+            if (!CAN_ACCESS_SECURE_ADMIN) return;
+            try {
+                const res = await fetch('/admin/permanent-admins', { cache: 'no-store' });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Failed to load permanent admins');
+                const admins = Array.isArray(data.admins) ? data.admins : [];
+                const pinHint = String(data.create_pin_hint || PERMANENT_ADMIN_DEFAULT_PIN);
+                const pinInput = document.getElementById('permanentAdminPin');
+                if (pinInput && !String(pinInput.value || '').trim()) pinInput.value = pinHint;
+                const rows = [];
+                rows.push('<table style="width:100%;margin-top:6px"><thead><tr><th>Admin</th><th>Role</th><th>Type</th></tr></thead><tbody>');
+                if (!admins.length) {
+                    rows.push('<tr><td colspan="3" class="empty">No admins found</td></tr>');
+                } else {
+                    for (const admin of admins) {
+                        const username = escapeHtml(admin.username || '');
+                        const role = String(admin.role || 'admin').toLowerCase() === 'gold' ? 'Gold' : 'Admin';
+                        const typeBadge = admin.is_permanent
+                            ? '<span class="perm-pill fixed">PERMANENT</span>'
+                            : '<span class="perm-pill flex">STANDARD</span>';
+                        rows.push(`<tr><td><strong>${username}</strong></td><td>${role === 'Gold' ? '<span class="gold-badge">GOLD</span>' : '<span class="muted">Admin</span>'}</td><td>${typeBadge}</td></tr>`);
+                    }
+                }
+                rows.push('</tbody></table>');
+                const tableEl = document.getElementById('permanentAdminsTable');
+                if (tableEl) tableEl.innerHTML = rows.join('');
+                setPermanentAdminsStatus(`Loaded ${admins.length} admin account(s).`);
+            } catch (e) {
+                setPermanentAdminsStatus(e.message || 'Failed to load permanent admins', true);
+            }
+        }
+
+        async function addPermanentAdmin() {
+            if (!CAN_ACCESS_SECURE_ADMIN) { alert('Access denied.'); return; }
+            const username = (document.getElementById('permanentAdminUsername')?.value || '').trim();
+            const password = (document.getElementById('permanentAdminPassword')?.value || '').trim();
+            const pin = (document.getElementById('permanentAdminPin')?.value || '').trim();
+            if (!username || !password || !pin) {
+                setPermanentAdminsStatus('Enter username, password, and pin.', true);
+                return;
+            }
+            if (!/^\d{6}$/.test(pin)) {
+                setPermanentAdminsStatus('PIN must be exactly 6 digits.', true);
+                return;
+            }
+            try {
+                const res = await fetch('/admin/permanent-admins', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, pin })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Failed to create permanent admin');
+                document.getElementById('permanentAdminUsername').value = '';
+                document.getElementById('permanentAdminPassword').value = '';
+                setPermanentAdminsStatus(`Permanent admin created: ${username}`);
+                loadPermanentAdminsOverlay();
+                loadAdmins();
+            } catch (e) {
+                setPermanentAdminsStatus(e.message || 'Failed to create permanent admin', true);
+            }
+        }
+
         function loadAdmins() {
             fetch('/admin/admins').then(r => r.json()).then(data => {
                 const admins = Array.isArray(data.admins) ? data.admins : [];
@@ -1288,6 +2021,7 @@
                         const admin = admins[i] || {};
                         const username = String(admin.username || '');
                         const safeUsername = escapeHtml(username);
+                        const isPermanent = !!admin.is_permanent;
                         const role = String(admin.role || 'admin').toLowerCase() === 'gold' ? 'Gold' : 'Admin';
                         const roleCell = canManage ? `<td>${role === 'Gold' ? '<span class="gold-badge">GOLD</span>' : '<span class="muted">Admin</span>'}</td>` : '';
                         const pwdId = `admin_pw_${i}`;
@@ -1304,14 +2038,18 @@
 
                         let actionsCell = '';
                         if (canManage) {
-                            actionsCell = `
-                                <button onclick='promptChangeAdminPassword(${usernameArg})'>Change Password</button>
-                                <button class="danger" onclick='deleteAdmin(${usernameArg})'>Delete</button>
-                            `;
+                            if (isPermanent) {
+                                actionsCell = '<span class="muted">Fixed account</span>';
+                            } else {
+                                actionsCell = `
+                                    <button onclick='promptChangeAdminPassword(${usernameArg})'>Change Password</button>
+                                    <button class="danger" onclick='deleteAdmin(${usernameArg})'>Delete</button>
+                                `;
+                            }
                         }
 
                         html += `<tr>
-                            <td><strong>${safeUsername}</strong>${username === CURRENT_ADMIN ? ' <span class="muted">(you)</span>' : ''}</td>
+                            <td><strong>${safeUsername}</strong>${isPermanent ? ' <span class="perm-pill fixed">PERMANENT</span>' : ''}${username === CURRENT_ADMIN ? ' <span class="muted">(you)</span>' : ''}</td>
                             ${roleCell}
                             <td>${passwordCell}</td>
                             ${canManage ? `<td class="row-actions">${actionsCell}</td>` : ''}
@@ -1380,6 +2118,18 @@
             el.type = isPwd ? 'text' : 'password';
             if(btn) btn.textContent = isPwd ? 'Hide' : 'Show';
         }
+        function bindPermanentAdminsModalEvents() {
+            const modal = document.getElementById('permanentAdminsModal');
+            if (!modal || modal.dataset.bound === '1') return;
+            modal.dataset.bound = '1';
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closePermanentAdminsOverlay();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !modal.hidden) closePermanentAdminsOverlay();
+            });
+        }
+        bindPermanentAdminsModalEvents();
         applyAdminRoleUi();
         </script>
         <script>
@@ -1619,20 +2369,19 @@
         <!-- ROUTES TAB -->
         <div id="routes" class="tab-content">
             <div class="route-builder">
-                <!-- MAP SECTION -->
-                <div>
-                    <div class="field-label" style="margin-bottom:8px">Click on map to add stops</div>
-                    <div id="routeMap"></div>
-                    <cursor-info id="cursorInfo">Click on map | First click = Start Point | Next clicks = Stops</cursor-info>
-                </div>
-                
-                <!-- CONTROLS -->
-                <div class="route-side-column">
-                    <div class="route-routes-tile">
-                        <h3 class="route-routes-head">Your Routes</h3>
-                        <div class="routes-grid routes-grid-compact" id="routesList"></div>
+                <div class="route-sidebar">
+                    <div id="routeSidebarEmpty" class="route-sidebar-empty" aria-hidden="true">
+                        <div class="route-empty-card route-empty-card-main"></div>
+                        <div class="route-empty-grid">
+                            <div class="route-empty-tile"></div>
+                            <div class="route-empty-tile"></div>
+                            <div class="route-empty-tile"></div>
+                            <div class="route-empty-tile"></div>
+                        </div>
+                        <div class="route-empty-card route-empty-card-wide"></div>
+                        <div class="route-empty-card route-empty-card-wide"></div>
                     </div>
-                    <div class="route-panel">
+                    <div id="routeCreationPane" class="route-panel route-creation-pane" hidden>
                         <h3 style="margin:0 0 16px 0; font-size:15px">Route Details</h3>
                         
                         <!-- Step Indicator -->
@@ -1686,6 +2435,9 @@
                                 <span class="value" id="followRoadsValue">ON</span>
                             </label>
                             <div id="followRoadSegmentsPanel" class="follow-road-segments"></div>
+                            <div class="follow-road-actions">
+                                <button id="tryhardFollowRoadBtn" type="button" class="route-tablet-btn" title="Aggressive retry for road-follow preview">Tryhard OSRM Retry</button>
+                            </div>
                             <div class="draw-mode-hint">When enabled, route path follows roads between each consecutive stop.</div>
                             <div id="followRoadFeedback" class="follow-road-feedback" aria-live="polite"></div>
                         </div>
@@ -1765,6 +2517,51 @@
                         <div class="button-group">
                             <button id="clearMapBtn" class="danger" style="background:rgba(255,123,138,0.05)">Clear</button>
                             <button id="saveRouteBtn" class="ok" style="background:rgba(52,211,153,0.1)">Save Route</button>
+                            <button id="completeRouteBtn" type="button">Complete</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="route-map-column">
+                    <div class="route-map-head">
+                        <div class="route-view-actions">
+                            <button id="openRoutesOverlayBtn" type="button" class="route-routes-btn" title="View your routes">Your Routes</button>
+                            <button id="createRouteStartBtn" type="button" class="route-create-btn">Create Route</button>
+                            <span id="routeLiveBadge" class="route-live-badge" hidden>Creation mode</span>
+                        </div>
+                    </div>
+                    <div class="route-map-section">
+                        <div id="routeMap"></div>
+                        <cursor-info id="cursorInfo" hidden>Click on map | First click = Start Point | Next clicks = Stops</cursor-info>
+                    </div>
+                    <div class="route-map-toolbar">
+                        <button id="routesExportBtn" type="button" class="route-tablet-btn">Export Routes</button>
+                        <button id="routesImportBtn" type="button" class="route-tablet-btn">Import Routes</button>
+                        <input id="routesImportFile" type="file" accept=".json,application/json" hidden>
+                    </div>
+                    <div id="routeIoStatus" class="route-io-status"></div>
+                </div>
+            </div>
+            <div id="routeListOverlay" class="route-list-overlay" hidden aria-hidden="true">
+                <div class="route-list-dialog" role="dialog" aria-modal="true" aria-labelledby="routeListTitle">
+                    <div class="route-list-head">
+                        <h3 id="routeListTitle" class="route-list-title">Your Routes</h3>
+                        <button id="closeRoutesOverlayBtn" type="button" class="route-overlay-close">Close</button>
+                    </div>
+                    <div class="route-list-body">
+                        <div class="routes-grid routes-grid-overlay" id="routesList"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="routeCreateOverlay" class="route-create-overlay" hidden aria-hidden="true">
+                <div class="route-create-dialog" role="dialog" aria-modal="true" aria-labelledby="routeCreateTitle">
+                    <h3 id="routeCreateTitle" class="route-create-title">Create Route</h3>
+                    <p class="route-create-sub">Enter route name to start drawing on the map.</p>
+                    <div class="route-create-form">
+                        <label class="field-label" for="routeCreateNameInput">Route Name</label>
+                        <input id="routeCreateNameInput" placeholder="e.g. North Campus Loop">
+                        <div class="route-create-actions">
+                            <button id="cancelRouteCreateBtn" type="button">Cancel</button>
+                            <button id="continueRouteCreateBtn" type="button" class="ok" style="background:rgba(52,211,153,0.12)">Continue</button>
                         </div>
                     </div>
                 </div>
@@ -1781,60 +2578,99 @@
 
         <!-- TRANSPORTS TAB -->
         <div id="buses" class="tab-content">
-            <div class="controls">
-                <input id="newBusNum" placeholder="Transport number (e.g. 21)" style="width:140px">
-                <input id="newLat" placeholder="Latitude" style="width:160px">
-                <input id="newLng" placeholder="Longitude" style="width:160px">
-                <button id="addBtn" class="ok">Add Transport</button>
-                <div style="flex:1"></div>
-                <button id="refreshBtn">Refresh</button>
-                <button id="clearAllBtn" class="danger">Clear All</button>
-            </div>
-            <div id="busList">
-                <div class="empty">Loading transports...</div>
+            <div class="admin-student-shell">
+                <aside class="admin-shell-sidebar" aria-hidden="true">
+                    <div class="admin-shell-tiles">
+                        <div class="admin-shell-tile admin-shell-tile-main"></div>
+                        <div class="admin-shell-tile-grid">
+                            <div class="admin-shell-tile"></div>
+                            <div class="admin-shell-tile"></div>
+                            <div class="admin-shell-tile"></div>
+                            <div class="admin-shell-tile"></div>
+                        </div>
+                        <div class="admin-shell-tile admin-shell-tile-wide"></div>
+                    </div>
+                </aside>
+                <section class="admin-shell-main">
+                    <div class="admin-shell-surface">
+                        <div class="controls">
+                            <input id="newBusNum" placeholder="Transport number (e.g. 21)" style="width:140px">
+                            <input id="newLat" placeholder="Latitude" style="width:160px">
+                            <input id="newLng" placeholder="Longitude" style="width:160px">
+                            <button id="addBtn" class="ok">Add Transport</button>
+                            <div style="flex:1"></div>
+                            <button id="refreshBtn">Refresh</button>
+                            <button id="clearAllBtn" class="danger">Clear All</button>
+                        </div>
+                    </div>
+                    <div class="admin-shell-surface">
+                        <div id="busList">
+                            <div class="empty">Loading transports...</div>
+                        </div>
+                    </div>
+                </section>
             </div>
         </div>
 
         <!-- BUILDINGS TAB -->
         <div id="buildings" class="tab-content">
-            <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:20px">
-                <!-- MAP -->
-                <div>
-                    <div class="field-label" style="margin-bottom:8px"><span class="icon">B</span> Click to place building</div>
-                    <div id="buildingsMap" style="height:500px; border-radius:8px; margin-bottom:16px; border:2px solid rgba(102,126,234,0.3)"></div>
-                </div>
-
-                <!-- CONTROLS -->
-                <div>
-                    <!-- HOSTELS -->
-                    <div class="route-panel" style="margin-bottom:20px">
-                        <h3 style="margin:0 0 12px 0; font-size:14px"><span class="icon">H</span> Add Hostel</h3>
-                        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px">
-                            <input id="hostelName" placeholder="Name (e.g. Block A)" style="width:100%; font-size:12px; padding:6px 8px">
-                            <input id="hostelCapacity" placeholder="Capacity" style="width:100%; font-size:12px; padding:6px 8px" value="100">
-                            <button id="addHostelBtn" class="ok" style="background:rgba(52,211,153,0.1); font-size:12px; padding:6px">+ Place on Map</button>
+            <div class="admin-student-shell">
+                <aside class="admin-shell-sidebar" aria-hidden="true">
+                    <div class="admin-shell-tiles">
+                        <div class="admin-shell-tile admin-shell-tile-main"></div>
+                        <div class="admin-shell-tile-grid">
+                            <div class="admin-shell-tile"></div>
+                            <div class="admin-shell-tile"></div>
+                            <div class="admin-shell-tile"></div>
+                            <div class="admin-shell-tile"></div>
                         </div>
-                        <div class="field-label">Hostels (<span id="hostelCount">0</span>)</div>
-                        <div id="hostelsList" style="max-height:200px; overflow-y:auto; background:#0d1117; border-radius:6px; padding:8px">
-                            <div class="empty" style="font-size:12px; padding:10px">Click map to add</div>
+                        <div class="admin-shell-tile admin-shell-tile-wide"></div>
+                    </div>
+                </aside>
+                <section class="admin-shell-main">
+                    <div class="admin-shell-surface">
+                        <div class="admin-buildings-layout">
+                            <!-- MAP -->
+                            <div>
+                                <div class="field-label" style="margin-bottom:8px"><span class="icon">B</span> Click to place building</div>
+                                <div id="buildingsMap" class="admin-shell-map"></div>
+                            </div>
+
+                            <!-- CONTROLS -->
+                            <div class="admin-buildings-col">
+                                <!-- HOSTELS -->
+                                <div class="route-panel">
+                                    <h3 style="margin:0 0 12px 0; font-size:14px"><span class="icon">H</span> Add Hostel</h3>
+                                    <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px">
+                                        <input id="hostelName" placeholder="Name (e.g. Block A)" style="width:100%; font-size:12px; padding:6px 8px">
+                                        <input id="hostelCapacity" placeholder="Capacity" style="width:100%; font-size:12px; padding:6px 8px" value="100">
+                                        <button id="addHostelBtn" class="ok" style="background:rgba(52,211,153,0.1); font-size:12px; padding:6px">+ Place on Map</button>
+                                    </div>
+                                    <div class="field-label">Hostels (<span id="hostelCount">0</span>)</div>
+                                    <div id="hostelsList" style="max-height:200px; overflow-y:auto; background:#0d1117; border-radius:6px; padding:8px">
+                                        <div class="empty" style="font-size:12px; padding:10px">Click map to add</div>
+                                    </div>
+                                </div>
+
+                                <!-- CLASSES -->
+                                <div class="route-panel">
+                                    <h3 style="margin:0 0 12px 0; font-size:14px"><span class="icon">C</span> Add Class</h3>
+                                    <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px">
+                                        <input id="className" placeholder="Name (e.g. A-101)" style="width:100%; font-size:12px; padding:6px 8px">
+                                        <input id="classDept" placeholder="Department" style="width:100%; font-size:12px; padding:6px 8px">
+                                        <button id="addClassBtn" class="ok" style="background:rgba(52,211,153,0.1); font-size:12px; padding:6px">+ Place on Map</button>
+                                    </div>
+                                    <div class="field-label">Classes (<span id="classCount">0</span>)</div>
+                                    <div id="classesList" style="max-height:200px; overflow-y:auto; background:#0d1117; border-radius:6px; padding:8px">
+                                        <div class="empty" style="font-size:12px; padding:10px">Click map to add</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-
-                    <!-- CLASSES -->
-                    <div class="route-panel">
-                        <h3 style="margin:0 0 12px 0; font-size:14px"><span class="icon">C</span> Add Class</h3>
-                        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px">
-                            <input id="className" placeholder="Name (e.g. A-101)" style="width:100%; font-size:12px; padding:6px 8px">
-                            <input id="classDept" placeholder="Department" style="width:100%; font-size:12px; padding:6px 8px">
-                            <button id="addClassBtn" class="ok" style="background:rgba(52,211,153,0.1); font-size:12px; padding:6px">+ Place on Map</button>
-                        </div>
-                        <div class="field-label">Classes (<span id="classCount">0</span>)</div>
-                        <div id="classesList" style="max-height:200px; overflow-y:auto; background:#0d1117; border-radius:6px; padding:8px">
-                            <div class="empty" style="font-size:12px; padding:10px">Click map to add</div>
-                        </div>
-                    </div>
-                </div>
+                </section>
             </div>
+                </div>
         </div>
 
         <!-- SERVER PERFORMANCE TAB -->
@@ -2068,6 +2904,29 @@
         </div>
     </div>
 
+    <div id="permanentAdminsModal" class="permanent-admins-modal" hidden aria-hidden="true">
+        <div id="permanentAdminsDialog" class="permanent-admins-dialog" role="dialog" aria-modal="true" aria-labelledby="permanentAdminsTitle">
+            <div class="permanent-admins-head">
+                <div>
+                    <h3 id="permanentAdminsTitle" class="permanent-admins-title">Permanent Admins</h3>
+                    <div class="permanent-admins-subtitle">Create fixed admin accounts (outside credentials.json). Required add PIN defaults to 456789.</div>
+                </div>
+                <button type="button" class="perf-detail-close" onclick="closePermanentAdminsOverlay()">Close</button>
+            </div>
+            <div class="permanent-admins-form">
+                <input id="permanentAdminUsername" placeholder="Username">
+                <div style="display:flex; gap:8px; align-items:center">
+                    <input id="permanentAdminPassword" type="password" placeholder="Password">
+                    <button type="button" onclick="toggleVisibility('permanentAdminPassword', this)" style="margin-top:0;background:#667eea;color:#fff">Show</button>
+                </div>
+                <input id="permanentAdminPin" maxlength="6" placeholder="Creation PIN (default 456789)">
+                <button type="button" class="ok" onclick="addPermanentAdmin()">+ Add Permanent Admin</button>
+            </div>
+            <div id="permanentAdminsStatus" class="permanent-admins-status"></div>
+            <div id="permanentAdminsTable"></div>
+        </div>
+    </div>
+
     <div id="perfDetailModal" class="perf-detail-modal" hidden aria-hidden="true">
         <div id="perfDetailDialog" class="perf-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="perfDetailTitle">
             <div class="perf-detail-head">
@@ -2093,6 +2952,13 @@
         let routeMap = null;
         let routeMarkers = [];
         let routeLine = null;
+        let routeCreationMode = false;
+        let routeCatalogCache = [];
+        let routePreviewLayers = [];
+        let routeBrowseNeedsFit = true;
+        let routeCursorDotEl = null;
+        let routeCursorDotRaf = null;
+        let routeCursorDotPoint = null;
         let stopRadiusLayers = [];
         let snapRangeLayers = [];
         let mapMode = 'start'; // 'start' or 'stops'
@@ -2837,6 +3703,10 @@
             tab.classList.add('active');
             content.classList.add('active');
             document.body.classList.toggle('admin-home-active', tabId === 'adminHome');
+            if (tabId !== 'routes') {
+                closeRouteListOverlay();
+                closeRouteCreateOverlay();
+            }
             if (tabId !== 'adminHome') {
                 hideUsersSection();
             }
@@ -2847,7 +3717,11 @@
                 stopPerfAutoRefresh();
                 stopAdminConsoleAutoRefresh();
             } else if (tabId === 'routes') {
-                setTimeout(initRouteMap, 100);
+                setTimeout(() => {
+                    initRouteMap();
+                    routeBrowseNeedsFit = true;
+                    exitRouteCreationMode(true);
+                }, 100);
                 loadRoutes();
                 stopBusesAutoRefresh();
                 stopPerfAutoRefresh();
@@ -3070,6 +3944,10 @@
         function updateCursorInfo() {
             const el = document.getElementById('cursorInfo');
             if (!el) return;
+            if (!routeCreationMode) {
+                el.textContent = 'Browse mode: click Create Route to start route creation.';
+                return;
+            }
             if (drawMode === 'straight') {
                 el.textContent = 'Straight mode: click START, then click END (single segment).';
                 return;
@@ -3083,6 +3961,245 @@
                 return;
             }
             el.textContent = 'Freehand mode: hold mouse and drag to draw path. Press Esc to finish.';
+        }
+
+        function getRouteRenderablePoints(route) {
+            const source = Array.isArray(route && route.path_points) && route.path_points.length >= 2
+                ? route.path_points
+                : (Array.isArray(route && route.waypoints) ? route.waypoints : []);
+            const points = [];
+            source.forEach((wp) => {
+                if (!Array.isArray(wp) || wp.length < 2) return;
+                const lat = Number(wp[0]);
+                const lng = Number(wp[1]);
+                if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+                points.push([lat, lng]);
+            });
+            return points;
+        }
+
+        function clearRoutePreviewLayers() {
+            if (!routeMap || !routePreviewLayers.length) return;
+            routePreviewLayers.forEach((layer) => {
+                try { routeMap.removeLayer(layer); } catch (e) {}
+            });
+            routePreviewLayers = [];
+        }
+
+        function setRouteMapEditingState(enabled) {
+            if (!routeMap || typeof routeMap.getContainer !== 'function') return;
+            const container = routeMap.getContainer();
+            if (!container) return;
+            container.classList.toggle('route-edit-active', !!enabled);
+            if (!enabled) {
+                container.classList.remove('precision-dot-enabled');
+                hideRouteCursorDot();
+            }
+        }
+
+        function updateRouteLiveBadge() {
+            const badge = document.getElementById('routeLiveBadge');
+            if (!badge) return;
+            if (!routeCreationMode) {
+                badge.hidden = true;
+                badge.textContent = 'Creation mode';
+                return;
+            }
+            const routeNameInput = document.getElementById('routeName');
+            const label = routeNameInput ? String(routeNameInput.value || '').trim() : '';
+            badge.textContent = label ? `Creating: ${label}` : 'Creation mode';
+            badge.hidden = false;
+        }
+
+        function renderRoutePreviewMap() {
+            if (!routeMap || routeCreationMode) return;
+            clearRoutePreviewLayers();
+            const fitPoints = [];
+            routeCatalogCache.forEach((route) => {
+                const points = getRouteRenderablePoints(route);
+                if (points.length < 2) return;
+                const color = String(route.color || '#667eea');
+                const line = L.polyline(points, {
+                    color: color,
+                    weight: 3,
+                    opacity: 0.74
+                }).addTo(routeMap);
+                const stopCount = Array.isArray(route.stops) ? route.stops.filter((s) => s && String(s).trim()).length : points.length;
+                line.bindPopup(`<b>${route.name || 'Route'}</b><br>${stopCount} stops`);
+                routePreviewLayers.push(line);
+                points.forEach((pt) => fitPoints.push(pt));
+            });
+            if (!routeBrowseNeedsFit) return;
+            if (fitPoints.length >= 2) {
+                const bounds = L.latLngBounds(fitPoints);
+                routeMap.fitBounds(bounds.pad(0.08), { animate: false });
+            } else {
+                routeMap.setView([20.3549, 85.8161], 15);
+            }
+            routeBrowseNeedsFit = false;
+        }
+
+        function openRouteListOverlay() {
+            const overlay = document.getElementById('routeListOverlay');
+            if (!overlay) return;
+            overlay.hidden = false;
+            overlay.setAttribute('aria-hidden', 'false');
+            loadRoutes();
+        }
+
+        function closeRouteListOverlay() {
+            const overlay = document.getElementById('routeListOverlay');
+            if (!overlay) return;
+            overlay.hidden = true;
+            overlay.setAttribute('aria-hidden', 'true');
+        }
+
+        function openRouteCreateOverlay() {
+            const overlay = document.getElementById('routeCreateOverlay');
+            const input = document.getElementById('routeCreateNameInput');
+            if (!overlay || routeCreationMode) return;
+            overlay.hidden = false;
+            overlay.setAttribute('aria-hidden', 'false');
+            if (input) {
+                input.value = '';
+                setTimeout(() => {
+                    try { input.focus(); } catch (e) {}
+                }, 20);
+            }
+        }
+
+        function closeRouteCreateOverlay() {
+            const overlay = document.getElementById('routeCreateOverlay');
+            if (!overlay) return;
+            overlay.hidden = true;
+            overlay.setAttribute('aria-hidden', 'true');
+        }
+
+        function enterRouteCreationMode(routeName = '', preserveDraft = false) {
+            routeCreationMode = true;
+            const creationPane = document.getElementById('routeCreationPane');
+            const emptyPane = document.getElementById('routeSidebarEmpty');
+            const createBtn = document.getElementById('createRouteStartBtn');
+            const cursorInfo = document.getElementById('cursorInfo');
+            if (creationPane) creationPane.hidden = false;
+            if (emptyPane) emptyPane.hidden = true;
+            if (createBtn) createBtn.hidden = true;
+            if (cursorInfo) cursorInfo.hidden = false;
+            closeRouteCreateOverlay();
+            closeRouteListOverlay();
+            setRouteMapEditingState(true);
+            clearRoutePreviewLayers();
+            if (!preserveDraft) {
+                editingRouteId = null;
+                resetRouteBuilderState();
+                const routeNameInput = document.getElementById('routeName');
+                if (routeNameInput) routeNameInput.value = routeName || '';
+            } else if (routeName) {
+                const routeNameInput = document.getElementById('routeName');
+                if (routeNameInput) routeNameInput.value = routeName;
+            }
+            updateRouteLiveBadge();
+            updateCursorInfo();
+            if (routeMap) {
+                try { routeMap.invalidateSize(); } catch (e) {}
+            }
+        }
+
+        function exitRouteCreationMode(discardDraft = true) {
+            routeCreationMode = false;
+            const creationPane = document.getElementById('routeCreationPane');
+            const emptyPane = document.getElementById('routeSidebarEmpty');
+            const createBtn = document.getElementById('createRouteStartBtn');
+            const cursorInfo = document.getElementById('cursorInfo');
+            if (creationPane) creationPane.hidden = true;
+            if (emptyPane) emptyPane.hidden = false;
+            if (createBtn) createBtn.hidden = false;
+            if (cursorInfo) cursorInfo.hidden = true;
+            setRouteMapEditingState(false);
+            if (discardDraft) {
+                editingRouteId = null;
+                const routeNameInput = document.getElementById('routeName');
+                if (routeNameInput) routeNameInput.value = '';
+                resetRouteBuilderState();
+            }
+            updateRouteLiveBadge();
+            renderRoutePreviewMap();
+            if (routeMap) {
+                try { routeMap.invalidateSize(); } catch (e) {}
+            }
+        }
+
+        function hasDraftRouteData() {
+            const routeNameInput = document.getElementById('routeName');
+            const hasName = !!(routeNameInput && String(routeNameInput.value || '').trim());
+            return currentWaypoints.length > 0 || hasName;
+        }
+
+        function ensureRouteCursorDot() {
+            if (!routeMap) return null;
+            const container = routeMap.getContainer ? routeMap.getContainer() : null;
+            if (!container) return null;
+            if (!routeCreationMode) {
+                container.classList.remove('precision-dot-enabled');
+                hideRouteCursorDot();
+                return null;
+            }
+            container.classList.add('precision-dot-enabled');
+            if (routeCursorDotEl && routeCursorDotEl.parentElement === container) return routeCursorDotEl;
+            if (routeCursorDotEl && routeCursorDotEl.parentElement) {
+                try { routeCursorDotEl.parentElement.removeChild(routeCursorDotEl); } catch (e) {}
+            }
+            const dot = document.createElement('span');
+            dot.className = 'route-cursor-dot';
+            dot.setAttribute('aria-hidden', 'true');
+            dot.hidden = true;
+            container.appendChild(dot);
+            routeCursorDotEl = dot;
+            return routeCursorDotEl;
+        }
+
+        function flushRouteCursorDot() {
+            routeCursorDotRaf = null;
+            if (!routeCursorDotEl || !routeCursorDotPoint) return;
+            const x = Number(routeCursorDotPoint.x);
+            const y = Number(routeCursorDotPoint.y);
+            if (!isFinite(x) || !isFinite(y)) return;
+            routeCursorDotEl.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+        }
+
+        function queueRouteCursorDot(point) {
+            routeCursorDotPoint = point || null;
+            if (routeCursorDotRaf != null) return;
+            routeCursorDotRaf = requestAnimationFrame(flushRouteCursorDot);
+        }
+
+        function setRouteCursorDotActive(active) {
+            if (!routeCursorDotEl) return;
+            routeCursorDotEl.classList.toggle('active', !!active);
+        }
+
+        function hideRouteCursorDot() {
+            if (routeCursorDotRaf != null) {
+                try { cancelAnimationFrame(routeCursorDotRaf); } catch (e) {}
+                routeCursorDotRaf = null;
+            }
+            routeCursorDotPoint = null;
+            if (!routeCursorDotEl) return;
+            routeCursorDotEl.hidden = true;
+            routeCursorDotEl.classList.remove('active');
+        }
+
+        function updateRouteCursorDotFromMapEvent(e) {
+            if (!routeCreationMode) return;
+            const dot = routeCursorDotEl || ensureRouteCursorDot();
+            if (!dot || !e) return;
+            const pt = e.containerPoint || (e.latlng && routeMap ? routeMap.latLngToContainerPoint(e.latlng) : null);
+            if (!pt) return;
+            const x = Number(pt.x);
+            const y = Number(pt.y);
+            if (!isFinite(x) || !isFinite(y)) return;
+            if (dot.hidden) dot.hidden = false;
+            queueRouteCursorDot({ x, y });
         }
 
         function formatStopRadiusText(meters) {
@@ -3307,10 +4424,12 @@
             ensureFollowRoadSegments();
             if (drawMode === 'freehand' && currentWaypoints.length > 2) {
                 panel.innerHTML = '<div class="follow-road-empty">Freehand mode keeps your drawn path. Switch to curve/straight mode for per-segment road-follow controls.</div>';
+                updateTryhardFollowRoadButtonState();
                 return;
             }
             if (!followRoadSegments.length) {
                 panel.innerHTML = '<div class="follow-road-empty">Add START and at least one stop to configure stop-wise road following.</div>';
+                updateTryhardFollowRoadButtonState();
                 return;
             }
             panel.innerHTML = '';
@@ -3346,6 +4465,19 @@
                 row.appendChild(mode);
                 panel.appendChild(row);
             });
+            updateTryhardFollowRoadButtonState();
+        }
+
+        function updateTryhardFollowRoadButtonState() {
+            const btn = document.getElementById('tryhardFollowRoadBtn');
+            if (!btn) return;
+            const flags = normalizeFollowRoadSegments(followRoadSegments, currentWaypoints.length, followRoadsEnabled);
+            const hasRoadSegments = flags.some(Boolean);
+            const canUse = !routeSaveInProgress && !isFreehandDrawing && drawMode !== 'freehand' && currentWaypoints.length >= 2 && hasRoadSegments;
+            btn.disabled = !canUse;
+            btn.title = canUse
+                ? 'Aggressive retry: bypass cache, ignore cooldown, and retry providers'
+                : 'Enable follow-road segments and add at least 2 waypoints to use Tryhard retry';
         }
 
         function refreshFollowRoadUi() {
@@ -3373,6 +4505,7 @@
             if (value) value.textContent = mixed ? 'MIX' : (allEnabled ? 'ON' : 'OFF');
             if (!mixed) followRoadsEnabled = allEnabled;
             renderFollowRoadSegmentsUi();
+            updateTryhardFollowRoadButtonState();
         }
 
         function refreshRouteSnapUi() {
@@ -3410,7 +4543,9 @@
             drawSnapRangeLayers();
         }
 
-        function updateRouteLineFollowRoadPreview() {
+        function updateRouteLineFollowRoadPreview(options = {}) {
+            const tryhard = !!(options && options.tryhard);
+            const forceNoCache = !!(options && options.forceNoCache);
             routeLinePreviewToken += 1;
             const token = routeLinePreviewToken;
             if (!routeMap || !routeLine || currentWaypoints.length < 2 || isFreehandDrawing || currentWaypoints.length > 24) return;
@@ -3428,16 +4563,19 @@
                 try { routePreviewAbortController.abort(); } catch (e) {}
             }
             routePreviewAbortController = new AbortController();
-            setFollowRoadFeedback('Processing road-follow preview...', 'loading');
+            setFollowRoadFeedback(tryhard ? 'Tryhard retry in progress...' : 'Processing road-follow preview...', 'loading');
             getOSRMRoute(waypointsSnapshot, segmentFlagsSnapshot, {
-                timeoutMs: 6500,
+                timeoutMs: tryhard ? 12000 : 6500,
                 signal: routePreviewAbortController.signal,
                 withSummary: true,
-                osrmConcurrency: OSRM_PREVIEW_CONCURRENCY,
+                osrmConcurrency: tryhard ? OSRM_MAX_CONCURRENCY : OSRM_PREVIEW_CONCURRENCY,
+                retryRounds: tryhard ? 2 : 1,
+                forceNoCache: forceNoCache,
+                ignoreProviderCooldown: tryhard,
                 onProgress: ({ phase, completedSegments, totalSegments }) => {
                     if (token !== routeLinePreviewToken) return;
                     if (phase === 'osrm') {
-                        setFollowRoadFeedback(`Following roads (OSRM)... ${completedSegments}/${totalSegments}`, 'loading');
+                        setFollowRoadFeedback(`${tryhard ? 'Tryhard' : 'Following roads'} (OSRM)... ${completedSegments}/${totalSegments}`, 'loading');
                     }
                 }
             }).then((routeBuildResult) => {
@@ -3451,12 +4589,40 @@
                 applyFollowRoadSegmentServices(summary, segmentFlagsSnapshot);
                 renderFollowRoadSegmentsUi();
                 if (summary && Number(summary.directFallbackSegments || 0) > 0) {
-                    setFollowRoadFeedback(`${summary.directFallbackSegments} segment(s) use direct lines.`, 'error');
+                    if (tryhard) {
+                        setFollowRoadFeedback(`Tryhard complete: ${summary.directFallbackSegments} segment(s) still use direct lines.`, 'error');
+                    } else {
+                        setFollowRoadFeedback(`${summary.directFallbackSegments} segment(s) use direct lines. Try "Tryhard OSRM Retry".`, 'error');
+                    }
                 } else {
-                    setFollowRoadFeedback('Road-follow preview updated.', 'success');
+                    setFollowRoadFeedback(tryhard ? 'Tryhard road-follow preview updated.' : 'Road-follow preview updated.', 'success');
                 }
                 drawSnapRangeLayers();
             }).catch(() => {});
+        }
+
+        function runTryhardFollowRoadRetry() {
+            if (drawMode === 'freehand') {
+                setFollowRoadFeedback('Tryhard retry is unavailable in freehand mode.', 'error');
+                return;
+            }
+            if (!routeMap || !routeLine || currentWaypoints.length < 2) {
+                setFollowRoadFeedback('Add at least START and one stop before tryhard retry.', 'error');
+                return;
+            }
+            const flags = normalizeFollowRoadSegments(followRoadSegments, currentWaypoints.length, followRoadsEnabled);
+            if (!flags.some(Boolean)) {
+                setFollowRoadFeedback('Enable at least one follow-road segment first.', 'error');
+                return;
+            }
+            osrmSegmentCache.clear();
+            OSRM_BASE_URLS.forEach((baseUrl) => {
+                const state = getOsrmProviderState(baseUrl);
+                state.failures = 0;
+                state.cooldownUntil = 0;
+            });
+            setFollowRoadFeedback('Tryhard retry queued...', 'loading');
+            updateRouteLineFollowRoadPreview({ tryhard: true, forceNoCache: true });
         }
 
         async function loadGlobalRouteSnapSettings() {
@@ -3493,16 +4659,22 @@
 
         function initFollowRoadControls() {
             const toggle = document.getElementById('followRoadsToggle');
-            if (!toggle || toggle.dataset.bound === '1') return;
-            toggle.dataset.bound = '1';
-            toggle.addEventListener('change', () => {
-                followRoadsEnabled = !!toggle.checked;
-                ensureFollowRoadSegments();
-                followRoadSegments = followRoadSegments.map(() => !!followRoadsEnabled);
-                followRoadSegmentServices = normalizeFollowRoadSegmentServices([], currentWaypoints.length, followRoadSegments);
-                refreshFollowRoadUi();
-                scheduleRouteRender();
-            });
+            if (toggle && toggle.dataset.bound !== '1') {
+                toggle.dataset.bound = '1';
+                toggle.addEventListener('change', () => {
+                    followRoadsEnabled = !!toggle.checked;
+                    ensureFollowRoadSegments();
+                    followRoadSegments = followRoadSegments.map(() => !!followRoadsEnabled);
+                    followRoadSegmentServices = normalizeFollowRoadSegmentServices([], currentWaypoints.length, followRoadSegments);
+                    refreshFollowRoadUi();
+                    scheduleRouteRender();
+                });
+            }
+            const tryhardBtn = document.getElementById('tryhardFollowRoadBtn');
+            if (tryhardBtn && tryhardBtn.dataset.bound !== '1') {
+                tryhardBtn.dataset.bound = '1';
+                tryhardBtn.addEventListener('click', runTryhardFollowRoadRetry);
+            }
             refreshFollowRoadUi();
         }
 
@@ -3617,6 +4789,7 @@
             refreshRouteSnapUi();
             renderMapWaypoints();
             renderStopsList();
+            updateRouteLiveBadge();
         }
 
         function handleRouteMapClick(lat, lng) {
@@ -3695,26 +4868,41 @@
                 attribution: '',
                 maxZoom: 19
             }).addTo(routeMap);
+            ensureRouteCursorDot();
+            setRouteMapEditingState(false);
 
             routeMap.on('click', (e) => {
+                if (!routeCreationMode) return;
+                updateRouteCursorDotFromMapEvent(e);
                 if (suppressNextClick) { suppressNextClick = false; return; }
                 if (drawMode === 'freehand') return;
                 handleRouteMapClick(e.latlng.lat, e.latlng.lng);
             });
 
             routeMap.on('mousedown', (e) => {
+                if (!routeCreationMode) return;
+                updateRouteCursorDotFromMapEvent(e);
+                setRouteCursorDotActive(true);
                 if (drawMode !== 'freehand') return;
                 startFreehand(e.latlng.lat, e.latlng.lng);
             });
             routeMap.on('mousemove', (e) => {
+                if (!routeCreationMode) return;
+                updateRouteCursorDotFromMapEvent(e);
                 if (drawMode !== 'freehand') return;
                 extendFreehand(e.latlng.lat, e.latlng.lng);
             });
             routeMap.on('mouseup', (e) => {
+                if (!routeCreationMode) return;
+                updateRouteCursorDotFromMapEvent(e);
+                setRouteCursorDotActive(false);
                 if (drawMode !== 'freehand') return;
                 stopFreehand(e.latlng.lat, e.latlng.lng);
             });
             routeMap.on('mouseout', () => {
+                if (!routeCreationMode) return;
+                setRouteCursorDotActive(false);
+                hideRouteCursorDot();
                 if (drawMode !== 'freehand') return;
                 if (isFreehandDrawing) stopFreehand();
             });
@@ -3745,6 +4933,13 @@
             document.addEventListener('keydown', (e) => {
                 const routesTab = document.getElementById('routes');
                 if (!routesTab || !routesTab.classList.contains('active')) return;
+                if (!routeCreationMode) {
+                    if (e.key === 'Escape') {
+                        closeRouteListOverlay();
+                        closeRouteCreateOverlay();
+                    }
+                    return;
+                }
                 if (isTextInputTarget(e.target)) return;
                 if ((e.ctrlKey || e.metaKey) && !e.shiftKey && String(e.key || '').toLowerCase() === 'z') {
                     e.preventDefault();
@@ -3774,6 +4969,7 @@
             updateSteps();
             updateInstructions();
             renderStopsList();
+            if (!routeCreationMode) renderRoutePreviewMap();
         }
 
         function addWaypointFromMap(lat, lng, opts = {}) {
@@ -3889,12 +5085,13 @@
 
         function setRouteBuilderDisabled(disabled) {
             const ids = [
-                'saveRouteBtn', 'clearMapBtn', 'followRoadsToggle', 'drawMode', 'routeName',
+                'saveRouteBtn', 'clearMapBtn', 'completeRouteBtn', 'followRoadsToggle', 'drawMode', 'routeName',
                 'routeColor', 'showStopRadius', 'stopRadiusSlider', 'stopRadiusCustom',
                 'applyStopRadiusBtn', 'globalSnapEnabled', 'globalSnapDistanceSlider',
                 'globalSnapDistanceCustom', 'saveGlobalSnapBtn', 'globalSnapShowRange',
                 'routeSnapOverride', 'routeSnapEnabled', 'routeSnapDistanceSlider',
-                'routeSnapDistanceCustom', 'applyRouteSnapBtn', 'routeSnapShowRange'
+                'routeSnapDistanceCustom', 'applyRouteSnapBtn', 'routeSnapShowRange',
+                'tryhardFollowRoadBtn'
             ];
             ids.forEach((id) => {
                 const el = document.getElementById(id);
@@ -3939,6 +5136,7 @@
             if (overlay) overlay.hidden = true;
             setRouteBuilderDisabled(false);
             routeSaveInProgress = false;
+            updateTryhardFollowRoadButtonState();
         }
 
         function normalizeCoordForCache(v) {
@@ -4028,75 +5226,85 @@
             return providers;
         }
 
-        async function fetchOsrmSegment(from, to, timeoutMs, externalSignal) {
-            const cached = getCachedOsrmSegment(from, to);
-            if (cached) {
-                return {
-                    segment: cached.segment,
-                    usedRoad: true,
-                    attemptedRoad: true,
-                    source: normalizeRoadServiceToken(cached.source, 'osrm')
-                };
+        async function fetchOsrmSegment(from, to, timeoutMs, externalSignal, fetchOptions = {}) {
+            const forceNoCache = !!(fetchOptions && fetchOptions.forceNoCache);
+            if (!forceNoCache) {
+                const cached = getCachedOsrmSegment(from, to);
+                if (cached) {
+                    return {
+                        segment: cached.segment,
+                        usedRoad: true,
+                        attemptedRoad: true,
+                        source: normalizeRoadServiceToken(cached.source, 'osrm')
+                    };
+                }
             }
             const coords = `${from[1]},${from[0]};${to[1]},${to[0]}`;
-            const providers = getPreferredOsrmProviders();
+            const ignoreProviderCooldown = !!(fetchOptions && fetchOptions.ignoreProviderCooldown);
+            const providers = ignoreProviderCooldown ? OSRM_BASE_URLS.slice() : getPreferredOsrmProviders();
+            const requestedRetryRounds = Math.floor(Number(fetchOptions && fetchOptions.retryRounds) || 1);
+            const retryRounds = Math.max(1, Math.min(4, requestedRetryRounds || 1));
             const totalTimeoutMs = Math.max(2500, Number(timeoutMs) || 9000);
             const perProviderTimeoutMs = Math.max(
                 1800,
                 Math.floor(totalTimeoutMs / Math.max(1, providers.length))
             );
             let lastErrorSource = 'osrm_failed';
-            for (let i = 0; i < providers.length; i += 1) {
-                const baseUrl = providers[i];
-                let timeoutId = null;
-                let abortHandler = null;
-                try {
-                    const controller = new AbortController();
-                    timeoutId = setTimeout(() => {
-                        try { controller.abort(); } catch (e) {}
-                    }, perProviderTimeoutMs);
-                    if (externalSignal) {
-                        if (externalSignal.aborted) throw new Error('aborted');
-                        abortHandler = () => {
+            for (let round = 0; round < retryRounds; round += 1) {
+                for (let i = 0; i < providers.length; i += 1) {
+                    const baseUrl = providers[i];
+                    let timeoutId = null;
+                    let abortHandler = null;
+                    try {
+                        const controller = new AbortController();
+                        const timeoutForAttempt = Math.max(1800, Math.floor(perProviderTimeoutMs * (round === 0 ? 1 : 1.25)));
+                        timeoutId = setTimeout(() => {
                             try { controller.abort(); } catch (e) {}
-                        };
-                        externalSignal.addEventListener('abort', abortHandler, { once: true });
-                    }
-                    const url = `${baseUrl}/route/v1/driving/${coords}?alternatives=false&steps=false&annotations=false&geometries=geojson&overview=full`;
-                    const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
-                    if (!res.ok) throw new Error(`osrm_http_${res.status}`);
-                    const data = await res.json();
-                    const code = String((data && data.code) || '').trim().toUpperCase();
-                    if (code && code !== 'OK') throw new Error(`osrm_code_${code.toLowerCase()}`);
-                    const coordsArr = data && data.routes && data.routes[0] && data.routes[0].geometry && data.routes[0].geometry.coordinates;
-                    if (!Array.isArray(coordsArr) || coordsArr.length < 2) throw new Error('osrm_no_geometry');
-                    const segment = coordsArr
-                        .map((c) => [Number(c[1]), Number(c[0])])
-                        .filter((pt) => Number.isFinite(pt[0]) && Number.isFinite(pt[1]));
-                    if (segment.length < 2) throw new Error('osrm_no_geometry');
-                    setCachedOsrmSegment(from, to, segment, 'osrm');
-                    markOsrmProviderSuccess(baseUrl);
-                    return { segment, usedRoad: true, attemptedRoad: true, source: 'osrm' };
-                } catch (e) {
-                    if (externalSignal && externalSignal.aborted) throw e;
-                    const message = String((e && e.message) || '').toLowerCase();
-                    if (message.includes('abort') || message.includes('timeout')) {
-                        lastErrorSource = 'osrm_timeout';
-                    } else if (message.startsWith('osrm_http_') || message.startsWith('osrm_code_')) {
-                        lastErrorSource = String((e && e.message) || 'osrm_failed');
-                    } else {
-                        lastErrorSource = 'osrm_failed';
-                    }
-                    markOsrmProviderFailure(baseUrl);
-                } finally {
-                    if (timeoutId) {
-                        clearTimeout(timeoutId);
-                        timeoutId = null;
-                    }
-                    if (abortHandler && externalSignal) {
-                        try { externalSignal.removeEventListener('abort', abortHandler); } catch (e) {}
+                        }, timeoutForAttempt);
+                        if (externalSignal) {
+                            if (externalSignal.aborted) throw new Error('aborted');
+                            abortHandler = () => {
+                                try { controller.abort(); } catch (e) {}
+                            };
+                            externalSignal.addEventListener('abort', abortHandler, { once: true });
+                        }
+                        const url = `${baseUrl}/route/v1/driving/${coords}?alternatives=false&steps=false&annotations=false&geometries=geojson&overview=full`;
+                        const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
+                        if (!res.ok) throw new Error(`osrm_http_${res.status}`);
+                        const data = await res.json();
+                        const code = String((data && data.code) || '').trim().toUpperCase();
+                        if (code && code !== 'OK') throw new Error(`osrm_code_${code.toLowerCase()}`);
+                        const coordsArr = data && data.routes && data.routes[0] && data.routes[0].geometry && data.routes[0].geometry.coordinates;
+                        if (!Array.isArray(coordsArr) || coordsArr.length < 2) throw new Error('osrm_no_geometry');
+                        const segment = coordsArr
+                            .map((c) => [Number(c[1]), Number(c[0])])
+                            .filter((pt) => Number.isFinite(pt[0]) && Number.isFinite(pt[1]));
+                        if (segment.length < 2) throw new Error('osrm_no_geometry');
+                        setCachedOsrmSegment(from, to, segment, 'osrm');
+                        markOsrmProviderSuccess(baseUrl);
+                        return { segment, usedRoad: true, attemptedRoad: true, source: 'osrm' };
+                    } catch (e) {
+                        if (externalSignal && externalSignal.aborted) throw e;
+                        const message = String((e && e.message) || '').toLowerCase();
+                        if (message.includes('abort') || message.includes('timeout')) {
+                            lastErrorSource = 'osrm_timeout';
+                        } else if (message.startsWith('osrm_http_') || message.startsWith('osrm_code_')) {
+                            lastErrorSource = String((e && e.message) || 'osrm_failed');
+                        } else {
+                            lastErrorSource = 'osrm_failed';
+                        }
+                        markOsrmProviderFailure(baseUrl);
+                    } finally {
+                        if (timeoutId) {
+                            clearTimeout(timeoutId);
+                            timeoutId = null;
+                        }
+                        if (abortHandler && externalSignal) {
+                            try { externalSignal.removeEventListener('abort', abortHandler); } catch (e) {}
+                        }
                     }
                 }
+                if (externalSignal && externalSignal.aborted) break;
             }
             return { segment: [from, to], usedRoad: false, attemptedRoad: true, source: lastErrorSource };
         }
@@ -4119,6 +5327,9 @@
                 const timeoutMs = Math.max(1500, Number(options && options.timeoutMs) || 9000);
                 const externalSignal = options && options.signal;
                 const requestedOsrmConcurrency = Math.floor(Number(options && options.osrmConcurrency) || OSRM_MAX_CONCURRENCY);
+                const retryRounds = Math.max(1, Math.min(4, Math.floor(Number(options && options.retryRounds) || 1)));
+                const forceNoCache = !!(options && options.forceNoCache);
+                const ignoreProviderCooldown = !!(options && options.ignoreProviderCooldown);
                 const segmentCount = Math.max(0, waypoints.length - 1);
                 const flags = Array.isArray(segmentFollowFlags)
                     ? segmentFollowFlags.slice(0, segmentCount).map((flag) => !!flag)
@@ -4141,7 +5352,11 @@
                         if (!flags[idx]) {
                             results[idx] = { segment: [from, to], usedRoad: false, attemptedRoad: false, source: 'direct' };
                         } else {
-                            results[idx] = await fetchOsrmSegment(from, to, timeoutMs, externalSignal);
+                            results[idx] = await fetchOsrmSegment(from, to, timeoutMs, externalSignal, {
+                                retryRounds,
+                                forceNoCache,
+                                ignoreProviderCooldown
+                            });
                         }
                         completed += 1;
                         if (onProgress) {
@@ -4291,6 +5506,9 @@
         document.getElementById('routeColor').addEventListener('change', () => {
             renderMapWaypoints();
         });
+        document.getElementById('routeName').addEventListener('input', () => {
+            updateRouteLiveBadge();
+        });
 
         document.getElementById('saveRouteBtn').addEventListener('click', async () => {
             if (routeSaveInProgress) return;
@@ -4391,6 +5609,78 @@
             }
         });
 
+        document.getElementById('completeRouteBtn').addEventListener('click', () => {
+            if (!routeCreationMode) return;
+            if (hasDraftRouteData()) {
+                const ok = confirm('Complete and return to route overview? Unsaved draft data will be discarded.');
+                if (!ok) return;
+            }
+            routeBrowseNeedsFit = true;
+            exitRouteCreationMode(true);
+            setRouteIoStatus('');
+        });
+
+        function setRouteIoStatus(msg, isError = false) {
+            const el = document.getElementById('routeIoStatus');
+            if (!el) return;
+            el.textContent = msg || '';
+            el.style.color = isError ? '#ff8ea2' : '#9aa4b2';
+        }
+
+        async function exportRoutesFromAdmin() {
+            try {
+                setRouteIoStatus('Preparing route export...');
+                const res = await fetch('/admin/routes/export', { cache: 'no-store' });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Failed to export routes');
+                const routes = Array.isArray(data.routes) ? data.routes : [];
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const href = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+                a.href = href;
+                a.download = `routes-export-${stamp}.json`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(href), 1200);
+                setRouteIoStatus(`Exported ${routes.length} route(s).`);
+            } catch (e) {
+                setRouteIoStatus(e.message || 'Failed to export routes', true);
+            }
+        }
+
+        function openRouteImportPicker() {
+            const input = document.getElementById('routesImportFile');
+            if (!input) return;
+            input.click();
+        }
+
+        async function importRoutesFromAdminFile(ev) {
+            const input = ev && ev.target ? ev.target : document.getElementById('routesImportFile');
+            const file = input && input.files ? input.files[0] : null;
+            if (!file) return;
+            const form = new FormData();
+            form.append('file', file);
+            try {
+                setRouteIoStatus(`Importing ${file.name}...`);
+                const res = await fetch('/admin/routes/import', {
+                    method: 'POST',
+                    body: form
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Failed to import routes');
+                await loadRoutes();
+                setRouteIoStatus(
+                    `Imported ${data.imported_count || 0} route(s): +${data.created_count || 0} new, ${data.updated_count || 0} updated, ${data.skipped_count || 0} skipped.`
+                );
+            } catch (e) {
+                setRouteIoStatus(e.message || 'Failed to import routes', true);
+            } finally {
+                if (input) input.value = '';
+            }
+        }
+
         async function loadRoutes() {
             const [routesRes, busRoutesRes] = await Promise.all([
                 fetch('/api/routes'),
@@ -4398,11 +5688,14 @@
             ]);
             const routes = await routesRes.json();
             const busRoutes = await busRoutesRes.json();
-            renderRoutes(routes, busRoutes);
+            routeCatalogCache = Array.isArray(routes) ? routes : [];
+            renderRoutes(routeCatalogCache, busRoutes);
+            if (!routeCreationMode) renderRoutePreviewMap();
         }
 
         function renderRoutes(routes, busRoutes) {
             const container = document.getElementById('routesList');
+            if (!container) return;
             if (routes.length === 0) {
                 container.innerHTML = '<div class="empty">No routes yet - create one!</div>';
                 return;
@@ -4438,8 +5731,10 @@
             const routes = await res.json();
             const route = routes.find(r => r.id === routeId);
             if (route) {
+                closeRouteListOverlay();
                 document.querySelector('[data-tab="routes"]').click();
                 setTimeout(() => {
+                    enterRouteCreationMode(route.name || '', true);
                     document.getElementById('routeName').value = route.name;
                     document.getElementById('routeColor').value = route.color;
                     currentWaypoints = JSON.parse(JSON.stringify(route.waypoints));
@@ -4462,6 +5757,7 @@
                     refreshRouteSnapUi();
                     renderMapWaypoints();
                     renderStopsList();
+                    updateRouteLiveBadge();
                     window.scrollTo(0, 0);
                 }, 200);
             }
@@ -4584,6 +5880,63 @@
             if (perfExportMdBtn) { perfExportMdBtn.disabled = true; perfExportMdBtn.title = 'Restricted'; }
             if (perfExportTxtBtn) { perfExportTxtBtn.disabled = true; perfExportTxtBtn.title = 'Restricted'; }
         }
+        const openRoutesOverlayBtn = document.getElementById('openRoutesOverlayBtn');
+        if (openRoutesOverlayBtn) openRoutesOverlayBtn.addEventListener('click', openRouteListOverlay);
+        const closeRoutesOverlayBtn = document.getElementById('closeRoutesOverlayBtn');
+        if (closeRoutesOverlayBtn) closeRoutesOverlayBtn.addEventListener('click', closeRouteListOverlay);
+        const routeListOverlay = document.getElementById('routeListOverlay');
+        if (routeListOverlay) {
+            routeListOverlay.addEventListener('click', (e) => {
+                if (e.target === routeListOverlay) closeRouteListOverlay();
+            });
+        }
+
+        const createRouteStartBtn = document.getElementById('createRouteStartBtn');
+        if (createRouteStartBtn) createRouteStartBtn.addEventListener('click', openRouteCreateOverlay);
+        const cancelRouteCreateBtn = document.getElementById('cancelRouteCreateBtn');
+        if (cancelRouteCreateBtn) cancelRouteCreateBtn.addEventListener('click', closeRouteCreateOverlay);
+        const continueRouteCreateBtn = document.getElementById('continueRouteCreateBtn');
+        if (continueRouteCreateBtn) {
+            continueRouteCreateBtn.addEventListener('click', () => {
+                const input = document.getElementById('routeCreateNameInput');
+                const routeName = input ? String(input.value || '').trim() : '';
+                if (!routeName) {
+                    setRouteIoStatus('Route name is required to continue.', true);
+                    if (input) {
+                        input.focus();
+                        try { input.select(); } catch (e) {}
+                    }
+                    return;
+                }
+                setRouteIoStatus('');
+                enterRouteCreationMode(routeName, false);
+            });
+        }
+        const routeCreateOverlay = document.getElementById('routeCreateOverlay');
+        if (routeCreateOverlay) {
+            routeCreateOverlay.addEventListener('click', (e) => {
+                if (e.target === routeCreateOverlay) closeRouteCreateOverlay();
+            });
+        }
+        const routeCreateNameInput = document.getElementById('routeCreateNameInput');
+        if (routeCreateNameInput) {
+            routeCreateNameInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (continueRouteCreateBtn) continueRouteCreateBtn.click();
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    closeRouteCreateOverlay();
+                }
+            });
+        }
+
+        const routesExportBtn = document.getElementById('routesExportBtn');
+        if (routesExportBtn) routesExportBtn.addEventListener('click', exportRoutesFromAdmin);
+        const routesImportBtn = document.getElementById('routesImportBtn');
+        if (routesImportBtn) routesImportBtn.addEventListener('click', openRouteImportPicker);
+        const routesImportFile = document.getElementById('routesImportFile');
+        if (routesImportFile) routesImportFile.addEventListener('change', importRoutesFromAdminFile);
         document.getElementById('clearAllBtn').addEventListener('click', async () => {
             if (!confirm('Clear all transports?')) return;
             await fetch('/api/buses/clear', { method: 'POST' });
