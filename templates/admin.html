@@ -390,6 +390,16 @@
             overflow: auto;
             padding-right: 4px;
         }
+        #routes.tab-content.active {
+            overflow: hidden;
+            padding-right: 0;
+        }
+        #routes.tab-content.active.route-browse-active .route-creation-pane.route-panel {
+            overflow: hidden;
+        }
+        #routes.tab-content.active.route-create-active .route-creation-pane.route-panel {
+            overflow: auto;
+        }
         #adminHome.tab-content.active {
             display: flex;
             flex-direction: column;
@@ -464,6 +474,16 @@
         .admin-shell-surface > .controls {
             margin-bottom: 0;
         }
+        .admin-shell-main > .controls {
+            margin-bottom: 0;
+            padding: 10px 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(140, 160, 196, 0.26);
+            background: linear-gradient(165deg, rgba(16, 23, 38, 0.64), rgba(8, 13, 23, 0.46));
+            box-shadow:
+                0 12px 28px rgba(3, 8, 20, 0.28),
+                inset 0 1px 0 rgba(255,255,255,0.08);
+        }
         .admin-shell-map {
             height: 500px;
             border-radius: 16px;
@@ -487,6 +507,14 @@
         }
         body.gold-admin .admin-shell-tile,
         body.gold-admin .admin-shell-surface {
+            border-color: rgba(212, 164, 48, 0.34);
+            background:
+                linear-gradient(165deg, rgba(44, 32, 12, 0.66), rgba(24, 17, 7, 0.52));
+            box-shadow:
+                0 12px 26px rgba(16, 10, 3, 0.34),
+                inset 0 1px 0 rgba(255, 244, 212, 0.11);
+        }
+        body.gold-admin .admin-shell-main > .controls {
             border-color: rgba(212, 164, 48, 0.34);
             background:
                 linear-gradient(165deg, rgba(44, 32, 12, 0.66), rgba(24, 17, 7, 0.52));
@@ -555,8 +583,9 @@
         /* Route Builder */
         #routeMap {
             width: 100%;
-            height: 500px;
-            min-height: 500px;
+            height: 100%;
+            min-height: 360px;
+            max-height: 100%;
             border-radius: 16px;
             border: 2px solid rgba(102,126,234,0.28);
             box-shadow:
@@ -631,11 +660,26 @@
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-1px); }
         }
+        @keyframes routeHeadSweep {
+            0% { transform: translateX(0); opacity: 0; }
+            12% { opacity: 0.34; }
+            38% { opacity: 0.1; }
+            100% { transform: translateX(calc(100vw + 240px)); opacity: 0; }
+        }
+        @keyframes routeCreatePulse {
+            0% { box-shadow: 0 0 0 0 rgba(126, 242, 179, 0.42); opacity: 0.95; }
+            70% { box-shadow: 0 0 0 9px rgba(126, 242, 179, 0); opacity: 0.45; }
+            100% { box-shadow: 0 0 0 0 rgba(126, 242, 179, 0); opacity: 0.95; }
+        }
         @media (prefers-reduced-motion: reduce) {
             #routeMap .route-cursor-dot::after {
                 animation: none;
                 opacity: 0.4;
                 transform: scale(1);
+            }
+            .route-map-head::after,
+            .route-create-btn::after {
+                animation: none !important;
             }
             .route-tablet-btn,
             .route-routes-btn,
@@ -663,21 +707,25 @@
             display: grid;
             grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
             gap: 14px;
-            margin-bottom: 20px;
+            margin-bottom: 0;
+            height: 100%;
             min-height: 0;
             align-items: start;
         }
         .route-sidebar {
             min-height: 0;
+            height: 100%;
             align-self: stretch;
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
         .route-sidebar-empty {
-            min-height: 560px;
+            min-height: 0;
+            height: 100%;
+            flex: 1 1 auto;
             display: grid;
-            grid-template-rows: auto auto auto auto;
+            grid-template-rows: 1.1fr auto auto auto;
             gap: 10px;
             align-content: start;
         }
@@ -711,7 +759,7 @@
         .route-creation-pane.route-panel {
             margin: 0;
             height: 100%;
-            max-height: min(78vh, 860px);
+            max-height: 100%;
             border-radius: 16px;
             border-color: rgba(140, 160, 196, 0.28);
             background: linear-gradient(165deg, rgba(16, 23, 38, 0.7), rgba(8, 13, 23, 0.52));
@@ -721,6 +769,8 @@
         }
         .route-map-column {
             min-width: 0;
+            min-height: 0;
+            height: 100%;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -731,12 +781,31 @@
             justify-content: space-between;
             gap: 12px;
             flex-wrap: wrap;
+            position: relative;
+            overflow: hidden;
+            border-radius: 14px;
+            padding: 8px 10px;
+            border: 1px solid rgba(140, 160, 196, 0.24);
+            background: linear-gradient(150deg, rgba(18, 28, 45, 0.5), rgba(11, 18, 30, 0.28));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+        }
+        .route-map-head::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 140px;
+            left: -160px;
+            pointer-events: none;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.18), transparent);
+            animation: routeHeadSweep 8s linear infinite;
         }
         .route-view-actions {
             display: flex;
             align-items: center;
             gap: 10px;
             flex-wrap: wrap;
+            flex: 1 1 auto;
         }
         .route-map-section {
             background: rgba(11, 19, 34, 0.54);
@@ -745,6 +814,10 @@
             padding: 12px;
             backdrop-filter: blur(6px);
             -webkit-backdrop-filter: blur(6px);
+            flex: 1 1 auto;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
         }
         .route-map-toolbar {
             display: flex;
@@ -752,6 +825,15 @@
             gap: 10px;
             flex-wrap: wrap;
             padding: 0 2px;
+        }
+        .route-map-toolbar-inline {
+            margin-left: auto;
+            background: rgba(12, 18, 31, 0.46);
+            border: 1px solid rgba(150, 172, 210, 0.24);
+            border-radius: 999px;
+            padding: 4px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
         .route-io-status {
             min-height: 16px;
@@ -785,9 +867,27 @@
         .route-create-btn {
             animation-delay: 0.42s;
         }
+        .route-create-btn::after {
+            content: '';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            transform: translateY(-50%);
+            background: rgba(126, 242, 179, 0.92);
+            box-shadow: 0 0 0 0 rgba(126, 242, 179, 0.42);
+            animation: routeCreatePulse 2.2s ease-out infinite;
+        }
         .route-tablet-btn {
             min-width: 150px;
             animation-delay: 0.2s;
+        }
+        .route-map-toolbar-inline .route-tablet-btn {
+            min-width: 128px;
+            min-height: 34px;
+            padding: 0 14px;
         }
         .route-tablet-btn::before {
             content: '';
@@ -925,6 +1025,11 @@
             background: rgba(30, 23, 10, 0.5);
             border-color: rgba(212, 164, 48, 0.34);
         }
+        body.gold-admin .route-map-head {
+            border-color: rgba(212, 164, 48, 0.36);
+            background: linear-gradient(150deg, rgba(44, 32, 12, 0.5), rgba(24, 17, 7, 0.34));
+            box-shadow: inset 0 1px 0 rgba(255, 244, 212, 0.12);
+        }
         body.gold-admin .route-empty-card,
         body.gold-admin .route-empty-tile,
         body.gold-admin .route-creation-pane.route-panel {
@@ -947,6 +1052,10 @@
                 inset 0 -1px 0 rgba(69, 42, 7, 0.35);
             backdrop-filter: blur(12px) saturate(135%);
             -webkit-backdrop-filter: blur(12px) saturate(135%);
+        }
+        body.gold-admin .route-map-toolbar-inline {
+            border-color: rgba(232, 195, 95, 0.34);
+            background: rgba(41, 30, 10, 0.5);
         }
         body.gold-admin .route-routes-btn:hover,
         body.gold-admin .route-create-btn:hover,
@@ -991,7 +1100,7 @@
             }
             .route-creation-pane.route-panel {
                 max-height: none;
-                overflow: visible;
+                overflow: auto;
             }
         }
         @media (max-width:760px) {
@@ -1011,6 +1120,15 @@
                 justify-content: center;
                 text-align: center;
                 min-width: 0;
+            }
+            .route-create-btn::after {
+                right: 12px;
+            }
+            .route-map-toolbar-inline {
+                margin-left: 0;
+                width: 100%;
+                justify-content: stretch;
+                border-radius: 14px;
             }
             .route-list-overlay,
             .route-create-overlay {
@@ -1429,6 +1547,31 @@
             font-size: 11px;
             color: #9aa4b2;
         }
+        .perf-live-time {
+            margin-top: 6px;
+            display: inline-flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 12px;
+            color: #c6d0df;
+        }
+        .perf-live-time .label {
+            color: #9aa4b2;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        .perf-live-time .value {
+            font-variant-numeric: tabular-nums;
+            font-family: "Consolas", "SFMono-Regular", Menlo, monospace;
+            color: #e6eef8;
+            font-weight: 600;
+        }
+        .perf-live-time .sep {
+            color: rgba(154, 167, 190, 0.85);
+            font-size: 11px;
+        }
         .sparkline-value {
             font-size: 12px;
             font-weight: 600;
@@ -1439,6 +1582,15 @@
         }
         body.gold-admin .sparkline-meta {
             color: #c7b894;
+        }
+        body.gold-admin .perf-live-time {
+            color: #e8d6ad;
+        }
+        body.gold-admin .perf-live-time .label {
+            color: #c7b894;
+        }
+        body.gold-admin .perf-live-time .value {
+            color: #ffeec2;
         }
         body.perf-detail-open { overflow: hidden; }
         .perf-detail-modal {
@@ -2528,15 +2680,15 @@
                             <button id="createRouteStartBtn" type="button" class="route-create-btn">Create Route</button>
                             <span id="routeLiveBadge" class="route-live-badge" hidden>Creation mode</span>
                         </div>
+                        <div class="route-map-toolbar route-map-toolbar-inline">
+                            <button id="routesExportBtn" type="button" class="route-tablet-btn">Export Routes</button>
+                            <button id="routesImportBtn" type="button" class="route-tablet-btn">Import Routes</button>
+                            <input id="routesImportFile" type="file" accept=".json,application/json" hidden>
+                        </div>
                     </div>
                     <div class="route-map-section">
                         <div id="routeMap"></div>
                         <cursor-info id="cursorInfo" hidden>Click on map | First click = Start Point | Next clicks = Stops</cursor-info>
-                    </div>
-                    <div class="route-map-toolbar">
-                        <button id="routesExportBtn" type="button" class="route-tablet-btn">Export Routes</button>
-                        <button id="routesImportBtn" type="button" class="route-tablet-btn">Import Routes</button>
-                        <input id="routesImportFile" type="file" accept=".json,application/json" hidden>
                     </div>
                     <div id="routeIoStatus" class="route-io-status"></div>
                 </div>
@@ -2670,13 +2822,35 @@
                     </div>
                 </section>
             </div>
-                </div>
         </div>
 
         <!-- SERVER PERFORMANCE TAB -->
         <div id="serverPerf" class="tab-content">
+            <div class="admin-student-shell">
+                <aside class="admin-shell-sidebar" aria-hidden="true">
+                    <div class="admin-shell-tiles">
+                        <div class="admin-shell-tile admin-shell-tile-main"></div>
+                        <div class="admin-shell-tile-grid">
+                            <div class="admin-shell-tile"></div>
+                            <div class="admin-shell-tile"></div>
+                            <div class="admin-shell-tile"></div>
+                            <div class="admin-shell-tile"></div>
+                        </div>
+                        <div class="admin-shell-tile admin-shell-tile-wide"></div>
+                    </div>
+                </aside>
+                <section class="admin-shell-main">
             <div class="controls" style="justify-content:space-between; margin-bottom:14px">
-                <div class="small">{% if is_gold_admin %}Live server telemetry and admin audit logs{% else %}Live server telemetry{% endif %}</div>
+                <div>
+                    <div class="small">{% if is_gold_admin %}Live server telemetry and admin audit logs{% else %}Live server telemetry{% endif %}</div>
+                    <div class="perf-live-time" aria-live="polite">
+                        <span class="label">System Live Time</span>
+                        <span id="perfSystemLiveTime" class="value">--:--:--</span>
+                        <span class="sep">|</span>
+                        <span class="label">Graph Time</span>
+                        <span id="perfGraphTime" class="value">--:--:--</span>
+                    </div>
+                </div>
                 <div>
                     {% if is_gold_admin %}
                     <button id="perfExportMdBtn">Export .md</button>
@@ -2717,6 +2891,23 @@
                 <div class="perf-card">
                     <div class="perf-k">SSE Clients</div>
                     <div class="perf-v" id="perfSseClients">--</div>
+                </div>
+                <div class="perf-card">
+                    <div class="perf-k">Requests/s</div>
+                    <div class="perf-v" id="perfRequestsPerSec">--</div>
+                </div>
+                <div class="perf-card">
+                    <div class="perf-k">SSE Events/s</div>
+                    <div class="perf-v" id="perfSseEventsPerSec">--</div>
+                </div>
+                <div class="perf-card">
+                    <div class="perf-k">Avg Snap Time</div>
+                    <div class="perf-v" id="perfAvgSnapMs">--</div>
+                    <div class="perf-v small" id="perfClientPerfReporters">--</div>
+                </div>
+                <div class="perf-card">
+                    <div class="perf-k">Avg ETA Compute</div>
+                    <div class="perf-v" id="perfAvgEtaMs">--</div>
                 </div>
             </div>
 
@@ -2845,9 +3036,25 @@
                 </div>
             </div>
             {% endif %}
+                </section>
+            </div>
         </div>
         {% if is_gold_admin %}
         <div id="adminConsole" class="tab-content">
+            <div class="admin-student-shell">
+                <aside class="admin-shell-sidebar" aria-hidden="true">
+                    <div class="admin-shell-tiles">
+                        <div class="admin-shell-tile admin-shell-tile-main"></div>
+                        <div class="admin-shell-tile-grid">
+                            <div class="admin-shell-tile"></div>
+                            <div class="admin-shell-tile"></div>
+                            <div class="admin-shell-tile"></div>
+                            <div class="admin-shell-tile"></div>
+                        </div>
+                        <div class="admin-shell-tile admin-shell-tile-wide"></div>
+                    </div>
+                </aside>
+                <section class="admin-shell-main">
             <div class="controls" style="justify-content:space-between; margin-bottom:14px">
                 <div class="small">Dedicated log of admin activity across the panel</div>
                 <div>
@@ -2898,6 +3105,8 @@
                 </div>
             </div>
             <div class="small" style="margin-top:8px">Includes login attempts and request-level admin actions.</div>
+                </section>
+            </div>
         </div>
         {% endif %}
             </div>
@@ -3034,6 +3243,13 @@
             graphDiskWrite: { key: 'diskWriteKbps', title: 'Disk Write Speed', yAxis: 'Write speed (kbps)', color: '#f472b6', formatValue: (v) => formatKbps(v) }
         };
         let activePerfDetailGraphId = null;
+        const perfSparklineRenderCache = Object.create(null);
+        let perfGraphRenderQueued = false;
+        let perfGraphRenderPendingForce = false;
+        let perfLatestGraphSampleMs = null;
+        let perfClockTimerId = null;
+        let perfServerClockBaseMs = null;
+        let perfServerClockSyncClientMs = 0;
 
         function isTabActive(tabId) {
             const el = document.getElementById(tabId);
@@ -3063,6 +3279,12 @@
             const n = Number(v);
             if (!Number.isFinite(n)) return '--';
             return `${n.toFixed(1)}%`;
+        }
+
+        function formatMs(v) {
+            const n = Number(v);
+            if (!Number.isFinite(n)) return '--';
+            return `${n.toFixed(2)} ms`;
         }
 
         function formatUptime(seconds) {
@@ -3117,12 +3339,91 @@
             return `rgba(${r}, ${g}, ${b}, ${alpha})`;
         }
 
-        function drawSparkline(canvasId, values, colorHex) {
+        function getPerfCanvasDpr() {
+            const raw = Number(window.devicePixelRatio || 1);
+            if (!Number.isFinite(raw) || raw <= 0) return 1;
+            return Math.max(1, Math.min(2, raw));
+        }
+
+        function getLatestPerfGraphSampleMs() {
+            if (Number.isFinite(perfLatestGraphSampleMs)) return perfLatestGraphSampleMs;
+            for (const cfg of Object.values(perfGraphConfigs)) {
+                const tsArr = perfGraphTimeHistory[cfg.key];
+                if (!Array.isArray(tsArr) || !tsArr.length) continue;
+                const ts = Number(tsArr[tsArr.length - 1]);
+                if (Number.isFinite(ts)) return ts;
+            }
+            return null;
+        }
+
+        function syncPerfServerClock(serverIso) {
+            const ts = Date.parse(String(serverIso || ''));
+            if (!Number.isFinite(ts)) return;
+            perfServerClockBaseMs = ts;
+            perfServerClockSyncClientMs = Date.now();
+        }
+
+        function getPerfEstimatedServerNowMs() {
+            if (!Number.isFinite(perfServerClockBaseMs) || !Number.isFinite(perfServerClockSyncClientMs)) {
+                return Date.now();
+            }
+            return perfServerClockBaseMs + Math.max(0, (Date.now() - perfServerClockSyncClientMs));
+        }
+
+        function renderPerfLiveTime() {
+            const nowMs = getPerfEstimatedServerNowMs();
+            const graphTsMs = getLatestPerfGraphSampleMs();
+            setText('perfSystemLiveTime', formatClockTime(nowMs));
+            setText('perfGraphTime', Number.isFinite(graphTsMs) ? formatClockTime(graphTsMs) : '--:--:--');
+        }
+
+        function startPerfLiveClock() {
+            stopPerfLiveClock();
+            renderPerfLiveTime();
+            perfClockTimerId = setInterval(() => {
+                if (!isTabActive('serverPerf') || document.hidden) return;
+                renderPerfLiveTime();
+            }, 1000);
+        }
+
+        function stopPerfLiveClock() {
+            if (perfClockTimerId) {
+                try { clearInterval(perfClockTimerId); } catch (e) {}
+                perfClockTimerId = null;
+            }
+        }
+
+        function schedulePerfGraphRender(force = false) {
+            if (force) perfGraphRenderPendingForce = true;
+            if (perfGraphRenderQueued) return;
+            perfGraphRenderQueued = true;
+            const raf = (window.requestAnimationFrame && typeof window.requestAnimationFrame === 'function')
+                ? window.requestAnimationFrame.bind(window)
+                : (cb) => setTimeout(cb, 16);
+            raf(() => {
+                perfGraphRenderQueued = false;
+                const forceRedraw = !!perfGraphRenderPendingForce;
+                perfGraphRenderPendingForce = false;
+                renderPerfGraphs(forceRedraw);
+            });
+        }
+
+        function drawSparkline(canvasId, values, times, colorHex, forceRedraw = false) {
             const canvas = document.getElementById(canvasId);
             if (!canvas) return;
             const cssW = Math.max(140, Math.floor(canvas.clientWidth || 220));
             const cssH = Math.max(48, Math.floor(canvas.clientHeight || 72));
-            const dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
+            const dpr = getPerfCanvasDpr();
+            const points = Array.isArray(values) ? values : [];
+            const pointCount = points.length;
+            const lastTs = (Array.isArray(times) && times.length > 0)
+                ? Number(times[times.length - 1]) || 0
+                : 0;
+            const renderSig = `${pointCount}|${lastTs}|${cssW}|${cssH}|${dpr}`;
+            const cache = perfSparklineRenderCache[canvasId] || (perfSparklineRenderCache[canvasId] = {});
+            if (!forceRedraw && cache.sig === renderSig) return;
+            cache.sig = renderSig;
+
             const pxW = cssW * dpr;
             const pxH = cssH * dpr;
             if (canvas.width !== pxW || canvas.height !== pxH) {
@@ -3136,33 +3437,38 @@
             ctx.fillStyle = 'rgba(255,255,255,0.01)';
             ctx.fillRect(0, 0, cssW, cssH);
 
-            const arr = Array.isArray(values) ? values.filter(v => Number.isFinite(v)) : [];
-            if (arr.length < 2) return;
+            if (pointCount < 2) return;
 
-            const minV = Math.min(...arr);
-            const maxV = Math.max(...arr);
+            let minV = Number(points[0]);
+            let maxV = Number(points[0]);
+            for (let i = 1; i < pointCount; i++) {
+                const v = Number(points[i]);
+                if (!Number.isFinite(v)) continue;
+                if (v < minV) minV = v;
+                if (v > maxV) maxV = v;
+            }
             const safeMax = (maxV - minV) < 0.0001 ? (minV + 1) : maxV;
             const range = safeMax - minV;
             const padX = 6;
             const padY = 6;
             const w = cssW - (padX * 2);
             const h = cssH - (padY * 2);
-            const stepX = arr.length > 1 ? (w / (arr.length - 1)) : w;
+            const stepX = pointCount > 1 ? (w / (pointCount - 1)) : w;
 
             const toX = (idx) => padX + (idx * stepX);
             const toY = (v) => padY + h - (((v - minV) / range) * h);
 
             ctx.beginPath();
-            ctx.moveTo(toX(0), toY(arr[0]));
-            for (let i = 1; i < arr.length; i++) ctx.lineTo(toX(i), toY(arr[i]));
+            ctx.moveTo(toX(0), toY(points[0]));
+            for (let i = 1; i < pointCount; i++) ctx.lineTo(toX(i), toY(points[i]));
             ctx.lineWidth = 2;
             ctx.strokeStyle = colorHex;
             ctx.stroke();
 
             ctx.beginPath();
-            ctx.moveTo(toX(0), toY(arr[0]));
-            for (let i = 1; i < arr.length; i++) ctx.lineTo(toX(i), toY(arr[i]));
-            ctx.lineTo(toX(arr.length - 1), padY + h);
+            ctx.moveTo(toX(0), toY(points[0]));
+            for (let i = 1; i < pointCount; i++) ctx.lineTo(toX(i), toY(points[i]));
+            ctx.lineTo(toX(pointCount - 1), padY + h);
             ctx.lineTo(toX(0), padY + h);
             ctx.closePath();
             ctx.fillStyle = hexToRgba(colorHex, 0.18);
@@ -3213,7 +3519,7 @@
 
             const cssW = Math.max(240, Math.floor(canvas.clientWidth || 920));
             const cssH = Math.max(220, Math.floor(canvas.clientHeight || 520));
-            const dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
+            const dpr = getPerfCanvasDpr();
             const pxW = cssW * dpr;
             const pxH = cssH * dpr;
             if (canvas.width !== pxW || canvas.height !== pxH) {
@@ -3383,14 +3689,14 @@
             }
         }
 
-        function renderPerfGraphs() {
-            drawSparkline('graphBandwidthIn', perfGraphHistory.inKbps, '#34d399');
-            drawSparkline('graphBandwidthOut', perfGraphHistory.outKbps, '#60a5fa');
-            drawSparkline('graphLagMs', perfGraphHistory.lagMs, '#f59e0b');
-            drawSparkline('graphRamUsed', perfGraphHistory.ramUsedMb, '#f97316');
-            drawSparkline('graphStorageUsed', perfGraphHistory.storageUsedPct, '#c084fc');
-            drawSparkline('graphDiskRead', perfGraphHistory.diskReadKbps, '#22d3ee');
-            drawSparkline('graphDiskWrite', perfGraphHistory.diskWriteKbps, '#f472b6');
+        function renderPerfGraphs(forceRedraw = false) {
+            drawSparkline('graphBandwidthIn', perfGraphHistory.inKbps, perfGraphTimeHistory.inKbps, '#34d399', forceRedraw);
+            drawSparkline('graphBandwidthOut', perfGraphHistory.outKbps, perfGraphTimeHistory.outKbps, '#60a5fa', forceRedraw);
+            drawSparkline('graphLagMs', perfGraphHistory.lagMs, perfGraphTimeHistory.lagMs, '#f59e0b', forceRedraw);
+            drawSparkline('graphRamUsed', perfGraphHistory.ramUsedMb, perfGraphTimeHistory.ramUsedMb, '#f97316', forceRedraw);
+            drawSparkline('graphStorageUsed', perfGraphHistory.storageUsedPct, perfGraphTimeHistory.storageUsedPct, '#c084fc', forceRedraw);
+            drawSparkline('graphDiskRead', perfGraphHistory.diskReadKbps, perfGraphTimeHistory.diskReadKbps, '#22d3ee', forceRedraw);
+            drawSparkline('graphDiskWrite', perfGraphHistory.diskWriteKbps, perfGraphTimeHistory.diskWriteKbps, '#f472b6', forceRedraw);
 
             const inKbps = latestNumeric(perfGraphHistory.inKbps);
             const outKbps = latestNumeric(perfGraphHistory.outKbps);
@@ -3407,13 +3713,14 @@
             setText('graphStorageUsedVal', Number.isFinite(storageUsedPct) ? `${storageUsedPct.toFixed(1)}%` : '--');
             setText('graphDiskReadVal', Number.isFinite(diskReadKbps) ? formatKbps(diskReadKbps) : '--');
             setText('graphDiskWriteVal', Number.isFinite(diskWriteKbps) ? formatKbps(diskWriteKbps) : '--');
+            renderPerfLiveTime();
             if (activePerfDetailGraphId) drawPerfDetailGraph();
         }
 
         function updatePerfGraphHistory(data, lagMs) {
             const bandwidth = (data && data.bandwidth) || {};
             const nowSec = Date.now() / 1000;
-            const sampleTs = Date.now();
+            const sampleTs = getPerfEstimatedServerNowMs();
             const totalInBytes = Number(bandwidth.in_bytes);
             const totalOutBytes = Number(bandwidth.out_bytes);
             let inKbps = Number(bandwidth.avg_in_kbps);
@@ -3450,7 +3757,8 @@
             const disk = (data && data.disk) || {};
             pushPerfGraphSample('diskReadKbps', Number(disk.process_read_kbps), sampleTs);
             pushPerfGraphSample('diskWriteKbps', Number(disk.process_write_kbps), sampleTs);
-            renderPerfGraphs();
+            perfLatestGraphSampleMs = sampleTs;
+            schedulePerfGraphRender();
         }
 
         function renderPerfAuditRows(logs, canViewAudit = false) {
@@ -3548,6 +3856,11 @@
                 setText('perfBandwidthOutRate', formatKbps(data.bandwidth && data.bandwidth.avg_out_kbps));
                 setText('perfRequests', data.requests_total);
                 setText('perfSseClients', data.sse_clients);
+                setText('perfRequestsPerSec', Number.isFinite(Number(data.requests_per_second)) ? `${Number(data.requests_per_second).toFixed(2)} req/s` : '--');
+                setText('perfSseEventsPerSec', Number.isFinite(Number(data.sse_events_per_second)) ? `${Number(data.sse_events_per_second).toFixed(2)} ev/s` : '--');
+                setText('perfAvgSnapMs', formatMs(data.avg_snap_time_ms));
+                setText('perfAvgEtaMs', formatMs(data.avg_eta_compute_time_ms));
+                setText('perfClientPerfReporters', Number.isFinite(Number(data.client_perf_reporters)) ? `${Number(data.client_perf_reporters)} clients` : '--');
                 setText('perfCurrentAdmin', data.admin && data.admin.current_admin);
                 setText('perfAdminCount', data.admin && data.admin.admins_count);
                 setText('perfLoginSuccess', data.admin && data.admin.successful_logins);
@@ -3561,15 +3874,24 @@
                 setText('perfClassesCount', data.classes_count);
                 setText('perfActiveStudents', data.active_students);
                 setText('perfActiveAdmins', data.active_admins);
+                syncPerfServerClock(data.server_time);
+                renderPerfLiveTime();
                 const canViewAudit = !!CAN_ACCESS_SECURE_ADMIN;
                 renderPerfAuditRows(data.audit_logs, canViewAudit);
                 updatePerfGraphHistory(data, lagMs);
             } catch (e) {
                 const reqEnd = (window.performance && typeof performance.now === 'function') ? performance.now() : Date.now();
                 pushPerfGraphSample('lagMs', Math.max(0, reqEnd - reqStart), Date.now());
-                renderPerfGraphs();
+                perfLatestGraphSampleMs = Date.now();
+                schedulePerfGraphRender();
+                renderPerfLiveTime();
                 setText('perfUptime', 'Failed to load');
                 setText('perfCpu', '--');
+                setText('perfRequestsPerSec', '--');
+                setText('perfSseEventsPerSec', '--');
+                setText('perfAvgSnapMs', '--');
+                setText('perfAvgEtaMs', '--');
+                setText('perfClientPerfReporters', '--');
                 renderPerfAuditRows([], CAN_ACCESS_SECURE_ADMIN);
             }
         }
@@ -3663,6 +3985,7 @@
 
         function startPerfAutoRefresh() {
             stopPerfAutoRefresh();
+            startPerfLiveClock();
             loadServerPerformance();
             perfAutoRefreshId = setInterval(() => {
                 if (!isTabActive('serverPerf') || document.hidden) return;
@@ -3671,6 +3994,7 @@
         }
 
         function stopPerfAutoRefresh() {
+            stopPerfLiveClock();
             if (perfAutoRefreshId) {
                 try { clearInterval(perfAutoRefreshId); } catch (e) {}
                 perfAutoRefreshId = null;
@@ -3702,6 +4026,9 @@
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             tab.classList.add('active');
             content.classList.add('active');
+            if (tabId === 'routes') {
+                syncRouteTabModeClass(true);
+            }
             document.body.classList.toggle('admin-home-active', tabId === 'adminHome');
             if (tabId !== 'routes') {
                 closeRouteListOverlay();
@@ -3752,6 +4079,7 @@
         document.querySelectorAll('.tab').forEach(tab => {
             tab.addEventListener('click', () => activateTab(tab.getAttribute('data-tab')));
         });
+        syncRouteTabModeClass(true);
 
         // ==== ROUTE MAP ====
         function pointDistanceMeters(a, b) {
@@ -3997,6 +4325,14 @@
             }
         }
 
+        function syncRouteTabModeClass(forceBrowse = null) {
+            const routesTab = document.getElementById('routes');
+            if (!routesTab) return;
+            const browse = forceBrowse == null ? !routeCreationMode : !!forceBrowse;
+            routesTab.classList.toggle('route-browse-active', browse);
+            routesTab.classList.toggle('route-create-active', !browse);
+        }
+
         function updateRouteLiveBadge() {
             const badge = document.getElementById('routeLiveBadge');
             if (!badge) return;
@@ -4077,6 +4413,7 @@
 
         function enterRouteCreationMode(routeName = '', preserveDraft = false) {
             routeCreationMode = true;
+            syncRouteTabModeClass(false);
             const creationPane = document.getElementById('routeCreationPane');
             const emptyPane = document.getElementById('routeSidebarEmpty');
             const createBtn = document.getElementById('createRouteStartBtn');
@@ -4107,6 +4444,7 @@
 
         function exitRouteCreationMode(discardDraft = true) {
             routeCreationMode = false;
+            syncRouteTabModeClass(true);
             const creationPane = document.getElementById('routeCreationPane');
             const emptyPane = document.getElementById('routeSidebarEmpty');
             const createBtn = document.getElementById('createRouteStartBtn');
@@ -5994,7 +6332,7 @@
             stopAdminConsoleAutoRefresh();
         });
         window.addEventListener('resize', () => {
-            if (isTabActive('serverPerf')) renderPerfGraphs();
+            if (isTabActive('serverPerf')) schedulePerfGraphRender(true);
             if (activePerfDetailGraphId) drawPerfDetailGraph();
         });
 
@@ -6009,6 +6347,21 @@
                         const k = msg.bus; const b = msg.data||{};
                         const table = document.getElementById('busList').querySelector('table');
                         if(table){ renderBuses({ [k]: b }); }
+                    } else if(msg.type === 'batch_update'){
+                        const rows = Array.isArray(msg.buses) ? msg.buses : [];
+                        if (!rows.length) return;
+                        const updates = {};
+                        for (let i = 0; i < rows.length; i++) {
+                            const row = rows[i] || {};
+                            const k = String(row.bus || '').trim();
+                            const b = row.data || {};
+                            if (!k) continue;
+                            updates[k] = b;
+                        }
+                        const table = document.getElementById('busList').querySelector('table');
+                        if (table && Object.keys(updates).length) {
+                            renderBuses(updates);
+                        }
                     } else if(msg.type === 'bus_stop'){
                         const row = document.querySelector(`#busList tr[data-bus="${msg.bus}"]`);
                         if(row) row.remove();

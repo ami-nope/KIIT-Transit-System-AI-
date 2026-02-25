@@ -6,6 +6,19 @@ def _env_int(name, default):
     except (TypeError, ValueError):
         return int(default)
 
+# Recommended production profile (documentation only; not applied automatically):
+# - Use async workers: gevent (WSGI) or uvicorn workers (ASGI migration).
+# - workers = CPU cores * 2
+# - keepalive = 30-75
+# - max_requests = 4000
+# - max_requests_jitter = 400
+# - graceful_timeout = 30
+# Example:
+#   worker_class = "gevent"
+#   workers = max(2, (os.cpu_count() or 1) * 2)
+#   keepalive = 45
+#   max_requests = 4000
+#   max_requests_jitter = 400
 
 # Important: app state is process-local (in-memory bus cache + SSE subscribers),
 # so multiple workers will split live state and cause inconsistent realtime behavior.

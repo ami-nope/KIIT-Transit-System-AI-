@@ -1560,9 +1560,68 @@ function advanceSimulatedBus(state, dtSec) {
 }
 
 function clearSimulatedBusDelayedTimers(state) {
-  if (!state || !state.delayedSendTimers) return;
-  state.delayedSendTimers.forEach((timerId) => { clearTimeout(timerId); });
-  state.delayedSendTimers.clear();
+  if (!state) return;
+  if (state.delayedTimerId) {
+    clearTimeout(state.delayedTimerId);
+    state.delayedTimerId = null;
+  }
+  if (Array.isArray(state.delayedQueue)) {
+    state.delayedQueue.length = 0;
+  }
+}
+
+function processSimulatedDelayedQueue(state) {
+  if (!state || !Array.isArray(state.delayedQueue)) return;
+  state.delayedTimerId = null;
+  const isLoadStateActive = loadSimulationRunning && activeSimulatedBuses[state.busNumber] === state;
+  const isSystemStateActive = systemSimRunning && systemSimBusStates[state.busNumber] === state;
+  if (!isLoadStateActive && !isSystemStateActive) {
+    state.delayedQueue.length = 0;
+    return;
+  }
+  const nowMs = Date.now();
+  if (!state.delayedQueue.length) return;
+  const due = [];
+  const keep = [];
+  for (let i = 0; i < state.delayedQueue.length; i++) {
+    const item = state.delayedQueue[i];
+    if (!item || !Number.isFinite(item.dueAt)) continue;
+    if (item.dueAt <= nowMs) due.push(item);
+    else keep.push(item);
+  }
+  state.delayedQueue = keep;
+  if (due.length) {
+    due.sort((a, b) => a.dueAt - b.dueAt);
+    let chain = Promise.resolve();
+    due.forEach((item) => {
+      chain = chain.then(() => sendSimulatedBusUpdate(state, item.opts)).catch(() => false);
+    });
+    chain.finally(() => {
+      if (state.delayedQueue.length) {
+        scheduleSimulatedDelayedQueue(state);
+      }
+    });
+    return;
+  }
+  if (state.delayedQueue.length) {
+    scheduleSimulatedDelayedQueue(state);
+  }
+}
+
+function scheduleSimulatedDelayedQueue(state) {
+  if (!state || !Array.isArray(state.delayedQueue) || !state.delayedQueue.length) return;
+  if (state.delayedTimerId) return;
+  let nextDueAt = Infinity;
+  for (let i = 0; i < state.delayedQueue.length; i++) {
+    const item = state.delayedQueue[i];
+    if (!item || !Number.isFinite(item.dueAt)) continue;
+    if (item.dueAt < nextDueAt) nextDueAt = item.dueAt;
+  }
+  if (!Number.isFinite(nextDueAt)) return;
+  const waitMs = Math.max(0, nextDueAt - Date.now());
+  state.delayedTimerId = setTimeout(() => {
+    processSimulatedDelayedQueue(state);
+  }, waitMs);
 }
 
 function queueSimulatedBusUpdate(state, options = {}) {
@@ -1574,25 +1633,16 @@ function queueSimulatedBusUpdate(state, options = {}) {
   if (delayMs <= 0) {
     return sendSimulatedBusUpdate(state, sendOpts);
   }
-
-  if (!state.delayedSendTimers) state.delayedSendTimers = new Set();
-  if (state.delayedSendTimers.size >= LOAD_SIM_MAX_DELAYED_SEND_TIMERS) {
+  if (!Array.isArray(state.delayedQueue)) state.delayedQueue = [];
+  if (state.delayedQueue.length >= LOAD_SIM_MAX_DELAYED_SEND_TIMERS) {
     return sendSimulatedBusUpdate(state, sendOpts);
   }
-
-  return new Promise((resolve) => {
-    const timerId = setTimeout(() => {
-      state.delayedSendTimers.delete(timerId);
-      const isLoadStateActive = loadSimulationRunning && activeSimulatedBuses[state.busNumber] === state;
-      const isSystemStateActive = systemSimRunning && systemSimBusStates[state.busNumber] === state;
-      if (!isLoadStateActive && !isSystemStateActive) {
-        resolve(false);
-        return;
-      }
-      sendSimulatedBusUpdate(state, sendOpts).then(resolve).catch(() => resolve(false));
-    }, delayMs);
-    state.delayedSendTimers.add(timerId);
+  state.delayedQueue.push({
+    dueAt: Date.now() + delayMs,
+    opts: sendOpts
   });
+  scheduleSimulatedDelayedQueue(state);
+  return Promise.resolve(true);
 }
 
 function maybeApplyLoadChaosTick(state) {
@@ -1723,7 +1773,8 @@ function createSimulatedBusState(busNumber, route, modeConfig = null) {
     spikeUntilMs: 0,
     spikeKmh: 0,
     allowReverse: waypoints.length > 2,
-    delayedSendTimers: new Set(),
+    delayedQueue: [],
+    delayedTimerId: null,
     simMode: 'load',
     tickMs,
     inFlight: false,
@@ -1749,6 +1800,13 @@ async function stopLoadSimulation() {
   busesToStop.forEach(busNumber => {
     const state = activeSimulatedBuses[busNumber];
     clearSimulatedBusDelayedTimers(state);
+    if (state) {
+      state.freezeUntilMs = 0;
+      state.reverseUntilMs = 0;
+      state.spikeUntilMs = 0;
+      state.pendingSend = false;
+      state.inFlight = false;
+    }
     const timer = loadSimulationTimers[busNumber];
     if (timer) clearInterval(timer);
     delete loadSimulationTimers[busNumber];

@@ -1,4 +1,4 @@
-# gevent monkey-patching must be first — makes threading/queue/time cooperative
+﻿# gevent monkey-patching must be first â€” makes threading/queue/time cooperative
 import os
 import sys
 
@@ -21,6 +21,8 @@ import copy
 import math
 import shutil
 import uuid
+import atexit
+import signal
 from werkzeug.security import generate_password_hash
 from werkzeug.middleware.proxy_fix import ProxyFix
 from datetime import datetime, timezone
@@ -91,14 +93,14 @@ def kalman_smooth(bus_id, lat, lng):
 
 # ---------- server-side stop detection ----------
 def _haversine_m(lat1, lng1, lat2, lng2):
-    """Fast equirectangular distance in meters — accurate at campus scale."""
+    """Fast equirectangular distance in meters â€” accurate at campus scale."""
     d2r = math.pi / 180
     dlat = (lat2 - lat1) * d2r
     dlng = (lng2 - lng1) * d2r
     x = dlng * math.cos((lat1 + lat2) * 0.5 * d2r)
     return 6371000 * math.sqrt(dlat * dlat + x * x)
 
-_AT_STOP_M = 80  # meters — "at stop" threshold
+_AT_STOP_M = 80  # meters â€” "at stop" threshold
 _bus_stop_state = {}  # bus_id -> { 'atStop': str|None, 'nearestStopIdx': int, 'direction': 'up'|'down'|None }
 
 def detect_stop_info(bus_id, lat, lng, route_id):
@@ -157,6 +159,63 @@ def detect_stop_info(bus_id, lat, lng, route_id):
         'terminalState': result['terminalState']
     }
     return result
+
+def _default_stop_info_payload():
+    return {
+        'atStop': None,
+        'nearestStopIdx': None,
+        'nearestStopName': None,
+        'nextStopName': None,
+        'direction': None,
+        'terminalState': None,
+        'routeStopCount': None,
+    }
+
+def _snapshot_stop_info_from_state(bus_id):
+    prev = _bus_stop_state.get(bus_id)
+    if not isinstance(prev, dict):
+        return _default_stop_info_payload()
+    result = _default_stop_info_payload()
+    for key in ('atStop', 'nearestStopIdx', 'nearestStopName', 'nextStopName', 'direction', 'terminalState'):
+        result[key] = prev.get(key)
+    return result
+
+def _get_stop_info_for_bus_update(bus_id, lat, lng, route_id, now_mono, force_recalc=False):
+    if not route_id:
+        _bus_stop_compute_meta.pop(bus_id, None)
+        _bus_stop_state.pop(bus_id, None)
+        return _default_stop_info_payload()
+    meta = _bus_stop_compute_meta.get(bus_id) or {}
+    should_recalc = bool(force_recalc)
+    if not should_recalc:
+        if str(meta.get('routeId') or '') != str(route_id):
+            should_recalc = True
+    if not should_recalc:
+        prev_lat = meta.get('lat')
+        prev_lng = meta.get('lng')
+        if prev_lat is None or prev_lng is None:
+            should_recalc = True
+        else:
+            try:
+                moved_m = _haversine_m(float(prev_lat), float(prev_lng), float(lat), float(lng))
+            except Exception:
+                moved_m = BUS_STOP_RECALC_MIN_MOVE_M + 1
+            if moved_m >= BUS_STOP_RECALC_MIN_MOVE_M:
+                should_recalc = True
+    if not should_recalc:
+        last_mono = float(meta.get('mono') or 0.0)
+        if (now_mono - last_mono) >= BUS_STOP_RECALC_MIN_SEC:
+            should_recalc = True
+    if should_recalc:
+        result = detect_stop_info(bus_id, lat, lng, route_id)
+        _bus_stop_compute_meta[bus_id] = {
+            'lat': lat,
+            'lng': lng,
+            'routeId': str(route_id),
+            'mono': float(now_mono),
+        }
+        return result
+    return _snapshot_stop_info_from_state(bus_id)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 _requested_data_dir = str(os.environ.get('DATA_DIR', BASE_DIR) or BASE_DIR).strip()
@@ -235,6 +294,11 @@ _locations_cache_route_index = {}
 _credentials_cache_lock = threading.Lock()
 _credentials_cache_data = None
 _credentials_cache_mtime = None
+
+_service_admins_cache_lock = threading.Lock()
+_service_admins_cache_data = None
+_service_admins_cache_mono = 0.0
+SERVICE_ADMINS_CACHE_TTL_SEC = max(0.5, float(os.environ.get('SERVICE_ADMINS_CACHE_TTL_SEC', '2')))
 
 _metrics_lock = threading.Lock()
 _app_ready_lock = threading.Lock()
@@ -329,12 +393,32 @@ def load_json(path, default):
     except Exception:
         return default
 
+def _atomic_write_text(path, body):
+    tmp_path = f'{path}.{uuid.uuid4().hex}.tmp'
+    try:
+        with open(tmp_path, 'w', encoding='utf-8', newline='\n') as f:
+            f.write(body)
+            try:
+                f.flush()
+                os.fsync(f.fileno())
+            except Exception:
+                pass
+        os.replace(tmp_path, path)
+        return True
+    except Exception:
+        try:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+        except Exception:
+            pass
+        return False
+
 def _save_json_with_status(path, data):
     global APP_DISK_WRITE_BYTES
     try:
         body = json.dumps(data, indent=2)
-        with open(path, 'w', encoding='utf-8') as f:
-            f.write(body)
+        if not _atomic_write_text(path, body):
+            return False
         try:
             with _app_disk_io_lock:
                 APP_DISK_WRITE_BYTES += len(body.encode('utf-8'))
@@ -347,12 +431,12 @@ def _save_json_with_status(path, data):
 def save_json(path, data):
     _save_json_with_status(path, data)
 
-def _get_locations_cached_snapshot():
+def _get_locations_cached_snapshot(force_reload=False):
     global _locations_cache_data, _locations_cache_mtime, _locations_cache_route_index
-    current_mtime = _get_file_mtime(LOCATIONS_FILE)
-    with _locations_cache_lock:
-        if _locations_cache_data is not None and _locations_cache_mtime == current_mtime:
-            return _locations_cache_data, _locations_cache_route_index
+    if not force_reload:
+        with _locations_cache_lock:
+            if _locations_cache_data is not None:
+                return _locations_cache_data, _locations_cache_route_index
     loaded = _normalize_locations_payload(load_json(LOCATIONS_FILE, copy.deepcopy(DEFAULT_LOCATIONS_PAYLOAD)))
     route_index = _build_route_index(loaded.get('routes', []))
     with _locations_cache_lock:
@@ -386,12 +470,12 @@ def save_locations(data):
             _locations_cache_route_index = _build_route_index(cache_payload.get('routes', []))
     return ok
 
-def _get_credentials_cached_payload():
+def _get_credentials_cached_payload(force_reload=False):
     global _credentials_cache_data, _credentials_cache_mtime
-    current_mtime = _get_file_mtime(CREDENTIALS_FILE)
-    with _credentials_cache_lock:
-        if _credentials_cache_data is not None and _credentials_cache_mtime == current_mtime:
-            return copy.deepcopy(_credentials_cache_data)
+    if not force_reload:
+        with _credentials_cache_lock:
+            if _credentials_cache_data is not None:
+                return copy.deepcopy(_credentials_cache_data)
     loaded = load_json(CREDENTIALS_FILE, copy.deepcopy(DEFAULT_CREDENTIALS_PAYLOAD))
     payload = loaded if isinstance(loaded, dict) else copy.deepcopy(DEFAULT_CREDENTIALS_PAYLOAD)
     with _credentials_cache_lock:
@@ -406,6 +490,26 @@ def _update_credentials_cache(payload):
     with _credentials_cache_lock:
         _credentials_cache_data = copy.deepcopy(payload)
         _credentials_cache_mtime = _get_file_mtime(CREDENTIALS_FILE)
+
+def _load_service_admins_cached(force=False):
+    global _service_admins_cache_data, _service_admins_cache_mono
+    now_mono = time.monotonic()
+    with _service_admins_cache_lock:
+        if not force and _service_admins_cache_data is not None and (now_mono - _service_admins_cache_mono) <= SERVICE_ADMINS_CACHE_TTL_SEC:
+            return copy.deepcopy(_service_admins_cache_data)
+    loaded = service_load_admins(force=force)
+    with _service_admins_cache_lock:
+        _service_admins_cache_data = copy.deepcopy(loaded if isinstance(loaded, list) else [])
+        _service_admins_cache_mono = now_mono
+        return copy.deepcopy(_service_admins_cache_data)
+
+def _save_service_admins_cached(admin_rows):
+    global _service_admins_cache_data, _service_admins_cache_mono
+    safe_rows = admin_rows if isinstance(admin_rows, list) else []
+    service_save_admins(safe_rows)
+    with _service_admins_cache_lock:
+        _service_admins_cache_data = copy.deepcopy(safe_rows)
+        _service_admins_cache_mono = time.monotonic()
 
 def ensure_files():
     if not os.path.exists(BUSES_FILE):
@@ -553,6 +657,7 @@ def prune_audit_logs(logs, now_epoch=None):
 
 def record_audit(event, status='success', username=None, details=''):
     """Persist lightweight admin audit entries for observability in admin panel."""
+    global _audit_dirty
     try:
         actor = username
         if not actor and has_request_context():
@@ -573,7 +678,7 @@ def record_audit(event, status='success', username=None, details=''):
             _audit_logs[:] = prune_audit_logs(_audit_logs)
             _audit_logs.append(entry)
             _audit_logs[:] = prune_audit_logs(_audit_logs)
-            save_json(AUDIT_FILE, _audit_logs)
+            _audit_dirty = True
     except Exception:
         pass
 
@@ -997,18 +1102,220 @@ APP_START_TS = time.time()
 REQUESTS_TOTAL = 0
 BANDWIDTH_IN_BYTES = 0
 BANDWIDTH_OUT_BYTES = 0
+REQUESTS_PER_SECOND = 0.0
+SSE_EVENTS_TOTAL = 0
+SSE_EVENTS_PER_SECOND = 0.0
+SSE_BATCH_SIZE = 0.0
+_requests_rate_window_started = time.monotonic()
+_requests_rate_window_count = 0
+_sse_rate_window_started = time.monotonic()
+_sse_rate_window_count = 0
 INACTIVE_REMOVE_SEC = 30
 DESTINATION_REMOVE_SEC = 5
+BUSES_PERSIST_INTERVAL_SEC = max(20, min(30, int(os.environ.get('BUSES_PERSIST_INTERVAL_SEC', '20'))))
+AUDIT_PERSIST_INTERVAL_SEC = max(5, int(os.environ.get('AUDIT_PERSIST_INTERVAL_SEC', '8')))
+BUS_POSITION_BROADCAST_EPS_M = max(2.0, float(os.environ.get('BUS_POSITION_BROADCAST_EPS_M', '2.0')))
+BUS_HEADING_BROADCAST_EPS_DEG = max(1.0, float(os.environ.get('BUS_HEADING_BROADCAST_EPS_DEG', '3')))
+BUS_SPEED_BROADCAST_EPS_KMH = max(0.5, float(os.environ.get('BUS_SPEED_BROADCAST_EPS_KMH', '1.0')))
+BUS_UPDATE_BATCH_INTERVAL_MS = max(60, min(200, int(os.environ.get('BUS_UPDATE_BATCH_INTERVAL_MS', '100'))))
+BUS_STOP_RECALC_MIN_MOVE_M = max(0.5, float(os.environ.get('BUS_STOP_RECALC_MIN_MOVE_M', '2.5')))
+BUS_STOP_RECALC_MIN_SEC = max(0.3, float(os.environ.get('BUS_STOP_RECALC_MIN_SEC', '1.0')))
 _bus_destination_ts = {}  # bus_id -> monotonic timestamp when destination reached
 _buses_dirty = False
+_audit_dirty = False
+_last_buses_persist_mono = 0.0
+_last_audit_persist_mono = 0.0
+_bus_stop_compute_meta = {}  # bus_id -> {'lat': float, 'lng': float, 'routeId': str|None, 'mono': float}
+_shutdown_persist_lock = threading.Lock()
+_shutdown_persist_done = False
+
+_client_perf_lock = threading.Lock()
+_client_perf_samples = {}  # client_id -> {'ts': float, 'snap_ms': float|None, 'eta_ms': float|None}
+CLIENT_PERF_TTL_SEC = max(30, int(os.environ.get('CLIENT_PERF_TTL_SEC', '120')))
+
+def _angular_diff_deg(a, b):
+    try:
+        av = float(a)
+        bv = float(b)
+    except Exception:
+        return 9999.0
+    return abs(((av - bv + 540.0) % 360.0) - 180.0)
+
+def _update_requests_rate_locked(now_mono=None):
+    global _requests_rate_window_started, _requests_rate_window_count, REQUESTS_PER_SECOND
+    now = float(now_mono if now_mono is not None else time.monotonic())
+    elapsed = max(0.0001, now - _requests_rate_window_started)
+    if elapsed < 1.0:
+        return
+    REQUESTS_PER_SECOND = round(_requests_rate_window_count / elapsed, 2)
+    _requests_rate_window_started = now
+    _requests_rate_window_count = 0
+
+def _update_sse_rate_locked(now_mono=None):
+    global _sse_rate_window_started, _sse_rate_window_count, SSE_EVENTS_PER_SECOND
+    now = float(now_mono if now_mono is not None else time.monotonic())
+    elapsed = max(0.0001, now - _sse_rate_window_started)
+    if elapsed < 1.0:
+        return
+    SSE_EVENTS_PER_SECOND = round(_sse_rate_window_count / elapsed, 2)
+    _sse_rate_window_started = now
+    _sse_rate_window_count = 0
+
+def _record_sse_event():
+    global SSE_EVENTS_TOTAL, _sse_rate_window_count
+    now = time.monotonic()
+    with _metrics_lock:
+        SSE_EVENTS_TOTAL += 1
+        _sse_rate_window_count += 1
+        _update_sse_rate_locked(now)
+
+def _record_sse_batch_size(size):
+    global SSE_BATCH_SIZE
+    try:
+        size_val = max(0.0, float(size))
+    except Exception:
+        return
+    with _metrics_lock:
+        if SSE_BATCH_SIZE <= 0:
+            SSE_BATCH_SIZE = round(size_val, 2)
+        else:
+            SSE_BATCH_SIZE = round((SSE_BATCH_SIZE * 0.72) + (size_val * 0.28), 2)
+
+def _flush_buses_to_disk(force=False):
+    global _buses_dirty, _last_buses_persist_mono
+    snap = None
+    with _buses_lock:
+        if force or _buses_dirty:
+            snap = {k: dict(v) for k, v in _buses.items()}
+            _buses_dirty = False
+    if snap is None:
+        return False
+    ok = _save_json_with_status(BUSES_FILE, snap)
+    _last_buses_persist_mono = time.monotonic()
+    if not ok:
+        with _buses_lock:
+            _buses_dirty = True
+    return ok
+
+def _flush_audit_to_disk(force=False):
+    global _audit_dirty, _last_audit_persist_mono
+    logs_snapshot = None
+    with _audit_lock:
+        if force or _audit_dirty:
+            logs_snapshot = list(_audit_logs)
+            _audit_dirty = False
+    if logs_snapshot is None:
+        return False
+    ok = _save_json_with_status(AUDIT_FILE, logs_snapshot)
+    _last_audit_persist_mono = time.monotonic()
+    if not ok:
+        with _audit_lock:
+            _audit_dirty = True
+    return ok
+
+def _persist_runtime_state():
+    global _shutdown_persist_done
+    with _shutdown_persist_lock:
+        if _shutdown_persist_done:
+            return
+        _shutdown_persist_done = True
+    try:
+        _flush_buses_to_disk(force=True)
+    except Exception:
+        pass
+    try:
+        _flush_audit_to_disk(force=True)
+    except Exception:
+        pass
+
+def _install_shutdown_hooks():
+    if getattr(app, '_persist_hooks_installed', False):
+        return
+    app._persist_hooks_installed = True
+    try:
+        atexit.register(_persist_runtime_state)
+    except Exception:
+        pass
+    for sig in (signal.SIGTERM, signal.SIGINT):
+        try:
+            prev = signal.getsignal(sig)
+            def _handler(signum, frame, _prev=prev):
+                _persist_runtime_state()
+                if callable(_prev):
+                    try:
+                        _prev(signum, frame)
+                    except Exception:
+                        pass
+            signal.signal(sig, _handler)
+        except Exception:
+            continue
+
+def _prune_client_perf_locked(now_epoch=None):
+    now_ts = float(now_epoch if now_epoch is not None else time.time())
+    cutoff = now_ts - CLIENT_PERF_TTL_SEC
+    stale = [cid for cid, sample in _client_perf_samples.items() if float((sample or {}).get('ts') or 0.0) < cutoff]
+    for cid in stale:
+        _client_perf_samples.pop(cid, None)
+
+def _record_client_perf_sample(client_id, snap_ms=None, eta_ms=None):
+    cid = str(client_id or '').strip()[:96]
+    if not cid:
+        return
+    now_ts = time.time()
+    snap_val = None
+    eta_val = None
+    try:
+        if snap_ms is not None:
+            snap_val = max(0.0, min(1000.0, float(snap_ms)))
+    except Exception:
+        snap_val = None
+    try:
+        if eta_ms is not None:
+            eta_val = max(0.0, min(1000.0, float(eta_ms)))
+    except Exception:
+        eta_val = None
+    with _client_perf_lock:
+        _prune_client_perf_locked(now_ts)
+        prev = _client_perf_samples.get(cid) or {}
+        prev_snap = prev.get('snap_ms')
+        prev_eta = prev.get('eta_ms')
+        # EWMA keeps noise low with minimal state.
+        next_snap = snap_val if snap_val is not None else prev_snap
+        if snap_val is not None and prev_snap is not None:
+            next_snap = (float(prev_snap) * 0.65) + (snap_val * 0.35)
+        next_eta = eta_val if eta_val is not None else prev_eta
+        if eta_val is not None and prev_eta is not None:
+            next_eta = (float(prev_eta) * 0.65) + (eta_val * 0.35)
+        _client_perf_samples[cid] = {
+            'ts': now_ts,
+            'snap_ms': next_snap,
+            'eta_ms': next_eta,
+        }
+
+def _get_client_perf_summary():
+    with _client_perf_lock:
+        _prune_client_perf_locked()
+        samples = list(_client_perf_samples.values())
+    if not samples:
+        return {'avg_snap_ms': None, 'avg_eta_ms': None, 'client_count': 0}
+    snap_vals = [float(s.get('snap_ms')) for s in samples if s.get('snap_ms') is not None]
+    eta_vals = [float(s.get('eta_ms')) for s in samples if s.get('eta_ms') is not None]
+    avg_snap = round(sum(snap_vals) / len(snap_vals), 2) if snap_vals else None
+    avg_eta = round(sum(eta_vals) / len(eta_vals), 2) if eta_vals else None
+    return {'avg_snap_ms': avg_snap, 'avg_eta_ms': avg_eta, 'client_count': len(samples)}
 
 def _init_app():
-    global _buses, _worker_started, _audit_logs, _buses_dirty
+    global _buses, _worker_started, _audit_logs, _buses_dirty, _audit_dirty, _last_buses_persist_mono, _last_audit_persist_mono
     init_t0 = time.perf_counter()
     app.logger.info('_init_app start')
     step_t0 = time.perf_counter()
     ensure_files()
     app.logger.info('_init_app ensure_files done in %.1fms', (time.perf_counter() - step_t0) * 1000.0)
+    try:
+        _get_locations_cached_snapshot(force_reload=True)
+        _get_credentials_cached_payload(force_reload=True)
+    except Exception:
+        pass
     step_t0 = time.perf_counter()
     raw = load_json(BUSES_FILE, {})
     app.logger.info('_init_app load buses json done in %.1fms', (time.perf_counter() - step_t0) * 1000.0)
@@ -1017,7 +1324,8 @@ def _init_app():
     app.logger.info('_init_app load audit json done in %.1fms', (time.perf_counter() - step_t0) * 1000.0)
     _audit_logs = prune_audit_logs(logs if isinstance(logs, list) else [])
     if _audit_logs != (logs if isinstance(logs, list) else []):
-        save_json(AUDIT_FILE, _audit_logs)
+        _save_json_with_status(AUDIT_FILE, _audit_logs)
+    _audit_dirty = False
     # Filter out stale buses on startup (older than INACTIVE_REMOVE_SEC)
     now = time.time()
     cleaned = {}
@@ -1031,15 +1339,20 @@ def _init_app():
     _buses = cleaned
     _buses_dirty = False
     if cleaned != raw:
-        save_json(BUSES_FILE, cleaned)
+        _save_json_with_status(BUSES_FILE, cleaned)
+    _last_buses_persist_mono = time.monotonic()
+    _last_audit_persist_mono = time.monotonic()
+    _install_shutdown_hooks()
     if not _worker_started:
         _worker_started = True
         threading.Thread(target=_sync_worker, daemon=True).start()
+        threading.Thread(target=_sse_dispatch_worker, daemon=True).start()
+        threading.Thread(target=_bus_batch_worker, daemon=True).start()
     app.logger.info('_init_app done in %.1fms', (time.perf_counter() - init_t0) * 1000.0)
 
 @app.before_request
 def _before():
-    global REQUESTS_TOTAL, BANDWIDTH_IN_BYTES
+    global REQUESTS_TOTAL, BANDWIDTH_IN_BYTES, _requests_rate_window_count
     trace = None
     try:
         if ROOT_TRACE_ENABLED and request.path in ('/', '/student'):
@@ -1058,8 +1371,11 @@ def _before():
                 app._ready = True
                 if trace:
                     app.logger.info('[req:%s] _init_app finished in %.1fms', trace, (time.perf_counter() - ready_t0) * 1000.0)
+    now_mono = time.monotonic()
     with _metrics_lock:
         REQUESTS_TOTAL += 1
+        _requests_rate_window_count += 1
+        _update_requests_rate_locked(now_mono)
     try:
         in_len = request.content_length
         if in_len is None:
@@ -1113,6 +1429,7 @@ def _auto_cleanup_buses():
             removed.append((str(bus_id), removed_data.get('routeId'), reason))
             _kalman_filters.pop(str(bus_id), None)
             _bus_stop_state.pop(str(bus_id), None)
+            _bus_stop_compute_meta.pop(str(bus_id), None)
             _bus_last_broadcast.pop(str(bus_id), None)
             _bus_destination_ts.pop(str(bus_id), None)
             _buses_dirty = True
@@ -1120,7 +1437,14 @@ def _auto_cleanup_buses():
         for bus_id in list(_bus_destination_ts.keys()):
             if bus_id not in _buses:
                 _bus_destination_ts.pop(bus_id, None)
+        for bus_id in list(_bus_stop_compute_meta.keys()):
+            if bus_id not in _buses:
+                _bus_stop_compute_meta.pop(bus_id, None)
+        for bus_id in list(_bus_last_broadcast.keys()):
+            if bus_id not in _buses:
+                _bus_last_broadcast.pop(bus_id, None)
     for bus_id, route_id, reason in removed:
+        _drop_bus_from_batch(bus_id)
         remove_driver_presence_for_bus(bus_id)
         record_audit('bus_auto_remove', status='success', username='system', details=f'bus={bus_id} reason={reason}')
         try:
@@ -1129,24 +1453,30 @@ def _auto_cleanup_buses():
             pass
 
 def _sync_worker():
-    global _buses_dirty
+    global _buses_dirty, _audit_dirty
     while True:
         time.sleep(1)
         try:
             _auto_cleanup_buses()
-            snap = None
-            with _buses_lock:
-                if _buses_dirty:
-                    snap = {k: dict(v) for k, v in _buses.items()}
-                    _buses_dirty = False
-            if snap is not None:
-                save_json(BUSES_FILE, snap)
+            now_mono = time.monotonic()
+            if _buses_dirty and ((now_mono - _last_buses_persist_mono) >= BUSES_PERSIST_INTERVAL_SEC):
+                _flush_buses_to_disk(force=False)
+            if _audit_dirty and ((now_mono - _last_audit_persist_mono) >= AUDIT_PERSIST_INTERVAL_SEC):
+                _flush_audit_to_disk(force=False)
         except Exception:
             pass
 
 # ---------- SSE ----------
 _subscribers_lock = threading.Lock()
-_subscribers = {}   # routeId|"all" -> [queue, ...]
+_subscribers = {}   # routeId|"all" -> {subscriber_id: queue}
+_subscriber_routes = {}  # subscriber_id -> routeId
+_subscriber_seq = 0
+SSE_DISPATCH_QUEUE_MAXSIZE = max(1000, int(os.environ.get('SSE_DISPATCH_QUEUE_MAXSIZE', '20000')))
+_sse_dispatch_queue = queue.Queue(maxsize=SSE_DISPATCH_QUEUE_MAXSIZE)
+SSE_BATCH_WINDOW_MS = max(2, int(os.environ.get('SSE_BATCH_WINDOW_MS', '8')))
+SSE_BATCH_MAX_EVENTS = max(8, int(os.environ.get('SSE_BATCH_MAX_EVENTS', '256')))
+_bus_update_batch_lock = threading.Lock()
+_bus_update_batch = {}  # bus_id -> {'bus': str, 'data': dict, 'routeId': str|None}
 _active_admin_sessions = {}  # session_id -> {'username': str, 'last_seen': ts}
 _active_admin_lock = threading.Lock()
 ACTIVE_ADMIN_TTL_SEC = 60 * 60
@@ -1157,57 +1487,189 @@ STUDENT_PRESENCE_TTL_SEC = max(20, int(os.environ.get('STUDENT_PRESENCE_TTL_SEC'
 DRIVER_PRESENCE_TTL_SEC = max(20, int(os.environ.get('DRIVER_PRESENCE_TTL_SEC', '45')))
 SSE_QUEUE_MAXSIZE = max(200, int(os.environ.get('SSE_QUEUE_MAXSIZE', '2000')))
 
-def broadcast(payload):
+def _register_subscriber(route_id, q):
+    global _subscriber_seq
+    rid = str(route_id or 'all')
+    with _subscribers_lock:
+        _subscriber_seq += 1
+        sid = _subscriber_seq
+        _subscribers.setdefault(rid, {})[sid] = q
+        _subscriber_routes[sid] = rid
+    return sid
+
+def _remove_subscriber_locked(sid):
+    rid = _subscriber_routes.pop(sid, None)
+    if not rid:
+        return
+    group = _subscribers.get(rid)
+    if not group:
+        return
+    group.pop(sid, None)
+    if not group:
+        _subscribers.pop(rid, None)
+
+def _remove_subscriber(sid):
+    with _subscribers_lock:
+        _remove_subscriber_locked(sid)
+
+def _iter_targets_for_route_locked(route_id):
+    targets = []
+    seen = set()
+    if route_id:
+        rid = str(route_id)
+        for sid, q in (_subscribers.get('all') or {}).items():
+            if sid in seen:
+                continue
+            seen.add(sid)
+            targets.append((sid, q))
+        for sid, q in (_subscribers.get(rid) or {}).items():
+            if sid in seen:
+                continue
+            seen.add(sid)
+            targets.append((sid, q))
+        return targets
+    for group in _subscribers.values():
+        for sid, q in group.items():
+            if sid in seen:
+                continue
+            seen.add(sid)
+            targets.append((sid, q))
+    return targets
+
+def _enqueue_sse_message(target_q, payload):
+    try:
+        target_q.put_nowait(payload)
+        return True
+    except queue.Full:
+        try:
+            target_q.get_nowait()
+            target_q.put_nowait(payload)
+            return True
+        except Exception:
+            return False
+    except Exception:
+        return False
+
+def _extract_payload_route(payload):
+    if not isinstance(payload, dict):
+        return None
+    route_id = payload.get('routeId')
+    if route_id:
+        return route_id
+    bus_data = payload.get('data')
+    if isinstance(bus_data, dict):
+        return bus_data.get('routeId')
+    return None
+
+def _queue_bus_update_for_batch(bus_id, route_id, payload):
+    bid = str(bus_id or '').strip()
+    if not bid or not isinstance(payload, dict):
+        return
+    rid = str(route_id or '').strip() or None
+    with _bus_update_batch_lock:
+        _bus_update_batch[bid] = {
+            'bus': bid,
+            'routeId': rid,
+            'data': payload,
+        }
+
+def _drop_bus_from_batch(bus_id):
+    bid = str(bus_id or '').strip()
+    if not bid:
+        return
+    with _bus_update_batch_lock:
+        _bus_update_batch.pop(bid, None)
+
+def _flush_bus_updates_to_sse():
+    with _bus_update_batch_lock:
+        if not _bus_update_batch:
+            return
+        rows = list(_bus_update_batch.values())
+        _bus_update_batch.clear()
+    grouped = {}
+    for row in rows:
+        rid = row.get('routeId')
+        grouped.setdefault(rid, []).append({'bus': row.get('bus'), 'data': row.get('data')})
+    _record_sse_batch_size(len(rows))
+    for rid, buses in grouped.items():
+        payload = {'type': 'batch_update', 'buses': buses}
+        broadcast(payload, route_id=rid)
+
+def _bus_batch_worker():
+    interval = max(0.06, BUS_UPDATE_BATCH_INTERVAL_MS / 1000.0)
+    while True:
+        try:
+            time.sleep(interval)
+            _flush_bus_updates_to_sse()
+        except Exception:
+            time.sleep(interval)
+
+def _sse_dispatch_worker():
+    while True:
+        try:
+            first = _sse_dispatch_queue.get()
+            if first is None:
+                continue
+            batch = [first]
+            deadline = time.monotonic() + (SSE_BATCH_WINDOW_MS / 1000.0)
+            while len(batch) < SSE_BATCH_MAX_EVENTS:
+                timeout = deadline - time.monotonic()
+                if timeout <= 0:
+                    break
+                try:
+                    nxt = _sse_dispatch_queue.get(timeout=timeout)
+                except queue.Empty:
+                    break
+                if nxt is None:
+                    continue
+                batch.append(nxt)
+
+            deliveries = {}  # sid -> {'q': queue, 'msgs': [json_str, ...]}
+            with _subscribers_lock:
+                for route_id, data in batch:
+                    for sid, target_q in _iter_targets_for_route_locked(route_id):
+                        slot = deliveries.get(sid)
+                        if slot is None:
+                            slot = {'q': target_q, 'msgs': []}
+                            deliveries[sid] = slot
+                        slot['msgs'].append(data)
+
+            if not deliveries:
+                continue
+
+            dead_subscribers = []
+            for sid, item in deliveries.items():
+                msgs = item.get('msgs') or []
+                if not msgs:
+                    continue
+                payload = msgs[0] if len(msgs) == 1 else msgs
+                if not _enqueue_sse_message(item['q'], payload):
+                    dead_subscribers.append(sid)
+
+            if dead_subscribers:
+                with _subscribers_lock:
+                    for sid in dead_subscribers:
+                        _remove_subscriber_locked(sid)
+        except Exception:
+            time.sleep(0.01)
+
+def broadcast(payload, route_id=None):
     try:
         data = json.dumps(payload)
     except Exception:
         data = json.dumps({"error": "bad-payload"})
-    # Extract routeId for targeted delivery
-    route_id = None
-    if isinstance(payload, dict):
-        route_id = payload.get('routeId')
-        if not route_id:
-            bus_data = payload.get('data')
-            if isinstance(bus_data, dict):
-                route_id = bus_data.get('routeId')
-    targets = []
-    with _subscribers_lock:
-        if route_id:
-            # Targeted: send to "all" subscribers + matching route subscribers
-            sent = set()
-            for q in list(_subscribers.get('all', [])):
-                qid = id(q)
-                if qid in sent:
-                    continue
-                sent.add(qid)
-                targets.append(q)
-            for q in list(_subscribers.get(route_id, [])):
-                qid = id(q)
-                if qid in sent:
-                    continue
-                sent.add(qid)
-                targets.append(q)
-        else:
-            # No route context (buses_clear, etc.) - send to all subscribers
-            sent = set()
-            for group in _subscribers.values():
-                for q in list(group):
-                    qid = id(q)
-                    if qid in sent:
-                        continue
-                    sent.add(qid)
-                    targets.append(q)
-    for q in targets:
+    _record_sse_event()
+    dispatch_route = route_id if route_id is not None else _extract_payload_route(payload)
+    try:
+        _sse_dispatch_queue.put_nowait((dispatch_route, data))
+    except queue.Full:
         try:
-            q.put_nowait(data)
-        except queue.Full:
-            try:
-                q.get_nowait()
-                q.put_nowait(data)
-            except Exception:
-                pass
+            _sse_dispatch_queue.get_nowait()
+            _sse_dispatch_queue.put_nowait((dispatch_route, data))
         except Exception:
             pass
+    except Exception:
+        pass
 
 @app.route('/events')
 def sse_events():
@@ -1217,26 +1679,21 @@ def sse_events():
     def stream():
         q = queue.Queue(maxsize=SSE_QUEUE_MAXSIZE)
         hb = max(5, int(os.environ.get('SSE_HEARTBEAT_SEC', '20')))
-        with _subscribers_lock:
-            _subscribers.setdefault(route_id, []).append(q)
+        subscriber_id = _register_subscriber(route_id, q)
         yield 'event: ping\ndata: "connected"\n\n'
         try:
             while True:
                 try:
                     msg = q.get(timeout=hb)
-                    yield f'data: {msg}\n\n'
+                    if isinstance(msg, list):
+                        for part in msg:
+                            yield f'data: {part}\n\n'
+                    else:
+                        yield f'data: {msg}\n\n'
                 except queue.Empty:
                     yield 'event: ping\ndata: {}\n\n'
         finally:
-            with _subscribers_lock:
-                try:
-                    subs = _subscribers.get(route_id)
-                    if subs:
-                        subs.remove(q)
-                        if not subs:
-                            del _subscribers[route_id]
-                except (ValueError, KeyError):
-                    pass
+            _remove_subscriber(subscriber_id)
     return Response(stream_with_context(stream()), mimetype='text/event-stream',
                     headers={
                         'Cache-Control': 'no-cache, no-transform',
@@ -1258,7 +1715,7 @@ def load_credentials(persist_changes=False):
         return dict(default_creds)
 
     changed = False
-    live_admins = service_load_admins()
+    live_admins = _load_service_admins_cached(force=False)
     if creds.get('admins') != live_admins:
         creds['admins'] = live_admins
     if 'institute_name' not in creds:
@@ -1306,7 +1763,7 @@ def save_credentials(data):
     admins_payload = payload.pop('admins', None)
     if isinstance(admins_payload, list):
         try:
-            service_save_admins(admins_payload)
+            _save_service_admins_cached(admins_payload)
         except Exception:
             pass
     ok = _save_json_with_status(CREDENTIALS_FILE, payload)
@@ -1743,7 +2200,7 @@ def admin_login():
                 return _render_admin_login_view(creds, error_text='Username is reserved.', institute_name=institute)
 
             admins = [
-                a for a in (service_load_admins() or [])
+                a for a in (_load_service_admins_cached(force=False) or [])
                 if not service_is_gold_username(a.get('username'))
             ]
             if any(str(a.get('username') or '') == username for a in admins):
@@ -1756,8 +2213,8 @@ def admin_login():
                 'password_hash': generate_password_hash(password),
                 'role': signup_role
             })
-            service_save_admins(admins)
-            creds['admins'] = service_load_admins()
+            _save_service_admins_cached(admins)
+            creds['admins'] = _load_service_admins_cached(force=False)
             creds['institute_name'] = institute or creds.get('institute_name', 'INSTITUTE')
             save_credentials(creds)
             session['admin'] = username
@@ -2028,7 +2485,7 @@ def add_admin():
         'password_hash': generate_password_hash(password),
         'role': target_role
     })
-    service_save_admins(admins)
+    _save_service_admins_cached(admins)
     record_audit('admin_add', status='success', username=session.get('admin') or 'anonymous', details=f'target={username} role={target_role}')
     return jsonify({'status': 'success', 'username': username, 'role': target_role})
 
@@ -2064,7 +2521,7 @@ def delete_admin(username):
         a for a in admins
         if a.get('username') != username and not service_is_gold_username(a.get('username'))
     ]
-    service_save_admins(new)
+    _save_service_admins_cached(new)
     if session.get('admin') == username:
         remove_active_admin_session()
         session.pop('admin', None)
@@ -2107,7 +2564,7 @@ def change_admin_password(username):
         a for a in creds.get('admins', [])
         if not service_is_gold_username(a.get('username'))
     ]
-    service_save_admins(admins)
+    _save_service_admins_cached(admins)
     record_audit('admin_password_change', status='success', username=session.get('admin') or 'anonymous', details=f'target={username}')
     return jsonify({'status': 'success'})
 
@@ -2267,8 +2724,15 @@ def admin_performance():
         last_success_login = None
         last_failed_login = None
         recent_audit = []
+    client_perf = _get_client_perf_summary()
     with _metrics_lock:
+        _update_requests_rate_locked()
+        _update_sse_rate_locked()
         requests_total = REQUESTS_TOTAL
+        requests_per_sec = REQUESTS_PER_SECOND
+        sse_events_total = SSE_EVENTS_TOTAL
+        sse_events_per_sec = SSE_EVENTS_PER_SECOND
+        sse_batch_size = SSE_BATCH_SIZE
         bandwidth_in_bytes = BANDWIDTH_IN_BYTES
         bandwidth_out_bytes = BANDWIDTH_OUT_BYTES
     uptime_for_rate = max(1, uptime_sec)
@@ -2301,7 +2765,15 @@ def admin_performance():
             'avg_out_kbps': round(((bandwidth_out_bytes * 8) / 1000) / uptime_for_rate, 2)
         },
         'requests_total': requests_total,
+        'requests_per_second': requests_per_sec,
+        'sse_events_total': sse_events_total,
+        'sse_events_per_second': sse_events_per_sec,
+        'sse_batch_size': sse_batch_size,
         'sse_clients': sse_clients,
+        'active_bus_count': buses_count,
+        'avg_snap_time_ms': client_perf.get('avg_snap_ms'),
+        'avg_eta_compute_time_ms': client_perf.get('avg_eta_ms'),
+        'client_perf_reporters': client_perf.get('client_count'),
         'buses_count': buses_count,
         'active_students': active_students,
         'active_drivers': active_drivers,
@@ -2507,6 +2979,20 @@ def update_student_presence():
         remove_student_presence(normalized)
     return jsonify({'status': 'success', 'active_students': get_active_student_count()})
 
+@app.route('/api/client/perf', methods=['POST'])
+def update_client_perf():
+    payload = request.get_json(silent=True) or request.form.to_dict() or {}
+    client_id = payload.get('clientId') or payload.get('viewerId') or request.headers.get('X-Client-Id')
+    normalized = _normalize_presence_id(client_id, 'viewer')
+    if not normalized:
+        return jsonify({'error': 'clientId is required'}), 400
+    _record_client_perf_sample(
+        normalized,
+        snap_ms=payload.get('avgSnapMs'),
+        eta_ms=payload.get('avgEtaMs'),
+    )
+    return jsonify({'status': 'success'})
+
 # ---------- bus APIs ----------
 @app.route('/api/buses', methods=['GET'])
 def get_all_buses():
@@ -2535,11 +3021,13 @@ def clear_all_buses():
         _bus_destination_ts.clear()
         _bus_last_broadcast.clear()
         _bus_stop_state.clear()
+        _bus_stop_compute_meta.clear()
         _kalman_filters.clear()
         _buses_dirty = True
+    with _bus_update_batch_lock:
+        _bus_update_batch.clear()
     for bus_id in removed_ids:
         remove_driver_presence_for_bus(bus_id)
-    save_json(BUSES_FILE, {})
     try:
         broadcast({'type': 'buses_clear'})
     except Exception:
@@ -2567,54 +3055,134 @@ def update_bus_location(bus_number):
         raw_lng = float(raw.get('lng'))
     except (TypeError, ValueError):
         return jsonify({'error': 'Provide numeric lat and lng'}), 400
-    # Kalman smoothing
+
     bus_id = str(bus_number)
     touch_driver_presence(_driver_bus_presence_key(bus_id))
     lat, lng = kalman_smooth(bus_id, raw_lat, raw_lng)
+
+    heading_value = None
+    if raw.get('heading') is not None:
+        try:
+            heading_value = float(raw.get('heading'))
+        except (TypeError, ValueError):
+            heading_value = None
+
+    speed_value = None
+    if raw.get('speed') is not None:
+        try:
+            parsed_speed = float(raw.get('speed'))
+            if math.isfinite(parsed_speed):
+                speed_value = max(0.0, min(180.0, parsed_speed))
+        except (TypeError, ValueError):
+            speed_value = None
+
     parsed_last_update = parse_iso_timestamp(raw.get('lastUpdate'))
     if parsed_last_update is None:
-        last_update = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+        parsed_last_update = time.time()
+        last_update = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(parsed_last_update))
     else:
         last_update = datetime.fromtimestamp(parsed_last_update, timezone.utc).isoformat().replace('+00:00', 'Z')
-    heading = raw.get('heading')  # device heading from driver/simulator
-    should_broadcast = True
+
     now_mono = time.monotonic()
+    should_broadcast = True
+    route_id = None
+    route_changed = False
+    current_data = None
     with _buses_lock:
-        existing = _buses.get(bus_id, {})
+        existing = _buses.get(bus_id)
+        if not isinstance(existing, dict):
+            existing = {}
         route_id = raw.get('routeId', existing.get('routeId'))
-        if existing.get('routeId') != route_id:
+        route_changed = existing.get('routeId') != route_id
+        if route_changed:
             _bus_destination_ts.pop(bus_id, None)
-        # Skip broadcast if position hasn't meaningfully changed (~0.5m)
-        # Always broadcast at least every 3s even when stationary (heartbeat)
-        if existing and 'lat' in existing and 'lng' in existing:
-            dlat = abs(lat - existing['lat'])
-            dlng = abs(lng - existing['lng'])
-            if dlat < 0.000005 and dlng < 0.000005:
-                last_bc = _bus_last_broadcast.get(bus_id, 0)
-                if (now_mono - last_bc) < 3:
-                    should_broadcast = False
-        entry = {'lat': lat, 'lng': lng, 'lastUpdate': last_update, 'routeId': route_id}
-        if heading is not None:
+            _bus_stop_compute_meta.pop(bus_id, None)
+
+        prev_lat = existing.get('lat')
+        prev_lng = existing.get('lng')
+        prev_heading = existing.get('heading')
+        prev_speed = existing.get('speed')
+        prev_last_ts = parse_iso_timestamp(existing.get('lastUpdate'))
+        moved_m = None
+        if prev_lat is not None and prev_lng is not None:
             try:
-                entry['heading'] = float(heading)
-            except (TypeError, ValueError):
-                pass
-        _buses[bus_id] = entry
+                moved_m = _haversine_m(float(prev_lat), float(prev_lng), float(lat), float(lng))
+            except Exception:
+                moved_m = BUS_POSITION_BROADCAST_EPS_M + 1.0
+
+        heading_changed = False
+        if heading_value is not None:
+            if prev_heading is None:
+                heading_changed = True
+            else:
+                heading_changed = _angular_diff_deg(heading_value, prev_heading) > BUS_HEADING_BROADCAST_EPS_DEG
+
+        if speed_value is None and moved_m is not None and prev_last_ts is not None and parsed_last_update is not None:
+            dt = float(parsed_last_update) - float(prev_last_ts)
+            if dt >= 1.0:
+                speed_value = max(0.0, min(180.0, (moved_m / dt) * 3.6))
+
+        speed_changed = False
+        if speed_value is not None:
+            if prev_speed is None:
+                speed_changed = True
+            else:
+                try:
+                    speed_changed = abs(float(speed_value) - float(prev_speed)) >= BUS_SPEED_BROADCAST_EPS_KMH
+                except Exception:
+                    speed_changed = True
+
+        position_changed = (moved_m is None) or (moved_m >= BUS_POSITION_BROADCAST_EPS_M)
+        should_broadcast = bool(route_changed or heading_changed or position_changed or speed_changed)
+
+        existing['lat'] = lat
+        existing['lng'] = lng
+        existing['lastUpdate'] = last_update
+        existing['routeId'] = route_id
+        if heading_value is not None:
+            existing['heading'] = heading_value
+        else:
+            existing.pop('heading', None)
+        if speed_value is not None:
+            existing['speed'] = round(speed_value, 2)
+        else:
+            existing.pop('speed', None)
+
+        _buses[bus_id] = existing
         _buses_dirty = True
-        current_data = dict(entry)
-    # Server-side stop detection — enrich broadcast payload
-    stop_info = detect_stop_info(bus_id, lat, lng, route_id)
-    current_data.update(stop_info)
+        if should_broadcast:
+            current_data = dict(existing)
+
+    stop_info = _get_stop_info_for_bus_update(
+        bus_id,
+        lat,
+        lng,
+        route_id,
+        now_mono,
+        force_recalc=(route_changed or should_broadcast),
+    )
+
+    remove_in_sec = None
     with _buses_lock:
         if stop_info.get('terminalState') == 'at_destination':
             _bus_destination_ts.setdefault(bus_id, now_mono)
-            current_data['removeInSec'] = max(0, round(DESTINATION_REMOVE_SEC - (now_mono - _bus_destination_ts[bus_id]), 2))
+            remove_in_sec = max(0, round(DESTINATION_REMOVE_SEC - (now_mono - _bus_destination_ts[bus_id]), 2))
         else:
             _bus_destination_ts.pop(bus_id, None)
+
     try:
         if should_broadcast:
+            if current_data is None:
+                current_data = {'lat': lat, 'lng': lng, 'lastUpdate': last_update, 'routeId': route_id}
+                if heading_value is not None:
+                    current_data['heading'] = heading_value
+                if speed_value is not None:
+                    current_data['speed'] = round(speed_value, 2)
+            current_data.update(stop_info)
+            if remove_in_sec is not None:
+                current_data['removeInSec'] = remove_in_sec
             _bus_last_broadcast[bus_id] = now_mono
-            broadcast({'type': 'bus_update', 'bus': bus_id, 'data': current_data})
+            _queue_bus_update_for_batch(bus_id, route_id, current_data)
     except Exception:
         pass
     return jsonify({'status': 'success', 'bus': bus_number})
@@ -2631,8 +3199,10 @@ def stop_bus(bus_number):
     # Clean up Kalman + stop state
     _kalman_filters.pop(bus_id, None)
     _bus_stop_state.pop(bus_id, None)
+    _bus_stop_compute_meta.pop(bus_id, None)
     _bus_last_broadcast.pop(bus_id, None)
     _bus_destination_ts.pop(bus_id, None)
+    _drop_bus_from_batch(bus_id)
     remove_driver_presence_for_bus(bus_id)
     try:
         broadcast({'type': 'bus_stop', 'bus': bus_id, 'routeId': route_id})
@@ -2666,6 +3236,9 @@ def set_bus_route(bus_number):
             if _buses[bus_id].get('routeId') != route_id:
                 _buses[bus_id]['routeId'] = route_id
                 _buses_dirty = True
+                _bus_stop_state.pop(bus_id, None)
+                _bus_stop_compute_meta.pop(bus_id, None)
+                _drop_bus_from_batch(bus_id)
             _bus_destination_ts.pop(bus_id, None)
         # Don't create a bus entry just for route assignment
     try:
@@ -2983,12 +3556,20 @@ def status():
     with _buses_lock:
         buses_count = len(_buses)
     with _metrics_lock:
+        _update_requests_rate_locked()
+        _update_sse_rate_locked()
         requests_total = REQUESTS_TOTAL
+        requests_per_second = REQUESTS_PER_SECOND
+        sse_events_per_second = SSE_EVENTS_PER_SECOND
+        sse_batch_size = SSE_BATCH_SIZE
     active_students = get_active_student_count()
     active_drivers = max(get_active_driver_count(), buses_count)
     return jsonify({
         'uptime_sec': int(time.time() - APP_START_TS),
         'requests_total': requests_total,
+        'requests_per_second': requests_per_second,
+        'sse_events_per_second': sse_events_per_second,
+        'sse_batch_size': sse_batch_size,
         'sse_clients': sse_clients,
         'buses_count': buses_count,
         'active_students': active_students,
@@ -2999,3 +3580,4 @@ def status():
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+

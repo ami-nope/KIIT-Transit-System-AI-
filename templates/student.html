@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <title>Transport Tracker - Student View</title>
@@ -625,6 +625,8 @@
         }
         .bus-icon {
             transition: transform 0.15s ease, opacity 0.2s ease;
+            will-change: transform;
+            transform: translateZ(0);
         }
         .bus-rotor {
             transition: transform 220ms ease-out;
@@ -3732,9 +3734,8 @@
         let busTravelDirection = {};  // busNum -> 'forward' | 'reverse'
         const busLastProgressMeters = {}; // busNum -> last snapped polyline progress
         const busDirectionRouteId = {}; // busNum -> routeId used for direction state
-        const busDirectionLastFlipAt = {}; // busNum -> timestamp of last direction flip
+        const busDirectionLastFlipAt = {}; // retained for cleanup compatibility
         const DIRECTION_PROGRESS_EPS_M = 5; // keep direction if progress delta is below this threshold
-        const DIRECTION_FLIP_COOLDOWN_MS = 1000; // optional anti-flicker cooldown for direction flips
         let busCurrentStop = {}; // busNum -> stop name if at a stop, null otherwise
         const AT_STOP_THRESHOLD = 80; // meters - consider bus "at stop" within this distance (accounts for GPS lag)
         const busNearestStopCache = {}; // busNum -> { idx, dist, atStopName }
@@ -3810,6 +3811,24 @@
         let routeStackFlowMomentumRaf = null;
         let routeStackFlowMomentumVelocity = 0;
         const busEtaTrendCache = {}; // busNum -> { etaSec, ts }
+        const ROTATION_UPDATE_EPS_DEG = 3;
+        const SNAP_LOCAL_WINDOW_SEGMENTS = 5;
+        const SNAP_LOCKED_WINDOW_SEGMENTS = 8;
+        const SNAP_FULL_SCAN_RETRY_MS = 900;
+        const busSnapSearchState = {}; // busNum -> { routeId, lastFullScanMs }
+        const ETA_RECOMPUTE_POS_DELTA_M = 5;
+        const ETA_RECOMPUTE_SPEED_DELTA_KMH = 0.5;
+        const ETA_RECOMPUTE_MAX_STALE_MS = 4000;
+        const etaComputeCache = { key: null, distanceM: null, speedKmh: null, ts: 0 };
+        const PERF_REPORT_INTERVAL_MS = 10000;
+        const perfAgg = {
+            snapTotalMs: 0,
+            snapCount: 0,
+            etaTotalMs: 0,
+            etaCount: 0,
+            lastSentMs: 0,
+            inFlight: false
+        };
 
         function expandBoundsByKm(bounds, km) {
             const center = bounds.getCenter();
@@ -4125,7 +4144,7 @@
             }, { passive: true });
         }
 
-        // Throttled time string â€” toLocaleTimeString is expensive, limit to 1/sec
+        // Throttled time string Ã¢â‚¬â€ toLocaleTimeString is expensive, limit to 1/sec
         let _cachedTimeStr = ''; let _cachedTimeMs = 0;
         function getTimeString() {
             const now = Date.now();
@@ -4499,6 +4518,47 @@
                 renderRouteBusByETA();
                 updateOperationalTiles();
             }, delayMs);
+        }
+        function maybeReportClientPerf(force = false) {
+            const now = Date.now();
+            if (!force && (now - perfAgg.lastSentMs) < PERF_REPORT_INTERVAL_MS) return;
+            if (perfAgg.inFlight) return;
+            if (perfAgg.snapCount <= 0 && perfAgg.etaCount <= 0) return;
+            const avgSnap = perfAgg.snapCount > 0 ? (perfAgg.snapTotalMs / perfAgg.snapCount) : null;
+            const avgEta = perfAgg.etaCount > 0 ? (perfAgg.etaTotalMs / perfAgg.etaCount) : null;
+            const payload = {
+                clientId: VIEWER_ID,
+                avgSnapMs: avgSnap != null ? Number(avgSnap.toFixed(2)) : null,
+                avgEtaMs: avgEta != null ? Number(avgEta.toFixed(2)) : null
+            };
+            perfAgg.inFlight = true;
+            fetch('/api/client/perf', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+                keepalive: true
+            }).catch(() => {}).finally(() => {
+                perfAgg.inFlight = false;
+                perfAgg.lastSentMs = Date.now();
+                perfAgg.snapTotalMs = 0;
+                perfAgg.snapCount = 0;
+                perfAgg.etaTotalMs = 0;
+                perfAgg.etaCount = 0;
+            });
+        }
+        function recordSnapComputeMs(ms) {
+            const value = Number(ms);
+            if (!Number.isFinite(value) || value < 0) return;
+            perfAgg.snapTotalMs += Math.min(1000, value);
+            perfAgg.snapCount += 1;
+            maybeReportClientPerf(false);
+        }
+        function recordEtaComputeMs(ms) {
+            const value = Number(ms);
+            if (!Number.isFinite(value) || value < 0) return;
+            perfAgg.etaTotalMs += Math.min(1000, value);
+            perfAgg.etaCount += 1;
+            maybeReportClientPerf(false);
         }
         function decorateEtaHtml(html) {
             if (typeof html !== 'string') return html;
@@ -5499,16 +5559,7 @@
                 const delta = progressMeters - prevProgress;
                 if (Math.abs(delta) >= DIRECTION_PROGRESS_EPS_M) {
                     const candidate = delta > 0 ? 'forward' : 'reverse';
-                    if (candidate !== direction) {
-                        const now = Date.now();
-                        const lastFlip = busDirectionLastFlipAt[busNum] || 0;
-                        if ((now - lastFlip) >= DIRECTION_FLIP_COOLDOWN_MS) {
-                            direction = candidate;
-                            busDirectionLastFlipAt[busNum] = now;
-                        }
-                    } else {
-                        direction = candidate;
-                    }
+                    direction = candidate;
                 }
             }
             busLastProgressMeters[busNum] = progressMeters;
@@ -5541,23 +5592,30 @@
         }
 
         function snapToRoute(lat, lng, busNum, routeIdOverride = null) {
+            const snapT0 = (window.performance && typeof performance.now === 'function') ? performance.now() : Date.now();
+            const finishSnap = (result) => {
+                const snapT1 = (window.performance && typeof performance.now === 'function') ? performance.now() : Date.now();
+                recordSnapComputeMs(Math.max(0, snapT1 - snapT0));
+                return result;
+            };
             const ridRaw = (routeIdOverride !== null && routeIdOverride !== undefined && routeIdOverride !== '')
                 ? routeIdOverride
                 : busRouteMap[busNum];
             const rid = String(ridRaw || '');
             if (!rid) {
                 delete busSnapLockState[busNum];
-                return { pos: [lat, lng], segIdx: -1, progressMeters: null };
+                delete busSnapSearchState[busNum];
+                return finishSnap({ pos: [lat, lng], segIdx: -1, progressMeters: null });
             }
             const coords = routeCoordsCache[rid];
             if (!coords || coords.length < 2) {
                 busSnapLockState[busNum] = { locked: false, routeId: String(rid) };
-                return { pos: [lat, lng], segIdx: -1, progressMeters: null };
+                return finishSnap({ pos: [lat, lng], segIdx: -1, progressMeters: null });
             }
             const snapCfg = getEffectiveRouteSnapSettings(rid);
             if (!snapCfg.enabled) {
                 busSnapLockState[busNum] = { locked: false, routeId: String(rid) };
-                return { pos: [lat, lng], segIdx: -1, progressMeters: null };
+                return finishSnap({ pos: [lat, lng], segIdx: -1, progressMeters: null });
             }
             const snapDistM = Math.max(1, Number(snapCfg.distance_m) || DEFAULT_ROUTE_SNAP_SETTINGS.distance_m);
             const releaseDistM = Math.max(snapDistM + 4, Math.round(snapDistM * 1.35));
@@ -5569,6 +5627,10 @@
             if (!lockState || String(lockState.routeId || '') !== String(rid)) {
                 lockState = { locked: false, routeId: String(rid) };
             }
+            let searchState = busSnapSearchState[busNum];
+            if (!searchState || String(searchState.routeId || '') !== rid) {
+                searchState = { routeId: rid, lastFullScanMs: 0 };
+            }
             const cumul = ensureRouteCumulDist(rid);
             const buildSnapResult = (pos, segIdx, t) => ({
                 pos,
@@ -5578,12 +5640,11 @@
                     : null
             });
 
-            // Local search from last known segment (Â±30) â€” fast path
             if (lastSeg >= 0) {
-                const window = lockState.locked ? 45 : 32;
+                const window = lockState.locked ? SNAP_LOCKED_WINDOW_SEGMENTS : SNAP_LOCAL_WINDOW_SEGMENTS;
                 const lo = Math.max(0, lastSeg - window), hi = Math.min(n - 1, lastSeg + window);
                 for (let i = lo; i <= hi; i++) {
-                    const ptObj = closestPointOnSegmentMeters(lng, lat, coords[i][1], coords[i][0], coords[i+1][1], coords[i+1][0]);
+                    const ptObj = closestPointOnSegmentMeters(lng, lat, coords[i][1], coords[i][0], coords[i + 1][1], coords[i + 1][0]);
                     const pt = ptObj.pt;
                     const d = calcDistance(lat, lng, pt[0], pt[1]);
                     if (d < bestDist) { bestDist = d; bestPt = pt; bestSeg = i; bestT = ptObj.t; }
@@ -5591,12 +5652,21 @@
                 const threshold = lockState.locked ? releaseDistM : snapDistM;
                 if (bestDist <= threshold) {
                     busSnapLockState[busNum] = { locked: true, routeId: String(rid) };
-                    return buildSnapResult(bestPt, bestSeg, bestT);
+                    busSnapSearchState[busNum] = searchState;
+                    return finishSnap(buildSnapResult(bestPt, bestSeg, bestT));
                 }
             }
-            // Full scan fallback
+
+            const nowMs = Date.now();
+            if (!lockState.locked && searchState.lastFullScanMs && (nowMs - searchState.lastFullScanMs) < SNAP_FULL_SCAN_RETRY_MS) {
+                busSnapLockState[busNum] = { locked: false, routeId: String(rid) };
+                busSnapSearchState[busNum] = searchState;
+                return finishSnap({ pos: [lat, lng], segIdx: -1, progressMeters: null });
+            }
+            searchState.lastFullScanMs = nowMs;
+
             for (let i = 0; i < n; i++) {
-                const ptObj = closestPointOnSegmentMeters(lng, lat, coords[i][1], coords[i][0], coords[i+1][1], coords[i+1][0]);
+                const ptObj = closestPointOnSegmentMeters(lng, lat, coords[i][1], coords[i][0], coords[i + 1][1], coords[i + 1][0]);
                 const pt = ptObj.pt;
                 const d = calcDistance(lat, lng, pt[0], pt[1]);
                 if (d < bestDist) { bestDist = d; bestPt = pt; bestSeg = i; bestT = ptObj.t; }
@@ -5604,13 +5674,14 @@
             const finalThreshold = lockState.locked ? releaseDistM : snapDistM;
             if (bestDist <= finalThreshold) {
                 busSnapLockState[busNum] = { locked: true, routeId: String(rid) };
-                return buildSnapResult(bestPt, bestSeg, bestT);
+                busSnapSearchState[busNum] = searchState;
+                return finishSnap(buildSnapResult(bestPt, bestSeg, bestT));
             }
             busSnapLockState[busNum] = { locked: false, routeId: String(rid) };
-            return { pos: [lat, lng], segIdx: -1, progressMeters: null };
+            busSnapSearchState[busNum] = searchState;
+            return finishSnap({ pos: [lat, lng], segIdx: -1, progressMeters: null });
         }
 
-        // Extract sub-path along route between two snapped points
         function getRouteSubPath(rid, fromPos, fromSeg, toPos, toSeg) {
             const coords = routeCoordsCache[rid];
             if (!coords || fromSeg < 0 || toSeg < 0) return null;
@@ -5631,7 +5702,7 @@
                 }
                 path.push(toPos);
             }
-            // Skip if path is too long (bus probably jumped routes) â€” max ~80 segments
+            // Skip if path is too long (bus probably jumped routes) Ã¢â‚¬â€ max ~80 segments
             if (path.length > 80) return null;
             return path;
         }
@@ -5664,13 +5735,35 @@
             return path[path.length - 1];
         }
 
-        // Tween state for smooth marker movement along route paths
-        const busTweens = {}; // busNum -> { path, dists, start, dur } or { from, to, start, dur }
+        // Tween state for smooth marker movement (single global RAF loop)
+        const busTweens = {}; // busNum -> { currentRenderedPosition, startPosition, targetPosition, lastUpdateTime, nextUpdateTime, currentRotation, rotationStart, rotationTarget, rotationStartTime, rotationEndTime, lastRxAt }
         const busSnapInfo = {}; // busNum -> { routeId, segIdx, progressMeters } from latest snap
         const busSnapLockState = {}; // busNum -> { locked: bool, routeId: string|null }
-        const TWEEN_MS = 800; // base tween duration floor
+        const POSITION_RENDER_EPS_M = 2;
+        const TELEPORT_DISTANCE_M = 300;
+        const ROTATION_SMOOTH_DURATION_MS = 200;
+        const INTERPOLATION_MIN_MS = 120;
+        const INTERPOLATION_MAX_MS = 1200;
         const DEFAULT_BUS_SPEED_MPS = 14 / 3.6; // dynamic movement fallback when speed is unknown
-        function easeInOut(t){ return t<0.5 ? 2*t*t : -1+(4-2*t)*t; }
+        function clamp01(v) { return Math.max(0, Math.min(1, v)); }
+        function lerp(a, b, t) { return a + ((b - a) * t); }
+        function lerpAngleDeg(a, b, t) {
+            const start = Number.isFinite(a) ? a : 0;
+            const end = Number.isFinite(b) ? b : start;
+            const delta = ((end - start + 540) % 360) - 180;
+            return (start + (delta * clamp01(t)) + 360) % 360;
+        }
+        function setMarkerPositionFast(marker, lat, lng) {
+            if (!marker) return;
+            const latlng = L.latLng(lat, lng);
+            marker._latlng = latlng;
+            if (map && marker._icon && typeof marker._setPos === 'function') {
+                const point = map.latLngToLayerPoint(latlng).round();
+                marker._setPos(point);
+            } else {
+                marker.setLatLng(latlng);
+            }
+        }
         function createKalmanAxis(initialValue) { return { x: initialValue, p: 1, q: 0.00014, r: 0.00016 }; }
         function kalmanAxisUpdate(state, measurement) { state.p += state.q; const k = state.p / (state.p + state.r); state.x = state.x + k * (measurement - state.x); state.p = (1 - k) * state.p; return state.x; }
         function kalmanFilterBusPosition(busNum, lat, lng) {
@@ -5713,62 +5806,75 @@
         function queueBusTween(busNum, toPos, routeIdOverride = null){
             try{
                 const marker = busMarkers[busNum];
-                const fromPos = marker ? [marker.getLatLng().lat, marker.getLatLng().lng] : toPos;
+                if (!marker) return;
                 const ridRaw = (routeIdOverride !== null && routeIdOverride !== undefined && routeIdOverride !== '')
                     ? routeIdOverride
                     : busRouteMap[busNum];
                 const rid = String(ridRaw || '');
 
-                // Cancel any active prediction â€” real data arrived
+                // Cancel any active prediction when fresh data arrives.
                 if (busPrediction[busNum]) { busPrediction[busNum].active = false; }
 
-                // Skip tween if position hasn't meaningfully changed (<1m)
-                const tweenDist = calcDistance(fromPos[0], fromPos[1], toPos[0], toPos[1]);
-                if (tweenDist < 1) {
-                    // Store real position for prediction system
-                    updatePredictionState(busNum, toPos);
-                    return;
-                }
-
-                // Anti-teleport: if jump > 500m, snap instantly instead of tweening
-                if (tweenDist > 500) {
-                    const snapResult = snapToRoute(toPos[0], toPos[1], busNum, rid);
-                    busSnapInfo[busNum] = { routeId: rid, segIdx: snapResult.segIdx, progressMeters: snapResult.progressMeters };
-                    marker.setLatLng(snapResult.pos);
-                    prevBusPositions[busNum] = snapResult.pos;
-                    updatePredictionState(busNum, toPos);
-                    return;
-                }
-
-                const fromInfo = busSnapInfo[busNum];
-                const fromSeg = (fromInfo && String(fromInfo.routeId || '') === rid) ? fromInfo.segIdx : -1;
-
-                // Try to get snap info for the destination
                 const snapResult = snapToRoute(toPos[0], toPos[1], busNum, rid);
                 const snappedTo = snapResult.pos;
-                const toSeg = snapResult.segIdx;
-                busSnapInfo[busNum] = { routeId: rid, segIdx: toSeg, progressMeters: snapResult.progressMeters };
+                busSnapInfo[busNum] = { routeId: rid, segIdx: snapResult.segIdx, progressMeters: snapResult.progressMeters };
 
-                // Try to build a route sub-path for curved animation
-                let routePath = null;
-                if (rid && fromSeg >= 0 && toSeg >= 0) {
-                    routePath = getRouteSubPath(rid, fromPos, fromSeg, snappedTo, toSeg);
+                const now = performance.now();
+                const existingState = busTweens[busNum];
+                const markerLatLng = marker.getLatLng();
+                const rendered = (existingState && Array.isArray(existingState.currentRenderedPosition))
+                    ? existingState.currentRenderedPosition
+                    : [markerLatLng.lat, markerLatLng.lng];
+                const moveDist = calcDistance(rendered[0], rendered[1], snappedTo[0], snappedTo[1]);
+                const desiredRotation = getRouteBearing(busNum, rid);
+                const currentRotation = (existingState && Number.isFinite(existingState.currentRotation))
+                    ? existingState.currentRotation
+                    : (prevBusRotation[busNum] || desiredRotation || 0);
+                const rotationDelta = angularDiffDeg(desiredRotation, currentRotation);
+
+                if (moveDist < POSITION_RENDER_EPS_M && rotationDelta <= ROTATION_UPDATE_EPS_DEG) {
+                    updatePredictionState(busNum, snappedTo);
+                    return;
                 }
 
-                // Calculate tween duration using dynamic GPS-based speed (clamped for smoothness).
-                const dynamicSpeedMps = getDynamicSpeedMps(busNum);
-                const latencyBias = (trackedBus && String(trackedBus) === String(busNum)) ? 0.46 : 0.78;
-                const dur = Math.max(80, Math.min(820, ((tweenDist / dynamicSpeedMps) * 1000) * latencyBias));
+                const prevRxAt = (existingState && Number.isFinite(existingState.lastRxAt)) ? existingState.lastRxAt : null;
+                const updateInterval = prevRxAt
+                    ? Math.max(INTERPOLATION_MIN_MS, Math.min(INTERPOLATION_MAX_MS, now - prevRxAt))
+                    : Math.max(INTERPOLATION_MIN_MS, Math.min(INTERPOLATION_MAX_MS, POLL_INTERVAL_MS));
 
-                if (routePath && routePath.length >= 2) {
-                    const dists = computePathDistances(routePath);
-                    busTweens[busNum] = { path: routePath, dists: dists, start: performance.now(), dur: dur };
+                const state = existingState || {};
+                state.currentRenderedPosition = rendered.slice();
+                state.lastRxAt = now;
+
+                if (moveDist > TELEPORT_DISTANCE_M) {
+                    state.startPosition = snappedTo.slice();
+                    state.targetPosition = snappedTo.slice();
+                    state.currentRenderedPosition = snappedTo.slice();
+                    state.lastUpdateTime = now;
+                    state.nextUpdateTime = now;
+                    setMarkerPositionFast(marker, snappedTo[0], snappedTo[1]);
                 } else {
-                    // Fallback: straight-line tween
-                    busTweens[busNum] = { from: fromPos, to: snappedTo, start: performance.now(), dur: dur };
+                    state.startPosition = rendered.slice();
+                    state.targetPosition = snappedTo.slice();
+                    state.lastUpdateTime = now;
+                    state.nextUpdateTime = now + updateInterval;
                 }
-                // Store real position for prediction system
-                updatePredictionState(busNum, toPos);
+
+                if (rotationDelta > ROTATION_UPDATE_EPS_DEG) {
+                    state.rotationStart = currentRotation;
+                    state.rotationTarget = desiredRotation;
+                    state.rotationStartTime = now;
+                    state.rotationEndTime = now + ROTATION_SMOOTH_DURATION_MS;
+                } else if (!Number.isFinite(state.rotationTarget)) {
+                    state.rotationStart = currentRotation;
+                    state.rotationTarget = currentRotation;
+                    state.rotationStartTime = now;
+                    state.rotationEndTime = now;
+                }
+                state.currentRotation = currentRotation;
+                busTweens[busNum] = state;
+
+                updatePredictionState(busNum, snappedTo);
                 ensureTweenLoop();
             }catch(e){ /* ignore */ }
         }
@@ -5878,7 +5984,10 @@
                 const sa = coords[pred.segIdx], sb = coords[Math.min(pred.segIdx + 1, coords.length - 1)];
                 const pLat = sa[0] + pred.t * (sb[0] - sa[0]);
                 const pLng = sa[1] + pred.t * (sb[1] - sa[1]);
-                try { marker.setLatLng([pLat, pLng]); } catch(e) {}
+                try { setMarkerPositionFast(marker, pLat, pLng); } catch(e) {}
+                if (busTweens[busNum]) {
+                    busTweens[busNum].currentRenderedPosition = [pLat, pLng];
+                }
 
                 // Update snap info for when real data arrives (so tween routes correctly)
                 busSnapInfo[busNum] = {
@@ -5903,18 +6012,42 @@
             for (const busNum in busTweens) {
                 const tw = busTweens[busNum];
                 const marker = busMarkers[busNum];
-                if(!marker) { delete busTweens[busNum]; continue; }
-                const t = Math.min(1, (frameTs - tw.start) / tw.dur);
-                const k = easeInOut(t);
-                let lat, lng;
-                if (tw.path) {
-                    const pos = interpAlongPath(tw.path, tw.dists, k);
-                    lat = pos[0]; lng = pos[1];
-                } else {
-                    lat = tw.from[0] + (tw.to[0]-tw.from[0]) * k;
-                    lng = tw.from[1] + (tw.to[1]-tw.from[1]) * k;
+                if (!marker || !tw) { delete busTweens[busNum]; continue; }
+
+                const markerLatLng = marker.getLatLng();
+                const startPos = Array.isArray(tw.startPosition) ? tw.startPosition : [markerLatLng.lat, markerLatLng.lng];
+                const targetPos = Array.isArray(tw.targetPosition) ? tw.targetPosition : startPos;
+                const startTime = Number.isFinite(tw.lastUpdateTime) ? tw.lastUpdateTime : frameTs;
+                const endTime = Number.isFinite(tw.nextUpdateTime) ? tw.nextUpdateTime : startTime;
+                const dur = Math.max(1, endTime - startTime);
+                const progress = clamp01((frameTs - startTime) / dur);
+                const lat = lerp(startPos[0], targetPos[0], progress);
+                const lng = lerp(startPos[1], targetPos[1], progress);
+                tw.currentRenderedPosition = [lat, lng];
+
+                const lastApplied = tw.lastAppliedPosition;
+                if (!lastApplied || calcDistance(lastApplied[0], lastApplied[1], lat, lng) >= 0.2 || progress >= 1) {
+                    setMarkerPositionFast(marker, lat, lng);
+                    tw.lastAppliedPosition = [lat, lng];
                 }
-                try{ marker.setLatLng([lat,lng]); if(t<1) any = true; }catch(e){}
+
+                const rotStart = Number.isFinite(tw.rotationStart) ? tw.rotationStart : (prevBusRotation[busNum] || 0);
+                const rotTarget = Number.isFinite(tw.rotationTarget) ? tw.rotationTarget : rotStart;
+                const rotStartTime = Number.isFinite(tw.rotationStartTime) ? tw.rotationStartTime : frameTs;
+                const rotEndTime = Number.isFinite(tw.rotationEndTime) ? tw.rotationEndTime : rotStartTime;
+                const rotDur = Math.max(1, rotEndTime - rotStartTime);
+                const rotProgress = clamp01((frameTs - rotStartTime) / rotDur);
+                const interpolatedRotation = lerpAngleDeg(rotStart, rotTarget, rotProgress);
+                tw.currentRotation = interpolatedRotation;
+                if (!Number.isFinite(tw.lastAppliedRotation) || angularDiffDeg(interpolatedRotation, tw.lastAppliedRotation) > 0.5 || rotProgress >= 1) {
+                    updateMarkerRotationCss(busNum, interpolatedRotation);
+                    tw.lastAppliedRotation = interpolatedRotation;
+                }
+
+                if (progress < 1 || rotProgress < 1) any = true;
+                prevBusPositions[busNum] = [lat, lng];
+                prevBusRotation[busNum] = interpolatedRotation;
+
                 if (trackedBus && busNum === trackedBus && followEnabled && map) {
                     try {
                         const px = map.latLngToContainerPoint([lat, lng]);
@@ -5930,9 +6063,8 @@
                         }
                     } catch(e) {}
                 }
-                if(t>=1){ delete busTweens[busNum]; }
             }
-            if(any) requestAnimationFrame(animateBusTweens);
+            if (any) requestAnimationFrame(animateBusTweens);
             else { _tweenAnimRunning = false; _lastTweenFrameTs = 0; }
         }
 
@@ -6037,7 +6169,7 @@
             try { const res = await fetch('/api/bus-routes'); busRouteMap = await res.json(); } catch(e) { console.error('Error loading bus routes:', e); }
         }
 
-        // Fast equirectangular distance â€” accurate within 0.1% at campus scale
+        // Fast equirectangular distance Ã¢â‚¬â€ accurate within 0.1% at campus scale
         const _DEG2RAD = Math.PI / 180;
         function calcDistance(lat1, lng1, lat2, lng2) {
             const dLat = (lat2 - lat1) * _DEG2RAD;
@@ -6045,13 +6177,13 @@
             const x = dLng * Math.cos((lat1 + lat2) * 0.5 * _DEG2RAD);
             return 6371000 * Math.sqrt(dLat * dLat + x * x);
         }
-        // Geographic bearing: 0Â°=north, clockwise. Input: [lat,lng] pairs.
+        // Geographic bearing: 0Ã‚Â°=north, clockwise. Input: [lat,lng] pairs.
         function calcBearing(from, to) {
             const dLng = (to[1] - from[1]) * _DEG2RAD;
             const lat1 = from[0] * _DEG2RAD, lat2 = to[0] * _DEG2RAD;
             const y = Math.sin(dLng) * Math.cos(lat2);
             const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
-            return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360; // 0-360Â°
+            return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360; // 0-360Ã‚Â°
         }
 
         // --- Route distance computation (along polyline) ---
@@ -6093,8 +6225,8 @@
         }
 
         // Get bearing for bus icon rotation.
-        // Returns CSS rotation degrees (0Â° = arrow pointing right/east).
-        // SVG arrow points right, so we subtract 90Â° from geographic bearing (0Â°=north).
+        // Returns CSS rotation degrees (0Ã‚Â° = arrow pointing right/east).
+        // SVG arrow points right, so we subtract 90Ã‚Â° from geographic bearing (0Ã‚Â°=north).
         function getRouteBearing(busNum, routeIdOverride = null) {
             const snapInfo = busSnapInfo[busNum];
             const ridRaw = (routeIdOverride !== null && routeIdOverride !== undefined && routeIdOverride !== '')
@@ -6193,11 +6325,11 @@
             if (timeDelta < 1.5) return null;
             const meters = calcDistance(prevPos[0], prevPos[1], position[0], position[1]);
             const kmh = (meters / 1000) / (timeDelta / 3600);
-            // Cap at 120 km/h â€” anything higher is GPS noise
+            // Cap at 120 km/h Ã¢â‚¬â€ anything higher is GPS noise
             if (kmh > 120) return null;
             return Math.round(kmh);
         }
-        // Cache speed and movement BEFORE overwriting prevRawPositions â€” fixes race condition
+        // Cache speed and movement BEFORE overwriting prevRawPositions Ã¢â‚¬â€ fixes race condition
         function cacheSpeedAndMovement(busNum, newLat, newLng, lastUpdateIso) {
             const pRaw = prevRawPositions[busNum];
             const pTime = prevBusTimes[busNum];
@@ -6212,7 +6344,7 @@
                 }
             }
         }
-        // Combined stop update â€” prefer server-sent data, fallback to client computation
+        // Combined stop update Ã¢â‚¬â€ prefer server-sent data, fallback to client computation
         function updateBusStopInfo(busNum, rawPosition, serverStopData) {
             const routeId = busRouteMap[busNum];
             const route = routeId ? getRouteById(routeId) : null;
@@ -7010,55 +7142,74 @@
         }
 
         async function computeAndShowStudentETA(busesDataParam){
-            const busesData = busesDataParam || latestBuses || {};
-            const nowMs = Date.now();
-            const freshEntries = Object.entries(busesData).filter(([num,b])=>{ const t = b && b.lastUpdate ? parseIsoTime(b.lastUpdate) : null; const lastSeen = busLastSeen[num] || 0; const effectiveTime = Math.max(lastSeen, t || 0); return effectiveTime && (nowMs - effectiveTime) <= OFFLINE_MS; });
-            const freshData = Object.fromEntries(freshEntries);
+            const etaT0 = (window.performance && typeof performance.now === 'function') ? performance.now() : Date.now();
+            try {
+                const busesData = busesDataParam || latestBuses || {};
+                const nowMs = Date.now();
+                const freshEntries = Object.entries(busesData).filter(([num,b])=>{ const t = b && b.lastUpdate ? parseIsoTime(b.lastUpdate) : null; const lastSeen = busLastSeen[num] || 0; const effectiveTime = Math.max(lastSeen, t || 0); return effectiveTime && (nowMs - effectiveTime) <= OFFLINE_MS; });
+                const freshData = Object.fromEntries(freshEntries);
 
-            // Determine active route context: tracked bus route first, else selected route
-            let activeRoute = null; let nearestStop = null;
-            let refLocation = (userLocation && userLocation.length === 2) ? userLocation : (map ? [map.getCenter().lat, map.getCenter().lng] : null);
+                // Determine active route context: tracked bus route first, else selected route
+                let activeRoute = null; let nearestStop = null;
+                let refLocation = (userLocation && userLocation.length === 2) ? userLocation : (map ? [map.getCenter().lat, map.getCenter().lng] : null);
 
-            let chosenBusNum = trackedBus;
-            let chosenBus = chosenBusNum ? freshData[chosenBusNum] : null;
-            let routeId = chosenBus && chosenBus.routeId!=null ? chosenBus.routeId : (chosenBusNum ? busRouteMap[chosenBusNum] : null);
+                let chosenBusNum = trackedBus;
+                let chosenBus = chosenBusNum ? freshData[chosenBusNum] : null;
+                let routeId = chosenBus && chosenBus.routeId!=null ? chosenBus.routeId : (chosenBusNum ? busRouteMap[chosenBusNum] : null);
 
-            if(routeId){ activeRoute = getRouteById(routeId); }
-            if(!activeRoute && selectedRouteId){ activeRoute = getRouteById(selectedRouteId); }
-            if(!activeRoute || !activeRoute.waypoints || activeRoute.waypoints.length===0){ maybeUpdateStudentEta('--'); return; }
+                if(routeId){ activeRoute = getRouteById(routeId); }
+                if(!activeRoute && selectedRouteId){ activeRoute = getRouteById(selectedRouteId); }
+                if(!activeRoute || !activeRoute.waypoints || activeRoute.waypoints.length===0){ maybeUpdateStudentEta('--'); return; }
 
-            // Find nearest student stop
-            if(refLocation){ let minD=Infinity; activeRoute.waypoints.forEach(stop=>{ const d = calcDistance(refLocation[0],refLocation[1], stop[0], stop[1]); if(d<minD){ minD=d; nearestStop=stop; } }); }
-            if(!nearestStop){ nearestStop = activeRoute.waypoints[0]; }
+                // Find nearest student stop
+                if(refLocation){ let minD=Infinity; activeRoute.waypoints.forEach(stop=>{ const d = calcDistance(refLocation[0],refLocation[1], stop[0], stop[1]); if(d<minD){ minD=d; nearestStop=stop; } }); }
+                if(!nearestStop){ nearestStop = activeRoute.waypoints[0]; }
 
-            // Choose bus: if not tracked, pick bus on route nearest to that stop
-            if(!chosenBusNum){
-                const busesOnRoute = Object.entries(freshData).filter(([num,b])=>{ const rid = (b && b.routeId!=null) ? b.routeId : busRouteMap[num]; return String(rid) === String(activeRoute.id); });
-                if(busesOnRoute.length===0){ maybeUpdateStudentEta('<span class="eta-spinner"></span>Updating'); return; }
-                let bestNum=null, bestB=null, bestDist=Infinity;
-                for(const [num,b] of busesOnRoute){ if(!b || typeof b.lat!=='number' || typeof b.lng!=='number') continue; const d = calcDistance(b.lat,b.lng, nearestStop[0], nearestStop[1]); if(d<bestDist){ bestDist=d; bestNum=num; bestB=b; } }
-                chosenBusNum = bestNum; chosenBus = bestB;
-                if(!chosenBus){ maybeUpdateStudentEta('<span class="eta-spinner"></span>Updating'); return; }
+                // Choose bus: if not tracked, pick bus on route nearest to that stop
+                if(!chosenBusNum){
+                    const busesOnRoute = Object.entries(freshData).filter(([num,b])=>{ const rid = (b && b.routeId!=null) ? b.routeId : busRouteMap[num]; return String(rid) === String(activeRoute.id); });
+                    if(busesOnRoute.length===0){ maybeUpdateStudentEta('<span class="eta-spinner"></span>Updating'); return; }
+                    let bestNum=null, bestB=null, bestDist=Infinity;
+                    for(const [num,b] of busesOnRoute){ if(!b || typeof b.lat!=='number' || typeof b.lng!=='number') continue; const d = calcDistance(b.lat,b.lng, nearestStop[0], nearestStop[1]); if(d<bestDist){ bestDist=d; bestNum=num; bestB=b; } }
+                    chosenBusNum = bestNum; chosenBus = bestB;
+                    if(!chosenBus){ maybeUpdateStudentEta('<span class="eta-spinner"></span>Updating'); return; }
+                }
+
+                // Check terminal status
+                const chosenTerminal = busTerminalStatus[chosenBusNum];
+                if (chosenTerminal === 'at_destination') { maybeUpdateStudentEta('Reached'); return; }
+                if (chosenTerminal === 'at_start') { maybeUpdateStudentEta('At Start'); return; }
+                if (chosenTerminal === 'waiting') { maybeUpdateStudentEta('Waiting'); return; }
+
+                // Route distance with dynamic speed when available (latency-first ETA response)
+                const routeIdForDist = chosenBus.routeId || busRouteMap[chosenBusNum];
+                const distMeters = getRouteDistanceBetween(routeIdForDist, [chosenBus.lat, chosenBus.lng], nearestStop) || calcDistance(chosenBus.lat, chosenBus.lng, nearestStop[0], nearestStop[1]);
+
+                if (distMeters <= AT_STOP_THRESHOLD) { maybeUpdateStudentEta('At Stop'); return; }
+
+                const speedKmh = Math.max(8, Math.min(45, busSpeedCache[chosenBusNum] || 12));
+                const cacheKey = `${chosenBusNum}|${routeIdForDist || ''}|${getLeaveOffsetMinutes()}|${chosenTerminal || ''}`;
+                if (etaComputeCache.key === cacheKey && Number.isFinite(etaComputeCache.distanceM) && Number.isFinite(etaComputeCache.speedKmh)) {
+                    const distDelta = Math.abs(distMeters - etaComputeCache.distanceM);
+                    const speedDelta = Math.abs(speedKmh - etaComputeCache.speedKmh);
+                    if (distDelta < ETA_RECOMPUTE_POS_DELTA_M && speedDelta < ETA_RECOMPUTE_SPEED_DELTA_KMH && (nowMs - etaComputeCache.ts) < ETA_RECOMPUTE_MAX_STALE_MS) {
+                        return;
+                    }
+                }
+
+                const seconds = Math.ceil(((distMeters / 1000) / speedKmh) * 3600);
+                const etaAdjustedSec = applyLeaveOffsetToEta(seconds);
+                const smoothed = smoothStudentEta(etaAdjustedSec);
+                const etaStr = formatMinSec(Math.round(smoothed));
+                maybeUpdateStudentEta(etaStr);
+                etaComputeCache.key = cacheKey;
+                etaComputeCache.distanceM = distMeters;
+                etaComputeCache.speedKmh = speedKmh;
+                etaComputeCache.ts = nowMs;
+            } finally {
+                const etaT1 = (window.performance && typeof performance.now === 'function') ? performance.now() : Date.now();
+                recordEtaComputeMs(Math.max(0, etaT1 - etaT0));
             }
-
-            // Check terminal status
-            const chosenTerminal = busTerminalStatus[chosenBusNum];
-            if (chosenTerminal === 'at_destination') { maybeUpdateStudentEta('Reached'); return; }
-            if (chosenTerminal === 'at_start') { maybeUpdateStudentEta('At Start'); return; }
-            if (chosenTerminal === 'waiting') { maybeUpdateStudentEta('Waiting'); return; }
-
-            // Route distance with dynamic speed when available (latency-first ETA response)
-            const routeIdForDist = chosenBus.routeId || busRouteMap[chosenBusNum];
-            const distMeters = getRouteDistanceBetween(routeIdForDist, [chosenBus.lat, chosenBus.lng], nearestStop) || calcDistance(chosenBus.lat, chosenBus.lng, nearestStop[0], nearestStop[1]);
-
-            if (distMeters <= AT_STOP_THRESHOLD) { maybeUpdateStudentEta('At Stop'); return; }
-
-            const speedKmh = Math.max(8, Math.min(45, busSpeedCache[chosenBusNum] || 12));
-            const seconds = Math.ceil(((distMeters / 1000) / speedKmh) * 3600);
-            const etaAdjustedSec = applyLeaveOffsetToEta(seconds);
-            const smoothed = smoothStudentEta(etaAdjustedSec);
-            const etaStr = formatMinSec(Math.round(smoothed));
-            maybeUpdateStudentEta(etaStr);
         }
 
         function estimateRouteDistance(waypoints) { let total = 0; for (let i = 0; i < waypoints.length - 1; i++) { total += calcDistance(waypoints[i][0], waypoints[i][1], waypoints[i+1][0], waypoints[i+1][1]); } return total / 1000; }
@@ -7277,10 +7428,12 @@
                     userWatchId = null;
                 }
                 refreshViewerPresence(true);
+                maybeReportClientPerf(true);
                 sendStudentPresence(false, true);
             });
             document.addEventListener('visibilitychange', ()=>{
                 if(document.hidden){
+                    maybeReportClientPerf(true);
                     if(busesPollTimerId){ try{ clearInterval(busesPollTimerId); }catch(e){} busesPollTimerId=null; }
                     if(trailRefreshTimerId){ try{ clearInterval(trailRefreshTimerId); }catch(e){} trailRefreshTimerId = null; }
                     if (_busUiRefreshTimer) { try { clearTimeout(_busUiRefreshTimer); } catch (e) {} _busUiRefreshTimer = null; }
@@ -7312,7 +7465,7 @@
                 latestBuses = buses || {};
                 const nowMs = Date.now();
                 const busNumbers = Object.keys(latestBuses);
-                // Keep buses that have data â€” don't filter by time here, let status handle it
+                // Keep buses that have data Ã¢â‚¬â€ don't filter by time here, let status handle it
                 const visibleBusNumbers = busNumbers.filter(n => {
                     const b = latestBuses[n];
                     if (!b || typeof b.lat !== 'number' || typeof b.lng !== 'number') return false;
@@ -7337,6 +7490,9 @@
                         delete prevRawPositions[busNum];
                         delete prevBusPositions[busNum];
                         delete prevBusTimes[busNum];
+                        delete prevBusRotation[busNum];
+                        delete prevTrackedState[busNum];
+                        delete prevRouteSelState[busNum];
                         delete busLastSeen[busNum];
                         delete busLastSSEUpdate[busNum];
                         delete busTravelDirection[busNum];
@@ -7351,6 +7507,8 @@
                         delete busTweenSpeedCache[busNum];
                         delete busSnapInfo[busNum];
                         delete busSnapLockState[busNum];
+                        delete busSnapSearchState[busNum];
+                        delete busTweens[busNum];
                         delete busPrediction[busNum];
                     }
                 });
@@ -7401,22 +7559,15 @@
                         if (showBus) {
                             queueBusTween(busNum, position, rid);
                             const onSelectedRoute = selectedRouteId && String(rid) === String(selectedRouteId);
-                            const rotationChanged = (prevBusRotation[busNum] === undefined) || (angularDiffDeg(rotation, prevBusRotation[busNum]) > 2);
                             const trackingChanged = prevTrackedState[busNum] !== !!isTracked;
                             const routeSelChanged = prevRouteSelState[busNum] !== !!onSelectedRoute;
                             if (trackingChanged || routeSelChanged) {
-                                const newIcon = createIcon(busNum, color, currentIconSize, rotation, isTracked || onSelectedRoute);
+                                const iconRotation = Number.isFinite(prevBusRotation[busNum]) ? prevBusRotation[busNum] : rotation;
+                                const newIcon = createIcon(busNum, color, currentIconSize, iconRotation, isTracked || onSelectedRoute);
                                 busMarkers[busNum].setIcon(newIcon);
-                            } else if (rotationChanged) {
-                                if (!updateMarkerRotationCss(busNum, rotation)) {
-                                    busMarkers[busNum].setIcon(createIcon(busNum, color, currentIconSize, rotation, isTracked || onSelectedRoute));
-                                }
                             }
-                            if (rotationChanged || trackingChanged || routeSelChanged) {
-                                prevBusRotation[busNum] = rotation;
-                                prevTrackedState[busNum] = !!isTracked;
-                                prevRouteSelState[busNum] = !!onSelectedRoute;
-                            }
+                            prevTrackedState[busNum] = !!isTracked;
+                            prevRouteSelState[busNum] = !!onSelectedRoute;
                         } else {
                             removeBusTrail(busNum);
                         }
@@ -7505,6 +7656,73 @@
             container.appendChild(frag);
         }
 
+        function applySseBusUpdate(busNum, b, renderCtxOverride = null) {
+            if (!b || typeof b.lat !== 'number' || typeof b.lng !== 'number') return false;
+            const filteredPos = kalmanFilterBusPosition(busNum, b.lat, b.lng);
+            if (b.routeId != null) busRouteMap[busNum] = b.routeId;
+            const nowMs = Date.now();
+            busLastSeen[busNum] = nowMs;
+            busLastSSEUpdate[busNum] = nowMs;
+            const srvStop = { atStop: b.atStop, nearestStopIdx: b.nearestStopIdx, nearestStopName: b.nearestStopName };
+            cacheSpeedAndMovement(busNum, b.lat, b.lng, b.lastUpdate);
+            prevRawPositions[busNum] = [b.lat, b.lng];
+            if (b.lastUpdate) prevBusTimes[busNum] = parseIsoTime(b.lastUpdate);
+            latestBuses[busNum] = { ...(latestBuses[busNum] || {}), ...b };
+            const rid = (latestBuses[busNum] && latestBuses[busNum].routeId != null)
+                ? latestBuses[busNum].routeId
+                : busRouteMap[busNum];
+            const trackedNow = trackedBus && busNum === trackedBus;
+            const renderCtx = renderCtxOverride || getRenderContext();
+            const sseSnap = snapToRoute(filteredPos[0], filteredPos[1], busNum, rid);
+            busSnapInfo[busNum] = { routeId: String(rid || ''), segIdx: sseSnap.segIdx, progressMeters: sseSnap.progressMeters };
+            updateBusDirectionFromProgress(busNum, rid, sseSnap);
+            updateBusStopInfo(busNum, [b.lat, b.lng], srvStop);
+            const liveStatus = determineStatus(busNum, [b.lat, b.lng], b.lastUpdate);
+            const isLiveOffline = liveStatus === 'Offline';
+            const snapPos = sseSnap.pos;
+            const liveRotation = getRouteBearing(busNum, rid);
+            const showBus = !!trackedNow || isPointRenderableByContext(snapPos[0], snapPos[1], rid, renderCtx);
+            if (!busMarkers[busNum]) {
+                if (showBus) {
+                    const color = colors[(parseInt(busNum) - 1) % colors.length];
+                    const onSelectedRoute = selectedRouteId && String(rid) === String(selectedRouteId);
+                    const icon = createIcon(busNum, color, currentIconSize, liveRotation, trackedNow || onSelectedRoute);
+                    busMarkers[busNum] = L.marker(snapPos, { icon, title: `Transport ${busNum}` }).addTo(map);
+                    prevBusRotation[busNum] = liveRotation;
+                    prevTrackedState[busNum] = !!trackedNow;
+                    prevRouteSelState[busNum] = !!onSelectedRoute;
+                    busMarkers[busNum].bindPopup(() => buildBusPopup(busNum, latestBuses[busNum] || b));
+                    busMarkers[busNum].on('click', () => { const nextTracked = setTrackedBus(busNum, { toggleIfSame: true }); if (followEnabled && nextTracked) map.setView(busMarkers[busNum].getLatLng(), DEFAULT_TILE_ZOOM); busMarkers[busNum].openPopup(); });
+                    busMarkers[busNum].on('mouseover', () => { followEnabled = false; }); busMarkers[busNum].on('mouseout', () => { followEnabled = true; });
+                    try { busMarkers[busNum].setOpacity(getMarkerOpacity(!!trackedNow, isLiveOffline)); } catch(e) {}
+                    flashElement(_dom.mapStage || document.querySelector('.map-stage'), `new_bus_sse_${busNum}`, 220);
+                    updateBusTrail(busNum, snapPos, color);
+                }
+            } else {
+                ensureLayerVisibility(busMarkers[busNum], showBus);
+                if (showBus) {
+                    const _newRot = liveRotation;
+                    const _c = colors[(parseInt(busNum) - 1) % colors.length];
+                    const _onR = selectedRouteId && String(rid) === String(selectedRouteId);
+                    const _tr = trackedBus && busNum === trackedBus;
+                    const trackingChanged = prevTrackedState[busNum] !== !!_tr;
+                    const routeSelChanged = prevRouteSelState[busNum] !== !!_onR;
+                    if (trackingChanged || routeSelChanged) {
+                        const iconRotation = Number.isFinite(prevBusRotation[busNum]) ? prevBusRotation[busNum] : _newRot;
+                        busMarkers[busNum].setIcon(createIcon(busNum, _c, currentIconSize, iconRotation, _tr || _onR));
+                    }
+                    prevTrackedState[busNum] = !!_tr;
+                    prevRouteSelState[busNum] = !!_onR;
+                    try { busMarkers[busNum].setOpacity(getMarkerOpacity(!!_tr, isLiveOffline)); } catch(e) {}
+                    queueBusTween(busNum, snapPos, rid);
+                    updateBusTrail(busNum, snapPos, _c);
+                } else {
+                    removeBusTrail(busNum);
+                }
+            }
+            return true;
+        }
+
         // Live updates via SSE for smooth animation
         let _sseLastMsg = 0; // timestamp of last SSE message for health check
         function initSSE(routeId){
@@ -7537,87 +7755,26 @@
                     _sseLastMsg = Date.now();
                     try{
                         const msg = JSON.parse(ev.data);
-                        if(msg.type === 'bus_update'){
-                            const busNum = String(msg.bus);
-                            const b = msg.data||{};
-                            if(typeof b.lat !== 'number' || typeof b.lng !== 'number') return;
-                            const filteredPos = kalmanFilterBusPosition(busNum, b.lat, b.lng);
-                            // update route mapping if provided
-                            if(b.routeId != null) busRouteMap[busNum] = b.routeId;
-                            // Track last seen time and raw position for status
-                            busLastSeen[busNum] = Date.now();
-                            busLastSSEUpdate[busNum] = Date.now();
-                            // Use server-sent stop data for stop display only
-                            const srvStop = { atStop: b.atStop, nearestStopIdx: b.nearestStopIdx, nearestStopName: b.nearestStopName };
-                            // Cache speed/movement BEFORE overwriting prev positions
-                            cacheSpeedAndMovement(busNum, b.lat, b.lng, b.lastUpdate);
-                            prevRawPositions[busNum] = [b.lat, b.lng];
-                            if(b.lastUpdate) prevBusTimes[busNum] = parseIsoTime(b.lastUpdate);
-                            // update cache and animate
-                            latestBuses[busNum] = { ...(latestBuses[busNum]||{}), ...b };
-                            const rid = (latestBuses[busNum] && latestBuses[busNum].routeId != null)
-                                ? latestBuses[busNum].routeId
-                                : busRouteMap[busNum];
-                            const trackedNow = trackedBus && busNum === trackedBus;
+                        if(msg.type === 'bus_update' || msg.type === 'batch_update'){
                             const renderCtx = getRenderContext();
-                            const sseSnap = snapToRoute(filteredPos[0], filteredPos[1], busNum, rid);
-                            busSnapInfo[busNum] = { routeId: String(rid || ''), segIdx: sseSnap.segIdx, progressMeters: sseSnap.progressMeters };
-                            updateBusDirectionFromProgress(busNum, rid, sseSnap);
-                            updateBusStopInfo(busNum, [b.lat, b.lng], srvStop);
-                            const liveStatus = determineStatus(busNum, [b.lat, b.lng], b.lastUpdate);
-                            const isLiveOffline = liveStatus === 'Offline';
-                            const snapPos = sseSnap.pos;
-                            const liveRotation = getRouteBearing(busNum, rid);
-                            const showBus = !!trackedNow || isPointRenderableByContext(snapPos[0], snapPos[1], rid, renderCtx);
-                            if(!busMarkers[busNum]){
-                                if (showBus) {
-                                    const color = colors[(parseInt(busNum) - 1) % colors.length];
-                                    const onSelectedRoute = selectedRouteId && String(rid) === String(selectedRouteId);
-                                    const icon = createIcon(busNum, color, currentIconSize, liveRotation, trackedNow || onSelectedRoute);
-                                    busMarkers[busNum] = L.marker(snapPos, { icon, title: `Transport ${busNum}` }).addTo(map);
-                                    prevBusRotation[busNum] = liveRotation;
-                                    prevTrackedState[busNum] = !!trackedNow;
-                                    prevRouteSelState[busNum] = !!onSelectedRoute;
-                                    busMarkers[busNum].bindPopup(() => buildBusPopup(busNum, latestBuses[busNum] || b));
-                                    busMarkers[busNum].on('click', () => { const nextTracked = setTrackedBus(busNum, { toggleIfSame: true }); if (followEnabled && nextTracked) map.setView(busMarkers[busNum].getLatLng(), DEFAULT_TILE_ZOOM); busMarkers[busNum].openPopup(); });
-                                    busMarkers[busNum].on('mouseover', () => { followEnabled = false; }); busMarkers[busNum].on('mouseout', () => { followEnabled = true; });
-                                    try { busMarkers[busNum].setOpacity(getMarkerOpacity(!!trackedNow, isLiveOffline)); } catch(e) {}
-                                    flashElement(_dom.mapStage || document.querySelector('.map-stage'), `new_bus_sse_${busNum}`, 220);
-                                    updateBusTrail(busNum, snapPos, color);
+                            let anyBusUpdated = false;
+                            if (msg.type === 'batch_update') {
+                                const rows = Array.isArray(msg.buses) ? msg.buses : [];
+                                for (let i = 0; i < rows.length; i++) {
+                                    const row = rows[i];
+                                    const busNum = String((row && row.bus) || '');
+                                    const data = row && row.data;
+                                    if (!busNum) continue;
+                                    if (applySseBusUpdate(busNum, data, renderCtx)) anyBusUpdated = true;
                                 }
                             } else {
-                                ensureLayerVisibility(busMarkers[busNum], showBus);
-                                if (showBus) {
-                                    // Snap to route and get route-locked bearing
-                                    const _newRot = liveRotation;
-                                    const _c = colors[(parseInt(busNum) - 1) % colors.length];
-                                    const _onR = selectedRouteId && String(rid) === String(selectedRouteId);
-                                    const _tr = trackedBus && busNum === trackedBus;
-                                    const trackingChanged = prevTrackedState[busNum] !== !!_tr;
-                                    const routeSelChanged = prevRouteSelState[busNum] !== !!_onR;
-                                    const rotationChanged = (prevBusRotation[busNum] === undefined) || (angularDiffDeg(_newRot, (prevBusRotation[busNum] || 0)) > 2);
-                                    if (trackingChanged || routeSelChanged) {
-                                        busMarkers[busNum].setIcon(createIcon(busNum, _c, currentIconSize, _newRot, _tr || _onR));
-                                    } else if (rotationChanged) {
-                                        if (!updateMarkerRotationCss(busNum, _newRot)) {
-                                            busMarkers[busNum].setIcon(createIcon(busNum, _c, currentIconSize, _newRot, _tr || _onR));
-                                        }
-                                    }
-                                    if (rotationChanged || trackingChanged || routeSelChanged) {
-                                        prevBusRotation[busNum] = _newRot;
-                                    }
-                                    prevTrackedState[busNum] = !!_tr;
-                                    prevRouteSelState[busNum] = !!_onR;
-                                    try { busMarkers[busNum].setOpacity(getMarkerOpacity(!!_tr, isLiveOffline)); } catch(e) {}
-                                    queueBusTween(busNum, snapPos, rid);
-                                    updateBusTrail(busNum, snapPos, _c);
-                                } else {
-                                    removeBusTrail(busNum);
-                                }
+                                const busNum = String(msg.bus);
+                                const data = msg.data || {};
+                                if (applySseBusUpdate(busNum, data, renderCtx)) anyBusUpdated = true;
                             }
+                            if (!anyBusUpdated) return;
                             scheduleSpatialSync();
                             setLastSyncUI(getTimeString());
-                            // Throttle ETA recomputation from SSE â€” at most once per second
                             queueBusUiRefresh(220);
                         } else if(msg.type === 'bus_stop'){
                             const busNum = String(msg.bus);
@@ -7627,6 +7784,9 @@
                             delete prevRawPositions[busNum];
                             delete prevBusPositions[busNum];
                             delete prevBusTimes[busNum];
+                            delete prevBusRotation[busNum];
+                            delete prevTrackedState[busNum];
+                            delete prevRouteSelState[busNum];
                             delete busTravelDirection[busNum];
                             delete busLastProgressMeters[busNum];
                             delete busDirectionRouteId[busNum];
@@ -7639,6 +7799,8 @@
                             delete busTweenSpeedCache[busNum];
                             delete busSnapInfo[busNum];
                             delete busSnapLockState[busNum];
+                            delete busSnapSearchState[busNum];
+                            delete busTweens[busNum];
                             delete busPrediction[busNum];
                             removeBusTrail(busNum);
                             const m = busMarkers[busNum]; if(m){ try{ map.removeLayer(m); }catch(e){} delete busMarkers[busNum]; }
@@ -7650,6 +7812,7 @@
                             delete busTravelDirection[busNum];
                             delete busSnapInfo[busNum];
                             delete busSnapLockState[busNum];
+                            delete busSnapSearchState[busNum];
                             delete busLastProgressMeters[busNum];
                             delete busDirectionRouteId[busNum];
                             delete busDirectionLastFlipAt[busNum];
@@ -7658,13 +7821,20 @@
                             latestBuses = {};
                             Object.values(busMarkers).forEach(m=>{ try{ map.removeLayer(m); }catch(e){} }); busMarkers = {};
                             prevRawPositions = {}; prevBusPositions = {}; prevBusTimes = {}; busLastSeen = {}; busLastSSEUpdate = {};
+                            prevBusRotation = {}; prevTrackedState = {}; prevRouteSelState = {};
                             busTravelDirection = {}; busCurrentStop = {}; busTerminalStatus = {};
                             Object.keys(busLastProgressMeters).forEach((k) => { delete busLastProgressMeters[k]; });
                             Object.keys(busDirectionRouteId).forEach((k) => { delete busDirectionRouteId[k]; });
                             Object.keys(busDirectionLastFlipAt).forEach((k) => { delete busDirectionLastFlipAt[k]; });
                             Object.keys(busSnapInfo).forEach((k) => { delete busSnapInfo[k]; });
                             Object.keys(busSnapLockState).forEach((k) => { delete busSnapLockState[k]; });
+                            Object.keys(busSnapSearchState).forEach((k) => { delete busSnapSearchState[k]; });
+                            Object.keys(busTweens).forEach((k) => { delete busTweens[k]; });
                             Object.keys(busPrediction).forEach((k) => { delete busPrediction[k]; });
+                            etaComputeCache.key = null;
+                            etaComputeCache.distanceM = null;
+                            etaComputeCache.speedKmh = null;
+                            etaComputeCache.ts = 0;
                             clearAllBusTrails();
                             scheduleSpatialSync();
                         }
@@ -7759,3 +7929,4 @@
 </script>
 </body>
 </html>
+
